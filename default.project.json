@@ -1,0 +1,13 @@
+{
+  "name": "project",
+  "tree": {
+    "$className": "DataModel",
+    "ServerStorage": {
+      "$className": "ServerStorage",
+      
+      "MeshCreatorPlugin": {
+        "$path": "src"
+      }
+    }
+  }
+}
