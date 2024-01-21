@@ -14,6 +14,7 @@ function MeshLoader.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh)
 		if newMeshLoader.MeshPart:FindFirstChildOfClass("EditableMesh") then
 			newMeshLoader.EM = newMeshLoader.MeshPart:FindFirstChildOfClass("EditableMesh")
 		else
+			task.synchronize()
 			newMeshLoader:CreateEditableMesh()
 		end
 

@@ -5,7 +5,7 @@ local MeshLoader = require(script.Parent.MeshLoader)
 function LoadMesh(MeshPart: MeshPart)
 	MeshLoader.new(MeshPart, MeshLoader.LoadMeshSaveFile(MeshPart))
 	
-	MeshPart.ChildAdded:Connect(function(child)
+	MeshPart.ChildAdded:ConnectParallel(function(child)
 		if child:IsA("Configuration") then
 			LoadMeshFromMeshSaveFile(child)
 		end
@@ -21,10 +21,3 @@ for _, child in workspace:GetDescendants() do
 		LoadMesh(child)
 	end
 end
---[[
-workspace.DescendantAdded:Connect(function(descendant)
-	if descendant:IsA("Configuration") then
-		LoadMesh(descendant.Parent)
-	end
-end)
-]]

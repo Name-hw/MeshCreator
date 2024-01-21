@@ -34,13 +34,13 @@ local IsAddSquareMeshButtonEnabled = false
 local IsMeshPartSelected = false
 local ToolBarGui, CurrentMeshCreator, SelectingObject
 
-if game.StarterPlayer.StarterPlayerScripts:FindFirstChild("MeshCreator_MeshLoaderActor") then
-	game.StarterPlayer.StarterPlayerScripts:FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
+if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor") then
+	game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
 end
 
 local MeshLoaderActorClone = Root.MeshLoaderActor:Clone()
 MeshLoaderActorClone.Name = "MeshCreator_MeshLoaderActor"
-MeshLoaderActorClone.Parent = game.StarterPlayer.StarterPlayerScripts
+MeshLoaderActorClone.Parent = game.ReplicatedFirst
 
 function PluginExit()
 	if CurrentMeshCreator then
