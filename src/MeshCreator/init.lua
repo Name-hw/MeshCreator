@@ -1,3 +1,4 @@
+--[[v0.0.5]]--
 local MeshCreator = {}
 MeshCreator.__index = MeshCreator
 

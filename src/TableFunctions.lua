@@ -3,7 +3,7 @@ local TableFunctions = {}
 local Root = script.Parent
 local Classes = require(Root.Classes)
 local lib = Root.lib
---local Table = require(lib.Table)
+local Table = require(lib.Table)
 
 function TableFunctions.VerticesToVertexIDs(Vertices, vertexID)
 	

@@ -1,8 +1,8 @@
 local Selection = game:GetService("Selection")
 local Root = script.Parent.Parent.Parent
-local Vender = Root.Vender
-local Roact = require(Vender.Roact)
-local StudioComponents = require(Vender.StudioComponents)
+local Vendor = Root.Vendor
+local Roact = require(Vendor.Roact)
+local StudioComponents = require(Vendor.StudioComponents)
 local ToolList = Roact.Component:extend("ToolList")
 local MeshCreator = require(Root.MeshCreator)
 

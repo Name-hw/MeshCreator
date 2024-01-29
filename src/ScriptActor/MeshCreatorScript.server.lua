@@ -23,8 +23,8 @@ local PluginGui = plugin:CreateDockWidgetPluginGui("MeshCreatorPlugin", PluginGu
 PluginGui.Name = "MeshCreator"
 PluginGui.Title = "MeshCreator"
 --[[
-local Vender = Root.Vender
-local Roact = require(Vender.Roact)
+local Vendor = Root.Vendor
+local Roact = require(Vendor.Roact)
 ]]
 local UI = Root.UI
 --local MeshExplorer = require(UI.MeshExplorer)

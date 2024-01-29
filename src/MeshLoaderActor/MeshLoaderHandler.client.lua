@@ -1,6 +1,18 @@
 local RunService = game:GetService("RunService")
 local MeshLoader = require(script.Parent.MeshLoader)
 
+function OnMeshAdded(child)
+	if child:IsA("MeshPart") then
+		LoadMesh(child)
+	end
+end
+
+function OnMeshSaveFileAdded(child)
+	if child.Name == "MeshSaveFile" then
+		LoadMeshFromMeshSaveFile(child)
+	end
+end
+
 function LoadMesh(MeshPart: MeshPart)
 	if MeshPart:FindFirstChildOfClass("EditableMesh") then
 		MeshPart:FindFirstChildOfClass("EditableMesh"):Destroy()
@@ -8,15 +20,17 @@ function LoadMesh(MeshPart: MeshPart)
 	
 	MeshLoader.new(MeshPart, MeshLoader.LoadMeshSaveFile(MeshPart))
 	
-	MeshPart.ChildAdded:Connect(function(child)
-		if child.Name == "MeshSaveFile" then
-			LoadMeshFromMeshSaveFile(child)
-		end
-	end)
+	MeshPart.ChildAdded:Connect(OnMeshSaveFileAdded)
 end
 
 function LoadMeshFromMeshSaveFile(MeshSaveFile: Configuration)
-	LoadMesh(MeshSaveFile.Parent)
+	local MeshPart = MeshSaveFile.Parent
+	
+	if MeshPart:FindFirstChildOfClass("EditableMesh") then
+		MeshPart:FindFirstChildOfClass("EditableMesh"):Destroy()
+	end
+
+	MeshLoader.new(MeshPart, MeshLoader.LoadMeshSaveFile(MeshPart))
 end
 
 if not game:IsLoaded() then
@@ -24,7 +38,7 @@ if not game:IsLoaded() then
 end
 
 for _, child in workspace:GetDescendants() do
-	if child:IsA("MeshPart") then
-		LoadMesh(child)
-	end
+	OnMeshAdded(child)
 end
+
+workspace.DescendantAdded:Connect(OnMeshAdded)
