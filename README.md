@@ -8,4 +8,3 @@ This repository contains the source code of MeshCreator Plugin.
 
 ## Credits
 - [Zlib128](https://github.com/jiwonz/zlib128.luau)
-- [StudioComponents](https://github.com/sircfenner/StudioComponents)

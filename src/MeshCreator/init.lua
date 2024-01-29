@@ -3,8 +3,10 @@ MeshCreator.__index = MeshCreator
 
 local AssetService = game:GetService("AssetService")
 local MeshFunctions = require(script.MeshFunctions)
-local Classes = require(script.Classes)
-local Enums = require(script.Enums)
+local Classes = require(script.Parent.Classes)
+local Enums = require(script.Parent.Enums)
+local TableFunctions = require(script.Parent.TableFunctions)
+--local Table = require(script.Parent.lib.Table)
 
 function MeshCreator.new(MeshPart: Instance, MeshSaveFile: Classes.Mesh)
 	local newMeshCreator = setmetatable(MeshCreator, MeshFunctions)
@@ -13,36 +15,53 @@ function MeshCreator.new(MeshPart: Instance, MeshSaveFile: Classes.Mesh)
 	newMeshCreator.Vertices = {}
 	newMeshCreator.Triangles = {}
 	
-	if newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh") then
-		newMeshCreator.EM = newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh")
-	else
-		newMeshCreator:CreateEditableMesh(MeshSaveFile)
-	end
+	newMeshCreator:CreateEditableMesh(MeshSaveFile)
 	
 	return newMeshCreator
 end
 
 function MeshCreator:CreateEditableMesh(MeshSaveFile)
-	if self.MeshPart.MeshId ~= "" then
-		self.EM = AssetService:CreateEditableMeshFromPartAsync(self.MeshPart)
-	else
-		self.EM = Instance.new("EditableMesh")
-		self.EM:SetAttribute("CustomMesh", true)
-	end
+	self.EM = Instance.new("EditableMesh")
 
 	if MeshSaveFile then
+		local newVertexIDs = {}
+		
 		if self.MeshPart:FindFirstChildOfClass("EditableMesh") then
 			self.MeshPart:FindFirstChildOfClass("EditableMesh"):Destroy()
 		end
-
+		
 		for _, Vertex: Classes.Vertex in MeshSaveFile.Vertices do
-			local VID = Vertex.VertexID
-			local VP: Vector3 = Vertex.VertexPosition --VertexPosition
-			local VN: Vector3 = Vertex.VertexNormal --VertexNormal
+			local VertexUV = Vertex.VertexUV
+			local VertexPosition = Vertex.VA_Position / (self.MeshPart.Size / self.MeshPart.MeshSize) --VER
+			local VN = Vertex.VA_Normal --VA_Normal
+			local newVertexID = self.EM:AddVertex(VertexPosition)
 			
-			self.EM:SetPosition(VID, VP)
-			self.EM:SetVertexNormal(VID, VN)
+			self.EM:SetVertexNormal(newVertexID, VN)
+			self.EM:SetUV(newVertexID, VertexUV)
+			
+			newVertexIDs[Vertex.VertexID] = newVertexID
+			Vertex.VertexID = newVertexID
+			
+			table.insert(self.Vertices, Vertex)
 		end
+		
+		for _, Triangle: Classes.Triangle in MeshSaveFile.Triangles do
+			local TriangleVertexIDs = Triangle.TriangleVertexIDs
+			local newTriangleVertexIDs = {}
+
+			for _, TriangleVertexID in ipairs(TriangleVertexIDs) do
+				table.insert(newTriangleVertexIDs, newVertexIDs[TriangleVertexID])
+			end
+			
+			Triangle.TriangleID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
+			Triangle.TriangleVertexIDs = newTriangleVertexIDs
+			
+			table.insert(self.Triangles, Triangle)
+		end
+	elseif self.MeshPart.MeshId ~= "" then
+		self.EM = AssetService:CreateEditableMeshFromPartAsync(self.MeshPart)
+	else
+		self.EM:SetAttribute("CustomMesh", true)
 	end
 	
 	self.EM.Name = "EditableMesh"
@@ -73,7 +92,7 @@ function MeshCreator:CreatePlaneMesh(width, height, offset: Vector3, normal: Vec
 	local TriangleIDs = self:AddTriangles(VertexIDs)
 	
 	for _, vertexID in VertexIDs do
-		self.EM:SetVertexNormal(vertexID, normal)
+		self.EM:SetVA_Normal(vertexID, normal)
 	end
 	
 	local newPlaneMesh: Classes.CustomMesh = {

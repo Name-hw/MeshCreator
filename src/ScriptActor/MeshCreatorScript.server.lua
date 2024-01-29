@@ -22,12 +22,14 @@ local PluginGuiInfo = DockWidgetPluginGuiInfo.new(
 local PluginGui = plugin:CreateDockWidgetPluginGui("MeshCreatorPlugin", PluginGuiInfo)
 PluginGui.Name = "MeshCreator"
 PluginGui.Title = "MeshCreator"
+--[[
 local Vender = Root.Vender
 local Roact = require(Vender.Roact)
+]]
 local UI = Root.UI
-local MeshExplorer = require(UI.MeshExplorer)
+--local MeshExplorer = require(UI.MeshExplorer)
+local Classes = require(Root.Classes)
 local MeshCreator = require(Root.MeshCreator)
-local Classes = require(Root.MeshCreator.Classes)
 local MeshSaveLoadSystem = require(Root.MeshSaveLoadSystem)
 local IsPluginEnabled = false
 local IsAddSquareMeshButtonEnabled = false
@@ -49,7 +51,7 @@ function PluginExit()
 		CurrentMeshCreator = CurrentMeshCreator:Remove()
 	end
 	task.synchronize()
-	Roact.unmount(ToolBarGui)
+	--Roact.unmount(ToolBarGui)
 end
 
 PluginButton.Click:Connect(function()
@@ -58,7 +60,7 @@ PluginButton.Click:Connect(function()
 	PluginButton:SetActive(IsPluginEnabled);
 	
 	if IsPluginEnabled then
-		ToolBarGui = Roact.mount(Roact.createElement(MeshExplorer), PluginGui)
+		--ToolBarGui = Roact.mount(Roact.createElement(MeshExplorer), PluginGui)
 		
 		Selection.SelectionChanged:Connect(function()
 			if IsPluginEnabled then
@@ -67,7 +69,8 @@ PluginButton.Click:Connect(function()
 				if SelectingObject then
 					if SelectingObject:IsA("MeshPart") and not IsMeshPartSelected then
 						IsMeshPartSelected = true
-						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject))
+						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
+						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile)
 						
 						if CurrentMeshCreator.EM:GetAttribute("CustomMesh") then
 							CurrentMeshCreator.MeshPart.Size = Vector3.new(1, 1, 1)
@@ -75,9 +78,9 @@ PluginButton.Click:Connect(function()
 							--CurrentMeshCreator:CreateCubeMesh(Vector3.new(1, 1, 1), Vector3.zero)
 						end
 						
-						CurrentMeshCreator:AddVertexAttachments()
-						
-						for _, Vertex: Classes.Vertex in ipairs(CurrentMeshCreator.Vertices) do
+						CurrentMeshCreator:AddVertexAttachments(MeshSaveFile)
+						task.wait()
+						for _, Vertex: Classes.Vertex in CurrentMeshCreator.Vertices do
 							local VertexID = Vertex.VertexID
 							local VA = Vertex.VertexAttachment
 							

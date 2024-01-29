@@ -15,13 +15,19 @@ export type CustomMesh = {
 
 export type Vertex = {
 	VertexID: number,
-	VertexPosition: Vector3,
-	VertexNormal: Vector3,
-	VertexAttachment: Attachment
+	VertexUV: Vector2,
+	VertexAttachment: Attachment,
+	VA_Position: Vector3,
+	VA_Normal: Vector3
 }
 
 export type Triangle = {
 	TriangleID: number,
+	TriangleVertexIDs: {
+		TriangleVertexID1: number,
+		TriangleVertexID2: number,
+		TriangleVertexID3: number
+	},
 	TriangleVertices: {
 		Vertex1: Vertex,
 		Vertex2: Vertex,

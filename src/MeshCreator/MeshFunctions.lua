@@ -1,93 +1,76 @@
 local MeshFunctions = {}
 MeshFunctions.__index = MeshFunctions
 
-local Classes = require(script.Parent.Classes)
+local Root = script.Parent.Parent
+local Classes = require(Root.Classes)
+local TableFunctions = require(Root.TableFunctions)
+local lib = Root.lib
+--local Table = require(lib.Table)
 
-function MeshFunctions:GetVertex(vertexID)
-	for _, Vertex: Classes.Vertex in self.Vertices do
-		if Vertex.VertexID == vertexID then
-			return Vertex
-		end
-	end
-end
-
-function MeshFunctions:GetTriangle()
-	
-end
-
-function MeshFunctions:AddVertexAttachments()
-	--[[
-	if self.MeshSaveFile then
-		self.EMV = self.MeshSaveFile.Vertices --EditableMeshVertices
-		self.EMT = self.MeshSaveFile.Triangles --EditableMeshTriangles
-		
-		for _, Vertex: Classes.Vertex in self.EMV do
-			print(Vertex.VertexPosition)
-			local VID = Vertex.VertexID
-			local VP: Vector3 = Vertex.VertexPosition --VertexPosition
-			local VN = Vertex.VertexNormal --VertexNormal
+function MeshFunctions:AddVertexAttachments(MeshSaveFile)
+	if MeshSaveFile then
+		--[[
+		self.EMV = MeshSaveFile.Vertices --EditableMeshVertices
+		self.EMT = MeshSaveFile.Triangles --EditableMeshTriangles
+		]] 
+		for _, Vertex: Classes.Vertex in self.Vertices do
+			local VertexID = Vertex.VertexID
+			local VP = Vertex.VA_Position --VA_Position
+			local VN = Vertex.VA_Normal --VA_Normal
 			local VA = Instance.new("Attachment") --VertexAttachment
 			VA.Name = "VertexAttachment"
-			VA.Position = VP * self.MeshPart.Size / self.MeshPart.MeshSize
+			VA.Position = VP
 			VA.Axis = VN
 			VA.Parent = self.MeshPart
-
-			self.Vertices[VID] = Vertex
-		end
-
-		for _, Triangle: Classes.Triangle in ipairs(self.EMT) do
-			local TID = Triangle.TriangleID
-			local TVs = Triangle.TriangleVertices
-
-			self.Triangles[TID] = Triangle
+			
+			Vertex.VertexAttachment = VA
 		end
 	else
 		self.EMVIDs = self.EM:GetVertices() --EditableMeshVertexIDs
 		self.EMTIDs = self.EM:GetTriangles() --EditableMeshTriangleIDs
-		
+
 		for _, vertexID in self.EMVIDs do
-			local VP = self.EM:GetPosition(vertexID) --VertexPosition
+			local VertexPosition = self.EM:GetPosition(vertexID) --VA_Position
 			local VA = Instance.new("Attachment") --VertexAttachment
 			VA.Name = "VertexAttachment"
-			VA.Position = VP * self.MeshPart.Size / self.MeshPart.MeshSize
+			VA.Position = VertexPosition * self.MeshPart.Size / self.MeshPart.MeshSize
 			VA.Axis = self.EM:GetVertexNormal(vertexID)
 			VA.Parent = self.MeshPart
 
 			local VertexClass: Classes.Vertex = {
 				VertexID = vertexID,
-				VertexPosition = VP,
-				VertexNormal = self.EM:GetVertexNormal(vertexID),
-				VertexAttachment = VA
+				VertexUV = self.EM:GetUV(vertexID),
+				VertexAttachment = VA,
 			}
 
 			self.Vertices[vertexID] = VertexClass
 		end
 
-		for _, triangleID in ipairs(self.EMTIDs) do
-			local TV = table.pack(self.EM:GetTriangleVertices(triangleID)) --TriangleVertices
+		for _, triangleID in self.EMTIDs do
+			local TVIDs, _ = table.pack(self.EM:GetTriangleVertices(triangleID)) --TriangleVertexIDs
+			--[[
 			local TVs = {}
 
-			for _, vertexID in TV do
-				local Vertex: Classes.Vertex = self.Vertices[vertexID]
-
+			for _, vertexID in ipairs(TV) do
 				table.insert(TVs, self.Vertices[vertexID])
 			end
-
+			]]
+			
 			local TriangleClass: Classes.Triangle = {
 				TriangleID = triangleID,
-				TriangleVertices = TVs
+				TriangleVertexIDs = TVIDs
 			}
 
 			self.Triangles[triangleID] = TriangleClass
 		end
 	end
-	]]
 	
+	--[[
 	self.EMVIDs = self.EM:GetVertices() --EditableMeshVertexIDs
 	self.EMTIDs = self.EM:GetTriangles() --EditableMeshTriangleIDs
 
 	for _, vertexID in self.EMVIDs do
-		local VP = self.EM:GetPosition(vertexID) --VertexPosition
+		local VP = self.EM:GetPosition(vertexID) --VA_Position
 		local VA = Instance.new("Attachment") --VertexAttachment
 		VA.Name = "VertexAttachment"
 		VA.Position = VP * self.MeshPart.Size / self.MeshPart.MeshSize
@@ -96,7 +79,10 @@ function MeshFunctions:AddVertexAttachments()
 
 		local VertexClass: Classes.Vertex = {
 			VertexID = vertexID,
-			VertexAttachment = VA
+			VertexUV = self.EM:GetUV(vertexID),
+			VertexAttachment = VA,
+			VA_Position = VP,
+			VA_Normal = self.EM:GetVertexNormal(vertexID)
 		}
 
 		self.Vertices[vertexID] = VertexClass
@@ -105,13 +91,11 @@ function MeshFunctions:AddVertexAttachments()
 	for _, triangleID in ipairs(self.EMTIDs) do
 		local TV = table.pack(self.EM:GetTriangleVertices(triangleID)) --TriangleVertices
 		local TVs = {}
-
-		for _, vertexID in TV do
-			local Vertex: Classes.Vertex = self.Vertices[vertexID]
-
+		
+		for _, vertexID in ipairs(TV) do
 			table.insert(TVs, self.Vertices[vertexID])
 		end
-
+		
 		local TriangleClass: Classes.Triangle = {
 			TriangleID = triangleID,
 			TriangleVertices = TVs
@@ -119,6 +103,7 @@ function MeshFunctions:AddVertexAttachments()
 
 		self.Triangles[triangleID] = TriangleClass
 	end
+	]]
 end
 
 function MeshFunctions:RemoveVertexAttachments()
@@ -131,41 +116,19 @@ function MeshFunctions:SetVertexPosition(vertexID, VA_Position)
 	self.EM:SetPosition(vertexID, VA_Position / (self.MeshPart.Size / self.MeshPart.MeshSize))
 end
 
-function MeshFunctions:GetTrianglesContaining(vertexID)
-	local TrianglesContainingVertex = {}
-	
-	for _, Triangle: Classes.Triangle in self.Triangles do
-		for _, Vertex: Classes.Vertex in Triangle.TriangleVertices do
-			if vertexID == Vertex.VertexID then
-				table.insert(TrianglesContainingVertex, Triangle)
-			end
-		end
-	end
-	
-	return TrianglesContainingVertex
-end
-
 function MeshFunctions:RemoveVertex(Vertex: Classes.Vertex)
 	local VertexID = Vertex.VertexID
+	local TrianglesContainingVertex = TableFunctions.GetTrianglesByVertexID(self.Triangles, VertexID)
 	
-	for _, Triangle: Classes.Triangle in self:GetTrianglesContaining(VertexID) do
+	for _, Triangle: Classes.Triangle in TrianglesContainingVertex do
 		local TriangleID = Triangle.TriangleID
 		
-		table.remove(self.Triangles, table.find(self.Triangles, Triangle))
 		self.EM:RemoveTriangle(TriangleID)
+		table.remove(self.Triangles, table.find(self.Triangles, Triangle))
 	end
 	
-	table.remove(self.Vertices, table.find(self.Vertices, Vertex))
 	self.EM:RemoveVertex(VertexID)
+	table.remove(self.Vertices, table.find(self.Vertices, Vertex))
 end
---[[
-function MeshFunctions:RemoveVertex(vertexID)
-	for _, TriangleID in self:GetTrianglesContaining(vertexID) do
-		table.remove(self.TVs, TriangleID)
-		self.EM:RemoveTriangle(TriangleID)
-	end
 
-	self.EM:RemoveVertex(vertexID)
-end
-]]
 return MeshFunctions
