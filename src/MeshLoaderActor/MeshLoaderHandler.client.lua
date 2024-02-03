@@ -17,7 +17,7 @@ function LoadMesh(MeshPart: MeshPart)
 	if MeshPart:FindFirstChildOfClass("EditableMesh") then
 		MeshPart:FindFirstChildOfClass("EditableMesh"):Destroy()
 	end
-	
+
 	MeshLoader.new(MeshPart, MeshLoader.LoadMeshSaveFile(MeshPart))
 	
 	MeshPart.ChildAdded:Connect(OnMeshSaveFileAdded)
@@ -33,12 +33,12 @@ function LoadMeshFromMeshSaveFile(MeshSaveFile: Configuration)
 	MeshLoader.new(MeshPart, MeshLoader.LoadMeshSaveFile(MeshPart))
 end
 
-if not game:IsLoaded() then
-	game.Loaded:Wait()
-end
+if RunService:IsRunning() and not plugin then
+	workspace.DescendantAdded:Connect(OnMeshAdded)
+elseif RunService:IsEdit() and plugin then
+	for _, child in workspace:GetDescendants() do
+		OnMeshAdded(child)
+	end
 
-for _, child in workspace:GetDescendants() do
-	OnMeshAdded(child)
+	workspace.DescendantAdded:Connect(OnMeshAdded)
 end
-
-workspace.DescendantAdded:Connect(OnMeshAdded)

@@ -79,7 +79,7 @@ PluginButton.Click:Connect(function()
 						end
 						
 						CurrentMeshCreator:AddVertexAttachments(MeshSaveFile)
-						task.wait()
+						
 						for _, Vertex: Classes.Vertex in CurrentMeshCreator.Vertices do
 							local VertexID = Vertex.VertexID
 							local VA = Vertex.VertexAttachment

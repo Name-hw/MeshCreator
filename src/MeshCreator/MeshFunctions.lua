@@ -25,7 +25,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 		local EMVIDs = self.EM:GetVertices() --EditableMeshVertexIDs
 		local EMTIDs = self.EM:GetTriangles() --EditableMeshTriangleIDs
 
-		for _, vertexID in self.EMVIDs do
+		for _, vertexID in EMVIDs do
 			local VertexPosition = self.EM:GetPosition(vertexID) --VA_Position
 			local VA = Instance.new("Attachment") --VertexAttachment
 			VA.Name = "VertexAttachment"
@@ -42,7 +42,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			self.Vertices[vertexID] = VertexClass
 		end
 
-		for _, triangleID in self.EMTIDs do
+		for _, triangleID in EMTIDs do
 			local TVIDs, _ = table.pack(self.EM:GetTriangleVertices(triangleID)) --TriangleVertexIDs
 			
 			local TriangleClass: Classes.Triangle = {

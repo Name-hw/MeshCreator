@@ -1,4 +1,4 @@
---[[v0.0.5]]--
+--[[v0.0.6]]--
 local MeshCreator = {}
 MeshCreator.__index = MeshCreator
 
@@ -122,8 +122,9 @@ function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
 	}
 	local TriangleIDs = self:AddTriangles(VertexIDs)
 	
-	local newCubeMesh: Classes.CubeMesh = {
+	local newCubeMesh: Classes.CustomMesh = {
 		MeshID = 1,
+		MeshType = Enums.MeshType.Cube,
 		Vertices = VertexIDs,
 		Triangles = TriangleIDs
 	}

@@ -3,6 +3,7 @@ MeshLoader.__index = MeshLoader
 
 local AssetService = game:GetService("AssetService")
 local HttpService = game:GetService("HttpService")
+local ServerStorage = game:GetService("ServerStorage")
 local Zlib128 = require(script.Parent.Zlib128)
 
 function MeshLoader.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh)

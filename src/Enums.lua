@@ -1,22 +1,22 @@
+local Enums = {}
+
 export type CEnumItem = {
 	Value: number, 
-	EnumType: CEnum
+	EnumType: Enum
 }
-
-local Enums = {}
 
 Enums.MeshType = {
 	Plane = {
 		Value = 1,
-		EnumType = Enums.Plane
+		EnumType = Enums.MeshType
 	}::CEnumItem, 
 	Cube = {
 		Value = 2,
-		EnumType = Enums.Plane
+		EnumType = Enums.MeshType
 	}::CEnumItem, 
 	Sphere = {
 		Value = 3,
-		EnumType = Enums.Plane
+		EnumType = Enums.MeshType
 	}::CEnumItem
 }
 
