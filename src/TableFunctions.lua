@@ -3,7 +3,7 @@ local TableFunctions = {}
 local Root = script.Parent
 local Classes = require(Root.Classes)
 local lib = Root.lib
-local Table = require(lib.Table)
+--local Table = require(lib.Table)
 
 function TableFunctions.VerticesToVertexIDs(Vertices, vertexID)
 	
@@ -11,26 +11,26 @@ end
 
 function TableFunctions.GetVertexByVertexID(Vertices, vertexID)
 	for _, Vertex in Vertices do
-		if Vertex.VertexID == vertexID then
+		if Vertex.ID == vertexID then
 			return Vertex
 		end
 	end
 end
 
-function TableFunctions.GetTrianglesByVertexID(Triangles, vertexID)
-	local TrianglesContainingVertex = {}
+function TableFunctions.GetEFElementsByVertexID(EFElements, vertexID)
+	local ElementsContainingVertex: {Classes.EFElement} = {}
 	
-	for _, Triangle: Classes.Triangle in Triangles do
-		local TriangleVertexIDs = Triangle.TriangleVertexIDs
-		
-		for _, TriangleVertexID in ipairs(TriangleVertexIDs) do
-			if TriangleVertexID == vertexID then
-				table.insert(TrianglesContainingVertex, Triangle)
+	for _, EFElement: Classes.EFElement in EFElements do
+		local ElementVertexIDs = EFElement.VertexIDs
+
+		for _, ElementVertexID in ipairs(ElementVertexIDs) do
+			if ElementVertexID == vertexID then
+				table.insert(ElementsContainingVertex, EFElement)
 			end
 		end
 	end
 	
-	return TrianglesContainingVertex
+	return ElementsContainingVertex
 end
 
 return TableFunctions

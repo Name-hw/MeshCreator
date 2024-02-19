@@ -35,10 +35,10 @@ function SaveLoadSystem.Save(MeshCreator)
 		local TriangleVertexIDs = {}
 		
 		for _, TriangleVertex: Classes.Vertex in Triangle.TriangleVertices do
-			table.insert(TriangleVertices, TableFunctions.GetVertexByVertexID(SaveData.Vertices, TriangleVertex.VertexID))
+			table.insert(TriangleVertices, TableFunctions.GetVertexByVertexID(SaveData.Vertices, TriangleVertex.ID))
 		end
 		
-		TriangleSaveData.TriangleVertexIDs = TriangleVertices
+		TriangleSaveData.VertexIDs = TriangleVertices
 		]]
 		table.insert(SaveData.Triangles, TriangleSaveData)
 	end

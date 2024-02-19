@@ -1,12 +1,13 @@
---[[v0.0.6]]--
+--[[v0.1.0]]--
 local MeshCreator = {}
-MeshCreator.__index = MeshCreator
 
 local AssetService = game:GetService("AssetService")
 local MeshFunctions = require(script.MeshFunctions)
+local MeshGizmo = require(script.MeshGizmo)
 local Classes = require(script.Parent.Classes)
 local Enums = require(script.Parent.Enums)
 local TableFunctions = require(script.Parent.TableFunctions)
+local lib = script.Parent.lib
 --local Table = require(script.Parent.lib.Table)
 
 function MeshCreator.new(MeshPart: Instance, MeshSaveFile: Classes.Mesh)
@@ -15,8 +16,13 @@ function MeshCreator.new(MeshPart: Instance, MeshSaveFile: Classes.Mesh)
 	newMeshCreator.MeshPart = MeshPart
 	newMeshCreator.Vertices = {}
 	newMeshCreator.Triangles = {}
+	newMeshCreator.MeshGizmo = MeshGizmo.new(MeshPart)
 	
-	newMeshCreator:CreateEditableMesh(MeshSaveFile)
+	if newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh") and not MeshSaveFile then
+		newMeshCreator.EM = newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh")
+	else
+		newMeshCreator:CreateEditableMesh(MeshSaveFile)
+	end
 	
 	return newMeshCreator
 end
@@ -33,29 +39,29 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 		
 		for _, Vertex: Classes.Vertex in MeshSaveFile.Vertices do
 			local VertexUV = Vertex.VertexUV
-			local VertexPosition = Vertex.VA_Position / (self.MeshPart.Size / self.MeshPart.MeshSize) --VER
-			local VN = Vertex.VA_Normal --VA_Normal
+			local VertexPosition = Vertex.VA_Position / (self.MeshPart.Size / self.MeshPart.MeshSize)
+			local VN = Vertex.VA_Normal
 			local newVertexID = self.EM:AddVertex(VertexPosition)
 			
 			self.EM:SetVertexNormal(newVertexID, VN)
 			self.EM:SetUV(newVertexID, VertexUV)
 			
-			newVertexIDs[Vertex.VertexID] = newVertexID
-			Vertex.VertexID = newVertexID
+			newVertexIDs[Vertex.ID] = newVertexID
+			Vertex.ID = newVertexID
 			
 			table.insert(self.Vertices, Vertex)
 		end
 		
 		for _, Triangle: Classes.Triangle in MeshSaveFile.Triangles do
-			local TriangleVertexIDs = Triangle.TriangleVertexIDs
+			local TriangleVertexIDs = Triangle.VertexIDs
 			local newTriangleVertexIDs = {}
-
+			
 			for _, TriangleVertexID in ipairs(TriangleVertexIDs) do
 				table.insert(newTriangleVertexIDs, newVertexIDs[TriangleVertexID])
 			end
 			
-			Triangle.TriangleID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
-			Triangle.TriangleVertexIDs = newTriangleVertexIDs
+			Triangle.ID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
+			Triangle.VertexIDs = newTriangleVertexIDs
 			
 			table.insert(self.Triangles, Triangle)
 		end
@@ -134,6 +140,7 @@ end
 
 function MeshCreator:Remove()
 	self:RemoveVertexAttachments()
+	self.MeshGizmo:RemoveEdgeAdornments()
 end
 
 return MeshCreator

@@ -31,9 +31,11 @@ local UI = Root.UI
 local Classes = require(Root.Classes)
 local MeshCreator = require(Root.MeshCreator)
 local MeshSaveLoadSystem = require(Root.MeshSaveLoadSystem)
+local lib = Root.lib
 local IsPluginEnabled = false
 local IsAddSquareMeshButtonEnabled = false
 local IsMeshPartSelected = false
+local VertexPositions = {}
 local ToolBarGui, CurrentMeshCreator, SelectingObject
 
 if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor") then
@@ -69,6 +71,7 @@ PluginButton.Click:Connect(function()
 				if SelectingObject then
 					if SelectingObject:IsA("MeshPart") and not IsMeshPartSelected then
 						IsMeshPartSelected = true
+						
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
 						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile)
 						
@@ -81,18 +84,29 @@ PluginButton.Click:Connect(function()
 						CurrentMeshCreator:AddVertexAttachments(MeshSaveFile)
 						
 						for _, Vertex: Classes.Vertex in CurrentMeshCreator.Vertices do
-							local VertexID = Vertex.VertexID
+							local VertexID = Vertex.ID
 							local VA = Vertex.VertexAttachment
 							
-							VA.Changed:Connect(function(property)
+							local function OnChanged(property)
 								if property == "Position" then
+									CurrentMeshCreator.MeshGizmo:UpdateByVertexID(CurrentMeshCreator.Vertices, VertexID)
 									CurrentMeshCreator:SetVertexPosition(VertexID, VA.Position)
 								end
+							end
+							
+							local function OnAncestryChanged()
+								CurrentMeshCreator:RemoveTriangleByVertexID(VertexID)
+								CurrentMeshCreator.MeshGizmo:RemoveEdgeByVertexID(VertexID)
+								CurrentMeshCreator:RemoveVertex(Vertex)
+							end
+							
+							VA.Changed:Connect(function(property)
+								task.spawn(OnChanged, property)
 							end)
 							
 							VA.AncestryChanged:Connect(function()
 								if IsPluginEnabled then
-									CurrentMeshCreator:RemoveVertex(Vertex)
+									task.spawn(OnAncestryChanged)
 								end
 							end)
 						end
@@ -115,3 +129,17 @@ PluginButton.Click:Connect(function()
 		PluginExit()
 	end
 end)
+--[[
+RunService.PostSimulation:Connect(function()
+	if CurrentMeshCreator and CurrentMeshCreator.MeshGizmo then
+		for _, Vertex: Classes.Vertex in CurrentMeshCreator.Vertices do
+			if Vertex.VertexAttachment.Position ~= VertexPositions[Vertex.ID] then
+				CurrentMeshCreator.MeshGizmo:UpdateByVertexID(CurrentMeshCreator.Vertices, Vertex.ID)
+			end
+			
+			VertexPositions[Vertex.ID] = Vertex.VertexAttachment.Position
+			task.synchronize()
+		end
+	end
+end)
+]]

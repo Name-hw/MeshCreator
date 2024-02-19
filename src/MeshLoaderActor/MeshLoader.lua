@@ -56,20 +56,20 @@ function MeshLoader:CreateEditableMesh()
 		self.EM:SetVertexNormal(newVertexID, VN)
 		self.EM:SetUV(newVertexID, VertexUV)
 
-		newVertexIDs[Vertex.VertexID] = newVertexID
-		Vertex.VertexID = newVertexID
+		newVertexIDs[Vertex.ID] = newVertexID
+		Vertex.ID = newVertexID
 	end
 
 	for _, Triangle: Classes.Triangle in self.MeshSaveFile.Triangles do
-		local TriangleVertexIDs = Triangle.TriangleVertexIDs
+		local TriangleVertexIDs = Triangle.VertexIDs
 		local newTriangleVertexIDs = {}
 
 		for _, TriangleVertexID in ipairs(TriangleVertexIDs) do
 			table.insert(newTriangleVertexIDs, newVertexIDs[TriangleVertexID])
 		end
 
-		Triangle.TriangleID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
-		Triangle.TriangleVertexIDs = newTriangleVertexIDs
+		Triangle.ID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
+		Triangle.VertexIDs = newTriangleVertexIDs
 	end
 	
 	self.EM.Name = "EditableMesh"
