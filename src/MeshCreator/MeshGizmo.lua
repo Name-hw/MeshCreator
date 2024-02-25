@@ -1,10 +1,18 @@
 local MeshGizmo = {}
 MeshGizmo.__index = MeshGizmo
 
+local CoreGui = game:GetService("CoreGui")
 local Root = script.Parent.Parent
 local Classes = require(Root.Classes)
 local TableFunctions = require(Root.TableFunctions)
 local lib = Root.lib
+local GizmoFolder = CoreGui:FindFirstChild("MeshCreator_GizmoFolder")
+
+if not GizmoFolder then
+	GizmoFolder = Instance.new("Folder")
+	GizmoFolder.Name = "MeshCreator_GizmoFolder"
+	GizmoFolder.Parent = CoreGui
+end
 
 function MeshGizmo:DrawLine(StartVertex: Classes.Vertex, EndVertex: Classes.Vertex)
 	local Origin = StartVertex.VertexAttachment.Position
@@ -23,8 +31,9 @@ function MeshGizmo:DrawLine(StartVertex: Classes.Vertex, EndVertex: Classes.Vert
 		LineAdornment.Adornee = self.Adornee
 		LineAdornment.CFrame =  CFrame.new(Origin, End)
 		LineAdornment.Length = (End - Origin).Magnitude
-		LineAdornment.Thickness = 5
-		LineAdornment.Parent = workspace.Terrain
+		LineAdornment.Thickness = TableFunctions.CheckSettingExist(self.Settings, "EA_Thickness")
+		LineAdornment.ZIndex = 1
+		LineAdornment.Parent = GizmoFolder
 		
 		local EdgeClass: Classes.Edge = {
 			ID = (#self.Edges + 1),
@@ -36,21 +45,22 @@ function MeshGizmo:DrawLine(StartVertex: Classes.Vertex, EndVertex: Classes.Vert
 	end
 end
 
-function MeshGizmo.new(Adornee)
+function MeshGizmo.new(Adornee, Settings)
 	local self = setmetatable({}, MeshGizmo)
 	
 	self.Edges = {}
 	self.Adornee = Adornee
+	self.Settings = Settings
 	
 	return self
 end
 
-function MeshGizmo:Create(Vertices, Triangles)
+function MeshGizmo:Create(Vertices: {Classes.Vertex}, Triangles: {Classes.Triangle})
 	for _, Triangle: Classes.Triangle in Triangles do
 		local TriangleVertices = {}
 		
-		for _, TriangleVertexID in ipairs(Triangle.VertexIDs) do
-			table.insert(TriangleVertices, TableFunctions.GetVertexByVertexID(Vertices, TriangleVertexID))
+		for _, triangleVertexID in ipairs(Triangle.VertexIDs) do
+			table.insert(TriangleVertices, TableFunctions.GetVertexByVertexID(Vertices, triangleVertexID))
 		end
 		
 		local TV1 = TriangleVertices[1]
@@ -85,7 +95,13 @@ function MeshGizmo:RemoveEdgeAdornments()
 	end
 end
 
-function MeshGizmo:SetEA_Position(Edge: Classes.Edge) --SetEdgeAdornmentPosition
+function MeshGizmo:SetEAs_Thickness(thickness)
+	for _, Edge: Classes.Edge in self.Edges do
+		Edge.EdgeAdornment.Thickness = thickness
+	end
+end
+
+function MeshGizmo.SetEA_Position(Edge: Classes.Edge) --SetEdgeAdornmentPosition
 	local Origin = Edge.StartVertex.VertexAttachment.Position
 	local End = Edge.EndVertex.VertexAttachment.Position
 	--task.synchronize()
@@ -93,19 +109,20 @@ function MeshGizmo:SetEA_Position(Edge: Classes.Edge) --SetEdgeAdornmentPosition
 	Edge.EdgeAdornment.Length = (End - Origin).Magnitude
 end
 
-function MeshGizmo:Update(Edge: Classes.Edge, Vertices)
-	Edge.StartVertex = TableFunctions.GetVertexByVertexID(Vertices, Edge.VertexIDs[1])
-	Edge.EndVertex = TableFunctions.GetVertexByVertexID(Vertices, Edge.VertexIDs[2])
+function MeshGizmo.UpdateEA_Position(Edge: Classes.Edge, Vertices: {Classes.Vertex})
+	local VerticesInEdge = TableFunctions.GetVertexFromEFElement(Vertices, Edge)
+	Edge.StartVertex = VerticesInEdge[1]
+	Edge.EndVertex = VerticesInEdge[2]
 	
-	self:SetEA_Position(Edge)
+	MeshGizmo.SetEA_Position(Edge)
 end
 
-function MeshGizmo:UpdateByVertexID(Vertices, vertexID)
+function MeshGizmo:UpdateEA_PositionByVertexID(Vertices: {Classes.Vertex}, vertexID)
 	local EdgesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Edges, vertexID)
 
 	for _, Edge: Classes.Edge in EdgesContainingVertex do
 		--task.desynchronize()
-		self:Update(Edge, Vertices)
+		MeshGizmo.UpdateEA_Position(Edge, Vertices)
 	end
 end
 

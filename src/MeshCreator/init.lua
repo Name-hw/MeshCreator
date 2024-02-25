@@ -10,13 +10,15 @@ local TableFunctions = require(script.Parent.TableFunctions)
 local lib = script.Parent.lib
 --local Table = require(script.Parent.lib.Table)
 
-function MeshCreator.new(MeshPart: Instance, MeshSaveFile: Classes.Mesh)
+function MeshCreator.new(MeshPart: Instance, MeshSaveFile: Classes.Mesh, Settings)
 	local newMeshCreator = setmetatable(MeshCreator, MeshFunctions)
 	
+	newMeshCreator.Settings = Settings
 	newMeshCreator.MeshPart = MeshPart
+	newMeshCreator.MeshPart.Locked = true
 	newMeshCreator.Vertices = {}
 	newMeshCreator.Triangles = {}
-	newMeshCreator.MeshGizmo = MeshGizmo.new(MeshPart)
+	newMeshCreator.MeshGizmo = MeshGizmo.new(MeshPart, newMeshCreator.Settings)
 	
 	if newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh") and not MeshSaveFile then
 		newMeshCreator.EM = newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh")
@@ -141,6 +143,9 @@ end
 function MeshCreator:Remove()
 	self:RemoveVertexAttachments()
 	self.MeshGizmo:RemoveEdgeAdornments()
+	
+	self.MeshPart.Locked = false
+	self = nil
 end
 
 return MeshCreator

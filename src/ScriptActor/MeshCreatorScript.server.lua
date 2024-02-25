@@ -14,29 +14,34 @@ local PluginGuiInfo = DockWidgetPluginGuiInfo.new(
 	Enum.InitialDockState.Float, --From what side gui appears
 	false, --Widget will be initially enabled
 	false, --Don't overdrive previouse enabled state
-	200, --default weight
-	300, --default height
-	200, --minimum weight (optional)
-	200 --minimum height (optional)
+	350, --default weight
+	500, --default height
+	350, --minimum weight (optional)
+	500 --minimum height (optional)
 )
 local PluginGui = plugin:CreateDockWidgetPluginGui("MeshCreatorPlugin", PluginGuiInfo)
 PluginGui.Name = "MeshCreator"
 PluginGui.Title = "MeshCreator"
---[[
-local Vendor = Root.Vendor
-local Roact = require(Vendor.Roact)
-]]
+local Settings = {
+	["EA_Thickness"] = plugin:GetSetting("EA_Thickness")
+}
 local UI = Root.UI
 --local MeshExplorer = require(UI.MeshExplorer)
+local SettingsPanel = require(UI.SettingsPanel).new(PluginGui, Settings)
 local Classes = require(Root.Classes)
+local Enums = require(Root.Enums)
+local TableFunctions = require(Root.TableFunctions)
 local MeshCreator = require(Root.MeshCreator)
 local MeshSaveLoadSystem = require(Root.MeshSaveLoadSystem)
 local lib = Root.lib
 local IsPluginEnabled = false
 local IsAddSquareMeshButtonEnabled = false
 local IsMeshPartSelected = false
-local VertexPositions = {}
-local ToolBarGui, CurrentMeshCreator, SelectingObject
+local IsEdgeSelected = false
+local ToolBarGui, CurrentMeshCreator, SelectingObject, SelectingObjects
+local LastSelectedEA: LineHandleAdornment
+
+local SelectMode = {}
 
 if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor") then
 	game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
@@ -46,34 +51,40 @@ local MeshLoaderActorClone = Root.MeshLoaderActor:Clone()
 MeshLoaderActorClone.Name = "MeshCreator_MeshLoaderActor"
 MeshLoaderActorClone.Parent = game.ReplicatedFirst
 
-function PluginExit()
+local function PluginExit()
 	if CurrentMeshCreator then
 		IsMeshPartSelected = false
+		PluginGui.Enabled = false
 		MeshSaveLoadSystem.Save(CurrentMeshCreator)
-		CurrentMeshCreator = CurrentMeshCreator:Remove()
+		CurrentMeshCreator:Remove()
 	end
 	task.synchronize()
-	--Roact.unmount(ToolBarGui)
 end
 
+local function SetSelectMode(newSelectMode)
+	SelectMode = Enums.SelectMode[newSelectMode]
+end
+
+SetSelectMode("VertexMode")
+
 PluginButton.Click:Connect(function()
-	IsPluginEnabled = not IsPluginEnabled;
+	IsPluginEnabled = not IsPluginEnabled
 	
-	PluginButton:SetActive(IsPluginEnabled);
+	PluginButton:SetActive(IsPluginEnabled)
 	
 	if IsPluginEnabled then
-		--ToolBarGui = Roact.mount(Roact.createElement(MeshExplorer), PluginGui)
-		
 		Selection.SelectionChanged:Connect(function()
 			if IsPluginEnabled then
-				SelectingObject = Selection:Get()[1]
+				SelectingObjects = Selection:Get()
+				SelectingObject = SelectingObjects[1]
 				
 				if SelectingObject then
 					if SelectingObject:IsA("MeshPart") and not IsMeshPartSelected then
 						IsMeshPartSelected = true
 						
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
-						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile)
+						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings)
+						PluginGui.Enabled = IsPluginEnabled
 						
 						if CurrentMeshCreator.EM:GetAttribute("CustomMesh") then
 							CurrentMeshCreator.MeshPart.Size = Vector3.new(1, 1, 1)
@@ -89,7 +100,7 @@ PluginButton.Click:Connect(function()
 							
 							local function OnChanged(property)
 								if property == "Position" then
-									CurrentMeshCreator.MeshGizmo:UpdateByVertexID(CurrentMeshCreator.Vertices, VertexID)
+									CurrentMeshCreator.MeshGizmo:UpdateEA_PositionByVertexID(CurrentMeshCreator.Vertices, VertexID)
 									CurrentMeshCreator:SetVertexPosition(VertexID, VA.Position)
 								end
 							end
@@ -110,12 +121,57 @@ PluginButton.Click:Connect(function()
 								end
 							end)
 						end
+						
+						for _, Edge: Classes.Edge in CurrentMeshCreator.MeshGizmo.Edges do
+							local EA = Edge.EdgeAdornment
+							
+							local function OnClicked()
+								if SelectMode == Enums.SelectMode.EdgeMode and not IsEdgeSelected then
+									local VAsInEdge = TableFunctions.FindVertexAttachmentsFromEFElement(CurrentMeshCreator.Vertices, Edge) --VertexAttachmentsInEdge
+									
+									Selection:Set(VAsInEdge)
+									EA.Color3 = Color3.new(1, 0.584314, 0)
+									IsEdgeSelected = true
+									LastSelectedEA = EA
+								end
+							end
+							
+							EA.MouseButton1Down:Connect(function()
+								task.spawn(OnClicked)
+							end)
+						end
+						
+						SettingsPanel.SettingsFrame:GetAttributeChangedSignal("EA_Thickness"):Connect(function()
+							local EA_Thickness = SettingsPanel.SettingsFrame:GetAttribute("EA_Thickness")
+							
+							plugin:SetSetting("EA_Thickness", EA_Thickness)
+							Settings["EA_Thickness"] = EA_Thickness
+							
+							if CurrentMeshCreator then
+								CurrentMeshCreator.MeshGizmo:SetEAs_Thickness(EA_Thickness)
+							end
+						end)
+						
+						SettingsPanel.SettingsFrame:GetAttributeChangedSignal("SelectMode"):Connect(function()
+							local SelectMode = SettingsPanel.SettingsFrame:GetAttribute("SelectMode")
+							
+							SetSelectMode(SelectMode)
+						end)
+					end
+					
+					for _, object in SelectingObjects do
+						if SelectingObject.Name == "VertexAttachment" and SelectMode ~= Enums.SelectMode.VertexMode then
+							if SelectMode ~= Enums.SelectMode.VertexMode and not IsEdgeSelected then
+								Selection:Set(Instance)
+							end
+						end
+					end
+				else
+					if IsEdgeSelected then
+						IsEdgeSelected = false
+						LastSelectedEA.Color3 = Color3.new(0.0509804, 0.411765, 0.67451)
 					end
 				end
-			elseif CurrentMeshCreator and IsMeshPartSelected then
-				IsMeshPartSelected = false
-				MeshSaveLoadSystem.Save(CurrentMeshCreator)
-				CurrentMeshCreator = CurrentMeshCreator:Remove()
 			end
 		end)
 		--[[
