@@ -37,7 +37,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			local VertexPosition = self.EM:GetPosition(vertexID) --VA_Position
 			local VertexNormal = self.EM:GetVertexNormal(vertexID) --VA_Position
 			
-			local VA = CreateVertexAttachment(VertexPosition, VertexNormal, self.MeshPart) --VertexAttachment
+			local VA = CreateVertexAttachment(VertexPosition * (self.MeshPart.Size / self.MeshPart.MeshSize), VertexNormal, self.MeshPart) --VertexAttachment
 			
 			local VertexClass: Classes.Vertex = {
 				ID = vertexID,
