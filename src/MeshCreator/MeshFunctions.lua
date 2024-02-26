@@ -7,6 +7,17 @@ local TableFunctions = require(Root.TableFunctions)
 local lib = Root.lib
 --local Table = require(lib.Table)
 
+local function CreateVertexAttachment(VP, VN, MeshPart)
+	local VA = Instance.new("Attachment") --VertexAttachment
+			VA.Visible = true
+			VA.Archivable = false
+			VA.Name = "VertexAttachment"
+			VA.Position = VP
+			VA.Axis = VN
+			VA.Parent = MeshPart
+	return VA
+end
+
 function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 	if MeshSaveFile then
 		for _, Vertex: Classes.Vertex in self.Vertices do
@@ -14,11 +25,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			local VP = Vertex.VA_Position --VA_Position
 			local VN = Vertex.VA_Normal --VA_Normal
 			
-			local VA = Instance.new("Attachment") --VertexAttachment
-			VA.Name = "VertexAttachment"
-			VA.Position = VP
-			VA.Axis = VN
-			VA.Parent = self.MeshPart
+			local VA = CreateVertexAttachment(VP, VN, self.MeshPart)
 			
 			Vertex.VertexAttachment = VA
 		end
@@ -30,11 +37,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			local VertexPosition = self.EM:GetPosition(vertexID) --VA_Position
 			local VertexNormal = self.EM:GetVertexNormal(vertexID) --VA_Position
 			
-			local VA = Instance.new("Attachment") --VertexAttachment
-			VA.Name = "VertexAttachment"
-			VA.Position = VertexPosition * (self.MeshPart.Size / self.MeshPart.MeshSize)
-			VA.Axis = VertexNormal
-			VA.Parent = self.MeshPart
+			local VA = CreateVertexAttachment(VertexPosition, VertexNormal, self.MeshPart) --VertexAttachment
 			
 			local VertexClass: Classes.Vertex = {
 				ID = vertexID,

@@ -58,7 +58,6 @@ local function PluginExit()
 		MeshSaveLoadSystem.Save(CurrentMeshCreator)
 		CurrentMeshCreator:Remove()
 	end
-	task.synchronize()
 end
 
 local function SetSelectMode(newSelectMode)
@@ -185,6 +184,8 @@ PluginButton.Click:Connect(function()
 		PluginExit()
 	end
 end)
+
+game.Close:Connect(PluginExit)
 --[[
 RunService.PostSimulation:Connect(function()
 	if CurrentMeshCreator and CurrentMeshCreator.MeshGizmo then

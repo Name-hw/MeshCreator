@@ -1,4 +1,3 @@
---[[v0.1.0]]--
 local MeshCreator = {}
 
 local AssetService = game:GetService("AssetService")
