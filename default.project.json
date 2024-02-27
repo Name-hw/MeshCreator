@@ -6,7 +6,7 @@
       "$className": "ServerStorage",
       
       "MeshCreatorPlugin": {
-        "$path": "src"
+        "$path": "src/MeshCreatorPlugin"
       }
     }
   },

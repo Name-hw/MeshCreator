@@ -1,14 +1,19 @@
-local SettingsPanel = {}
+local SettingsHandler = {}
+
 local Root = script.Parent.Parent
 local Enums = require(Root.Enums)
+local Types = require(Root.Types)
 local Vendor = Root.Vendor
 local GuiLib = require(Vendor.GuiLib.LazyLoader)
 local GuiClasses = GuiLib.Classes
-local SettingsFrame = script.Parent.Settings
+local UI = Root.UI
+local SettingsFrame = UI.Settings
+local CurrentSettings: Types.Settings = {}
+local PreviousSettings: Types.Settings = {}
 
-function SettingsPanel.new(parent, pluginSettings: {})
-	local self = {}
-	
+function SettingsHandler.new(parent, pluginSettings: {}, defaultSettings: {})
+	local self = setmetatable(SettingsHandler, {})
+
 	self.SettingsFrame = SettingsFrame
 	self.ControlFrame = self.SettingsFrame.ControlFrame
 	self.MenuFrame = self.SettingsFrame.MenuFrame
@@ -24,7 +29,7 @@ function SettingsPanel.new(parent, pluginSettings: {})
 	if pluginSettings["EA_Thickness"] then
 		self.ET_TextMask.Frame.Text = pluginSettings["EA_Thickness"]
 	else
-		self.ET_TextMask.Frame.Text = 5
+		self.ET_TextMask.Frame.Text = defaultSettings["EA_Thickness"]
 	end
 	
 	self.SettingsFrame.Parent = parent
@@ -33,27 +38,37 @@ function SettingsPanel.new(parent, pluginSettings: {})
 	EdgeThicknessSlider.Changed:Connect(function(value)
 		ET_TextMask.Frame.Text = math.round(value * 50)
 	end)
-	
-	self.ET_TextMask.Frame.FocusLost:Connect(function()
+	]]
+	self.ET_TextMask.Frame:GetPropertyChangedSignal("Text"):Connect(function()
 		if self.ET_TextMask.Frame.Text then
-			--EdgeThicknessSlider:Set(tonumber(self.ET_TextMask.Frame.Text) / 50, false)
+			CurrentSettings["EA_Thickness"] = self.ET_TextMask.Frame.Text
 		end
 	end)
-	]]
 	
 	self.SM_Dropdown.Changed:Connect(function(option: TextButton)
 		self.SettingsFrame:SetAttribute("SelectMode", option.Label.Text .. "Mode")
 	end)
 	
 	self.ControlFrame.ApplyButton.Activated:Connect(function()
-		self.SettingsFrame:SetAttribute("EA_Thickness", self.ET_TextMask.Frame.Text)
+		self:ApplySettings()
 	end)
 	
 	self.ControlFrame.ResetButton.Activated:Connect(function()
-		self.ET_TextMask.Frame.Text = self.SettingsFrame:GetAttribute("EA_Thickness")
+		self.ET_TextMask.Frame.Text = defaultSettings["EA_Thickness"]
+		task.wait()
+		self:ApplySettings()
 	end)
 	
 	return self
 end
 
-return SettingsPanel
+function SettingsHandler:ApplySettings()
+	for settingName, value in pairs(CurrentSettings) do
+		if PreviousSettings[settingName] ~= value then
+			self.SettingsFrame:SetAttribute(settingName, value)
+			PreviousSettings[settingName] = value
+		end
+	end
+end
+
+return SettingsHandler

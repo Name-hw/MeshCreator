@@ -22,20 +22,23 @@ local PluginGuiInfo = DockWidgetPluginGuiInfo.new(
 local PluginGui = plugin:CreateDockWidgetPluginGui("MeshCreatorPlugin", PluginGuiInfo)
 PluginGui.Name = "MeshCreator"
 PluginGui.Title = "MeshCreator"
-local Settings = {
-	["EA_Thickness"] = plugin:GetSetting("EA_Thickness")
-}
-local UI = Root.UI
---local MeshExplorer = require(UI.MeshExplorer)
-local SettingsPanel = require(UI.SettingsPanel).new(PluginGui, Settings)
 local Classes = require(Root.Classes)
 local Enums = require(Root.Enums)
+local Types = require(Root.Types)
+local Settings: Types.Settings = {
+	["EA_Thickness"] = plugin:GetSetting("EA_Thickness")
+}
+local DefaultSettings: Types.Settings = {
+	["EA_Thickness"] = 5
+}
 local TableFunctions = require(Root.TableFunctions)
 local MeshCreator = require(Root.MeshCreator)
 local MeshSaveLoadSystem = require(Root.MeshSaveLoadSystem)
+local UIHandlers = Root.UIHandlers
+--local MeshExplorer = require(UI.MeshExplorer)
+local SettingsHandler = require(UIHandlers.SettingsHandler).new(PluginGui, Settings, DefaultSettings)
 local lib = Root.lib
 local IsPluginEnabled = false
-local IsAddSquareMeshButtonEnabled = false
 local IsMeshPartSelected = false
 local IsEdgeSelected = false
 local ToolBarGui, CurrentMeshCreator, SelectingObject, SelectingObjects
@@ -86,7 +89,7 @@ PluginButton.Click:Connect(function()
 						PluginGui.Enabled = IsPluginEnabled
 						
 						if CurrentMeshCreator.EM:GetAttribute("CustomMesh") then
-							CurrentMeshCreator.MeshPart.Size = Vector3.new(1, 1, 1)
+							--CurrentMeshCreator.MeshPart.Size = Vector3.new(1, 1, 1)
 							--CurrentMeshCreator:CreatePlaneMesh(5, 5, Vector3.new(0, 5, 0), Vector3.new(0, 10, 0))
 							--CurrentMeshCreator:CreateCubeMesh(Vector3.new(1, 1, 1), Vector3.zero)
 						end
@@ -140,8 +143,8 @@ PluginButton.Click:Connect(function()
 							end)
 						end
 						
-						SettingsPanel.SettingsFrame:GetAttributeChangedSignal("EA_Thickness"):Connect(function()
-							local EA_Thickness = SettingsPanel.SettingsFrame:GetAttribute("EA_Thickness")
+						SettingsHandler.SettingsFrame:GetAttributeChangedSignal("EA_Thickness"):Connect(function()
+							local EA_Thickness = SettingsHandler.SettingsFrame:GetAttribute("EA_Thickness")
 							
 							plugin:SetSetting("EA_Thickness", EA_Thickness)
 							Settings["EA_Thickness"] = EA_Thickness
@@ -151,8 +154,8 @@ PluginButton.Click:Connect(function()
 							end
 						end)
 						
-						SettingsPanel.SettingsFrame:GetAttributeChangedSignal("SelectMode"):Connect(function()
-							local SelectMode = SettingsPanel.SettingsFrame:GetAttribute("SelectMode")
+						SettingsHandler.SettingsFrame:GetAttributeChangedSignal("SelectMode"):Connect(function()
+							local SelectMode = SettingsHandler.SettingsFrame:GetAttribute("SelectMode")
 							
 							SetSelectMode(SelectMode)
 						end)
