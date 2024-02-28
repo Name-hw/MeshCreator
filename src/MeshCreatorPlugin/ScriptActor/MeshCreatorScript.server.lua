@@ -39,6 +39,7 @@ local MeshSaveLoadSystem = require(Root.MeshSaveLoadSystem)
 local UIHandlers = Root.UIHandlers
 --local MeshExplorer = require(UI.MeshExplorer)
 local SettingsHandler = require(UIHandlers.SettingsHandler).new(PluginGui, Settings, DefaultSettings)
+local EditorGuiHandler = require(UIHandlers.EditorGuiHandler).new(CoreGui)
 local lib = Root.lib
 local IsPluginEnabled = false
 local IsMeshPartSelected = false
@@ -53,6 +54,10 @@ if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActo
 	game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
 end
 
+if CoreGui:FindFirstChild("MeshCreator_EditorGui") then
+	CoreGui:FindFirstChild("MeshCreator_EditorGui"):Destroy()
+end
+
 local MeshLoaderActorClone = Root.MeshLoaderActor:Clone()
 MeshLoaderActorClone.Name = "MeshCreator_MeshLoaderActor"
 MeshLoaderActorClone.Parent = game.ReplicatedFirst
@@ -61,6 +66,7 @@ local function PluginExit()
 	if CurrentMeshCreator then
 		IsMeshPartSelected = false
 		PluginGui.Enabled = false
+		EditorGuiHandler.EditorGui.Enabled = false
 		MeshSaveLoadSystem.Save(CurrentMeshCreator)
 		CurrentMeshCreator:Remove()
 	end
@@ -102,8 +108,6 @@ local function OnSettingsChanged(attributeName)
 			if Settings["GizmoVisible"] then
 				CurrentMeshCreator.MeshGizmo:SetEAs_Thickness(Attribute)
 			end
-		elseif attributeName == "SelectMode" then
-			SetSelectMode(Attribute)
 		elseif attributeName == "GizmoVisible" then
 			if CurrentMeshCreator then
 				CurrentMeshCreator.MeshGizmo:SetEAs_Visible(Attribute)
@@ -115,8 +119,16 @@ local function OnSettingsChanged(attributeName)
 				coroutine.close(EACHCoroutine)
 			end
 		end
-
+		
 		PreviousSetting[attributeName] = Attribute
+	end
+end
+
+local function OnHeaderChanged(attributeName)
+	local Attribute = EditorGuiHandler.HeaderHandler.HeaderFrame:GetAttribute(attributeName)
+
+	if attributeName == "SelectMode" then
+		SetSelectMode(Attribute)
 	end
 end
 
@@ -140,6 +152,7 @@ PluginButton.Click:Connect(function()
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
 						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings)
 						PluginGui.Enabled = IsPluginEnabled
+						EditorGuiHandler.EditorGui.Enabled = IsPluginEnabled
 						
 						if CurrentMeshCreator.EM:GetAttribute("CustomMesh") then
 							--CurrentMeshCreator.MeshPart.Size = Vector3.new(1, 1, 1)
@@ -188,6 +201,7 @@ PluginButton.Click:Connect(function()
 						end
 						
 						SettingsHandler.SettingsFrame.AttributeChanged:Connect(OnSettingsChanged)
+						EditorGuiHandler.HeaderHandler.HeaderFrame.AttributeChanged:Connect(OnHeaderChanged)
 					end
 					
 					for _, object in SelectingObjects do

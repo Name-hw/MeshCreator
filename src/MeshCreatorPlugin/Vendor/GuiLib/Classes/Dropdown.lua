@@ -100,11 +100,8 @@ function init(self)
 	local listFrame = self.ListFrame
 	
 	local function contentSizeUpdate()
-		local absSize = button.AbsoluteSize
-		local ratio = absSize.y / absSize.x
-		
-		button.Arrow.Size = UDim2.new(ratio, 0, 1, 0)
-		button.Option.Size = UDim2.new(1 - ratio, -12, 1, 0)
+		button.Arrow.Size = UDim2.new(0, 30, 0, 30)
+		button.Option.Size = UDim2.new(0.65, -12, 1, 0)
 	end
 	
 	contentSizeUpdate()
