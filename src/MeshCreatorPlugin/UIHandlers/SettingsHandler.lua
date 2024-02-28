@@ -84,7 +84,6 @@ function SettingsHandler:ApplySettings()
 		if PreviousSettings[settingName] ~= value then
 			self.SettingsFrame:SetAttribute(settingName, value)
 			PreviousSettings[settingName] = value
-			print(settingName, value)
 		end
 	end
 end
