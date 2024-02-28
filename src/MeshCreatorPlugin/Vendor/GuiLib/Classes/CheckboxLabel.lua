@@ -78,17 +78,6 @@ function init(self)
 	local container = self.Frame.CheckContainer
 	local checkmark = self.Button.Checkmark
 	
-	local function contentSizeUpdate()
-		local absSize = self.Frame.AbsoluteSize
-		local ratio = absSize.y / absSize.x
-		container.Size = UDim2.new(ratio, 0, 1, 0)
-		label.Size = UDim2.new(1 - ratio, -10, 1, 0)
-		label.Position = UDim2.new(ratio, 10, 0, 0)
-	end
-	
-	contentSizeUpdate()
-	self._Maid:Mark(self.Frame:GetPropertyChangedSignal("AbsoluteSize"):Connect(contentSizeUpdate))
-	
 	self._Maid:Mark(self.Button.Activated:Connect(function()
 		self:SetValue(not checkmark.Visible)
 	end))

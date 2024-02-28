@@ -140,8 +140,11 @@ function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
 end
 
 function MeshCreator:Remove()
+	if self.Settings["GizmoVisible"] then
+		self.MeshGizmo:RemoveEdgeAdornments()
+	end
+	
 	self:RemoveVertexAttachments()
-	self.MeshGizmo:RemoveEdgeAdornments()
 	
 	self.MeshPart.Locked = false
 	self = nil

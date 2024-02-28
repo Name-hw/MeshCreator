@@ -12,6 +12,14 @@ local CurrentSettings: Types.Settings = {}
 local PreviousSettings: Types.Settings = {}
 
 function SettingsHandler.new(parent, pluginSettings: {}, defaultSettings: {})
+	local function checkSetting(settingName, Object)
+		if pluginSettings[settingName] then
+			Object.Frame.Text = pluginSettings[settingName]
+		else
+			Object.Frame.Text = defaultSettings[settingName]
+		end
+	end
+
 	local self = setmetatable(SettingsHandler, {})
 
 	self.SettingsFrame = SettingsFrame
@@ -19,20 +27,21 @@ function SettingsHandler.new(parent, pluginSettings: {}, defaultSettings: {})
 	self.MenuFrame = self.SettingsFrame.MenuFrame
 	self.EdgeThicknessFrame = self.MenuFrame.EdgeThicknessFrame
 	self.SelectModeFrame = self.MenuFrame.SelectModeFrame
-	
+	self.GizmoVisibleFrame = self.MenuFrame.GizmoVisibleFrame
+
 	--local EdgeThicknessSlider = GuiClasses.Slider.new(self.MenuFrame.EdgeThicknessFrame.SliderFrameX, "x")
 	self.ET_TextMask = GuiClasses.TextMask.new(self.MenuFrame.EdgeThicknessFrame.TextBox)
 	self.ET_TextMask:SetMaxLength(2)
 	self.ET_TextMask:SetMaskType("Number")
 	self.SM_Dropdown = GuiClasses.Dropdown.new(self.SelectModeFrame.DropdownButton, self.SelectModeFrame.DropdownButton.ListFrame)
-	
-	if pluginSettings["EA_Thickness"] then
-		self.ET_TextMask.Frame.Text = pluginSettings["EA_Thickness"]
-	else
-		self.ET_TextMask.Frame.Text = defaultSettings["EA_Thickness"]
-	end
+	self.GV_Checkbox = GuiClasses.CheckboxLabel.new(self.GizmoVisibleFrame)
+
+	checkSetting("EA_Thickness", self.ET_TextMask)
+	self.GV_Checkbox:SetValue(pluginSettings["GizmoVisible"])
 	
 	self.SettingsFrame.Parent = parent
+	
+	PreviousSettings = pluginSettings
 	
 	--[[
 	EdgeThicknessSlider.Changed:Connect(function(value)
@@ -46,16 +55,26 @@ function SettingsHandler.new(parent, pluginSettings: {}, defaultSettings: {})
 	end)
 	
 	self.SM_Dropdown.Changed:Connect(function(option: TextButton)
-		self.SettingsFrame:SetAttribute("SelectMode", option.Label.Text .. "Mode")
+		--self.SettingsFrame:SetAttribute("SelectMode", option.Label.Text .. "Mode")
+		CurrentSettings["SelectMode"] = option.Label.Text .. "Mode"
 	end)
 	
+	self.GV_Checkbox.Changed:Connect(function(bool: boolean)
+		CurrentSettings["GizmoVisible"] = bool
+	end)
+
 	self.ControlFrame.ApplyButton.Activated:Connect(function()
 		self:ApplySettings()
 	end)
 	
 	self.ControlFrame.ResetButton.Activated:Connect(function()
 		self.ET_TextMask.Frame.Text = defaultSettings["EA_Thickness"]
-		task.wait()
+		self.GV_Checkbox:SetValue(defaultSettings["GizmoVisible"])
+		
+		for settingName, value in pairs(defaultSettings) do
+			CurrentSettings[settingName] = value
+		end
+
 		self:ApplySettings()
 	end)
 	
@@ -67,6 +86,7 @@ function SettingsHandler:ApplySettings()
 		if PreviousSettings[settingName] ~= value then
 			self.SettingsFrame:SetAttribute(settingName, value)
 			PreviousSettings[settingName] = value
+			print(settingName, value)
 		end
 	end
 end

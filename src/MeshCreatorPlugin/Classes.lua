@@ -1,3 +1,5 @@
+local Classes = {}
+
 local Enums = require(script.Parent.Enums)
 
 export type Mesh = {
@@ -27,10 +29,14 @@ export type EFElement = GeometryElement & { --EdgeFaceElement
 
 export type Edge = EFElement & {
 	EdgeAdornment: LineHandleAdornment,
-	StartVertex: Vertex,
-	EndVertex: Vertex
+	StartVertexAttachment: Attachment,
+	EndVertexAttachment: Attachment
 }
 
 export type Triangle = EFElement
 
-return nil
+for _, Class in script:GetChildren() do
+	Classes[Class.Name] = require(Class)
+end
+
+return Classes

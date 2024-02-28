@@ -14,31 +14,43 @@ if not GizmoFolder then
 	GizmoFolder.Parent = CoreGui
 end
 
-function MeshGizmo:DrawLine(StartVertex: Classes.Vertex, EndVertex: Classes.Vertex)
-	local Origin = StartVertex.VertexAttachment.Position
-	local End = EndVertex.VertexAttachment.Position
+function MeshGizmo:CreateEdgeAdornment(Origin, End)
+	local LineAdornment = Instance.new("LineHandleAdornment")
+		LineAdornment.Name = "EdgeAdornment"
+		LineAdornment.Adornee = self.Adornee
+		LineAdornment.CFrame =  CFrame.new(Origin, End)
+		LineAdornment.Length = (End - Origin).Magnitude
+		LineAdornment.Thickness = TableFunctions.GetSetting(self.Settings, "EA_Thickness")
+		LineAdornment.ZIndex = 1
+		LineAdornment.Parent = GizmoFolder
+	
+	return LineAdornment
+end
+
+function MeshGizmo:DrawLine(startVertex: Classes.Vertex, endVertex: Classes.Vertex)
+	local Origin = startVertex.VertexAttachment.Position
+	local End = endVertex.VertexAttachment.Position
 	local Redundant = false
 	
 	for _, Edge: Classes.Edge in self.Edges do
-		if table.find(Edge.VertexIDs, StartVertex.ID) and table.find(Edge.VertexIDs, EndVertex.ID) then
+		if table.find(Edge.VertexIDs, startVertex.ID) and table.find(Edge.VertexIDs, endVertex.ID) then
 			Redundant = true
 		end
 	end
 	
 	if not Redundant then
-		local LineAdornment = Instance.new("LineHandleAdornment")
-		LineAdornment.Name = "EdgeAdornment"
-		LineAdornment.Adornee = self.Adornee
-		LineAdornment.CFrame =  CFrame.new(Origin, End)
-		LineAdornment.Length = (End - Origin).Magnitude
-		LineAdornment.Thickness = TableFunctions.CheckSettingExist(self.Settings, "EA_Thickness")
-		LineAdornment.ZIndex = 1
-		LineAdornment.Parent = GizmoFolder
+		local LineAdornment: LineHandleAdornment
+
+		if self.Settings["GizmoVisible"] then
+			LineAdornment = self:CreateEdgeAdornment(Origin, End)
+		end
 		
 		local EdgeClass: Classes.Edge = {
 			ID = (#self.Edges + 1),
-			VertexIDs = {StartVertex.ID, EndVertex.ID},
-			EdgeAdornment = LineAdornment
+			VertexIDs = {startVertex.ID, endVertex.ID},
+			EdgeAdornment = LineAdornment,
+			StartVertexAttachment = startVertex.VertexAttachment,
+			EndVertexAttachment = endVertex.VertexAttachment
 		}
 		
 		self.Edges[EdgeClass.ID] = EdgeClass
@@ -66,7 +78,7 @@ function MeshGizmo:Create(Vertices: {Classes.Vertex}, Triangles: {Classes.Triang
 		local TV1 = TriangleVertices[1]
 		local TV2 = TriangleVertices[2]
 		local TV3 = TriangleVertices[3]
-
+		
 		self:DrawLine(TV1, TV2)
 		self:DrawLine(TV2, TV3)
 		self:DrawLine(TV3, TV1)
@@ -89,9 +101,8 @@ function MeshGizmo:RemoveEdgeByVertexID(vertexID)
 end
 
 function MeshGizmo:RemoveEdgeAdornments()
-	--task.synchronize()
-	for _, Edge: Classes.Edge in self.Edges do
-		Edge.EdgeAdornment:Destroy()
+	for _, EdgeAdornment: LineHandleAdornment in GizmoFolder:GetChildren() do
+		EdgeAdornment:Destroy()
 	end
 end
 
@@ -101,19 +112,33 @@ function MeshGizmo:SetEAs_Thickness(thickness)
 	end
 end
 
+function MeshGizmo:SetEAs_Visible(GizmoVisible)
+	if GizmoVisible then
+		for _, Edge: Classes.Edge in self.Edges do
+			local Origin = Edge.StartVertexAttachment.Position
+			local End = Edge.EndVertexAttachment.Position
+			
+			Edge.EdgeAdornment = self:CreateEdgeAdornment(Origin, End)
+		end
+	elseif not GizmoVisible then
+		self:RemoveEdgeAdornments()
+	end
+end
+
 function MeshGizmo.SetEA_Position(Edge: Classes.Edge) --SetEdgeAdornmentPosition
-	local Origin = Edge.StartVertex.VertexAttachment.Position
-	local End = Edge.EndVertex.VertexAttachment.Position
+	local Origin = Edge.StartVertexAttachment.Position
+	local End = Edge.EndVertexAttachment.Position
 	--task.synchronize()
 	Edge.EdgeAdornment.CFrame =  CFrame.new(Origin, End)
 	Edge.EdgeAdornment.Length = (End - Origin).Magnitude
 end
 
 function MeshGizmo.UpdateEA_Position(Edge: Classes.Edge, Vertices: {Classes.Vertex})
+	--[[
 	local VerticesInEdge = TableFunctions.GetVertexFromEFElement(Vertices, Edge)
 	Edge.StartVertex = VerticesInEdge[1]
 	Edge.EndVertex = VerticesInEdge[2]
-	
+	]]
 	MeshGizmo.SetEA_Position(Edge)
 end
 
@@ -122,7 +147,8 @@ function MeshGizmo:UpdateEA_PositionByVertexID(Vertices: {Classes.Vertex}, verte
 
 	for _, Edge: Classes.Edge in EdgesContainingVertex do
 		--task.desynchronize()
-		MeshGizmo.UpdateEA_Position(Edge, Vertices)
+		--MeshGizmo.UpdateEA_Position(Edge, Vertices)
+		MeshGizmo.SetEA_Position(Edge)
 	end
 end
 

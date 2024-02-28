@@ -26,10 +26,12 @@ local Classes = require(Root.Classes)
 local Enums = require(Root.Enums)
 local Types = require(Root.Types)
 local Settings: Types.Settings = {
-	["EA_Thickness"] = plugin:GetSetting("EA_Thickness")
+	EA_Thickness = plugin:GetSetting("EA_Thickness"),
+	GizmoVisible = plugin:GetSetting("GizmoVisible")
 }
 local DefaultSettings: Types.Settings = {
-	["EA_Thickness"] = 5
+	EA_Thickness = 5,
+	GizmoVisible = true
 }
 local TableFunctions = require(Root.TableFunctions)
 local MeshCreator = require(Root.MeshCreator)
@@ -41,10 +43,11 @@ local lib = Root.lib
 local IsPluginEnabled = false
 local IsMeshPartSelected = false
 local IsEdgeSelected = false
-local ToolBarGui, CurrentMeshCreator, SelectingObject, SelectingObjects
+local ToolBarGui, CurrentMeshCreator, SelectingObject, SelectingObjects, EACHCoroutine, Connection: RBXScriptConnection --EAConnectHandlingCoroutine
 local LastSelectedEA: LineHandleAdornment
 
 local SelectMode = {}
+local PreviousSetting: Types.Settings = {}
 
 if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor") then
 	game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
@@ -65,6 +68,56 @@ end
 
 local function SetSelectMode(newSelectMode)
 	SelectMode = Enums.SelectMode[newSelectMode]
+end
+
+local function OnEAClicked(Edge: Classes.Edge)
+	local EA = Edge.EdgeAdornment
+
+	if SelectMode == Enums.SelectMode.EdgeMode and not IsEdgeSelected then
+		Selection:Set({Edge.StartVertexAttachment, Edge.EndVertexAttachment})
+		EA.Color3 = Color3.new(1, 0.584314, 0)
+		IsEdgeSelected = true
+		LastSelectedEA = EA
+	end
+end
+
+local function EAConnectHandling()
+	for _, Edge: Classes.Edge in CurrentMeshCreator.MeshGizmo.Edges do
+		local EA = Edge.EdgeAdornment
+		
+		EA.MouseButton1Down:Connect(function()
+			OnEAClicked(Edge)
+		end)
+	end
+end
+
+local function OnSettingsChanged(attributeName)
+	local Attribute = SettingsHandler.SettingsFrame:GetAttribute(attributeName)
+	
+	if Settings[attributeName] ~= PreviousSetting[attributeName] then
+		plugin:SetSetting(attributeName, Attribute)
+		Settings[attributeName] = Attribute
+
+		if attributeName == "EA_Thickness" then
+			if Settings["GizmoVisible"] then
+				CurrentMeshCreator.MeshGizmo:SetEAs_Thickness(Attribute)
+			end
+		elseif attributeName == "SelectMode" then
+			SetSelectMode(Attribute)
+		elseif attributeName == "GizmoVisible" then
+			if CurrentMeshCreator then
+				CurrentMeshCreator.MeshGizmo:SetEAs_Visible(Attribute)
+			end
+
+			if Attribute then
+				EACHCoroutine = task.spawn(EAConnectHandling)
+			elseif not Attribute and EACHCoroutine then
+				coroutine.close(EACHCoroutine)
+			end
+		end
+
+		PreviousSetting[attributeName] = Attribute
+	end
 end
 
 SetSelectMode("VertexMode")
@@ -102,14 +155,20 @@ PluginButton.Click:Connect(function()
 							
 							local function OnChanged(property)
 								if property == "Position" then
-									CurrentMeshCreator.MeshGizmo:UpdateEA_PositionByVertexID(CurrentMeshCreator.Vertices, VertexID)
+									if Settings["GizmoVisible"] then
+										CurrentMeshCreator.MeshGizmo:UpdateEA_PositionByVertexID(CurrentMeshCreator.Vertices, VertexID)
+									end
+
 									CurrentMeshCreator:SetVertexPosition(VertexID, VA.Position)
 								end
 							end
 							
 							local function OnAncestryChanged()
+								if Settings["GizmoVisible"] then
+									CurrentMeshCreator.MeshGizmo:RemoveEdgeByVertexID(VertexID)
+								end
+
 								CurrentMeshCreator:RemoveTriangleByVertexID(VertexID)
-								CurrentMeshCreator.MeshGizmo:RemoveEdgeByVertexID(VertexID)
 								CurrentMeshCreator:RemoveVertex(Vertex)
 							end
 							
@@ -124,41 +183,11 @@ PluginButton.Click:Connect(function()
 							end)
 						end
 						
-						for _, Edge: Classes.Edge in CurrentMeshCreator.MeshGizmo.Edges do
-							local EA = Edge.EdgeAdornment
-							
-							local function OnClicked()
-								if SelectMode == Enums.SelectMode.EdgeMode and not IsEdgeSelected then
-									local VAsInEdge = TableFunctions.FindVertexAttachmentsFromEFElement(CurrentMeshCreator.Vertices, Edge) --VertexAttachmentsInEdge
-									
-									Selection:Set(VAsInEdge)
-									EA.Color3 = Color3.new(1, 0.584314, 0)
-									IsEdgeSelected = true
-									LastSelectedEA = EA
-								end
-							end
-							
-							EA.MouseButton1Down:Connect(function()
-								task.spawn(OnClicked)
-							end)
+						if Settings["GizmoVisible"] then
+							EACHCoroutine = task.spawn(EAConnectHandling)
 						end
 						
-						SettingsHandler.SettingsFrame:GetAttributeChangedSignal("EA_Thickness"):Connect(function()
-							local EA_Thickness = SettingsHandler.SettingsFrame:GetAttribute("EA_Thickness")
-							
-							plugin:SetSetting("EA_Thickness", EA_Thickness)
-							Settings["EA_Thickness"] = EA_Thickness
-							
-							if CurrentMeshCreator then
-								CurrentMeshCreator.MeshGizmo:SetEAs_Thickness(EA_Thickness)
-							end
-						end)
-						
-						SettingsHandler.SettingsFrame:GetAttributeChangedSignal("SelectMode"):Connect(function()
-							local SelectMode = SettingsHandler.SettingsFrame:GetAttribute("SelectMode")
-							
-							SetSelectMode(SelectMode)
-						end)
+						SettingsHandler.SettingsFrame.AttributeChanged:Connect(OnSettingsChanged)
 					end
 					
 					for _, object in SelectingObjects do

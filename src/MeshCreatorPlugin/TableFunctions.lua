@@ -5,7 +5,7 @@ local Classes = require(Root.Classes)
 local lib = Root.lib
 --local Table = require(lib.Table)
 
-function TableFunctions.CheckSettingExist(Settings, Setting)
+function TableFunctions.GetSetting(Settings, Setting)
 	if Settings[Setting] then return Settings[Setting] end
 end
 
