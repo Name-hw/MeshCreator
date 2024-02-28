@@ -54,10 +54,6 @@ if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActo
 	game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
 end
 
-if CoreGui:FindFirstChild("MeshCreator_EditorGui") then
-	CoreGui:FindFirstChild("MeshCreator_EditorGui"):Destroy()
-end
-
 local MeshLoaderActorClone = Root.MeshLoaderActor:Clone()
 MeshLoaderActorClone.Name = "MeshCreator_MeshLoaderActor"
 MeshLoaderActorClone.Parent = game.ReplicatedFirst

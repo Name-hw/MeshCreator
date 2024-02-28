@@ -11,9 +11,13 @@ local HeaderHandler = require(UIHandlers.HeaderHandler)
 
 function EditorGuiHandler.new(parent)
 	local self = setmetatable(EditorGuiHandler, {})
-
-    self.EditorGui = EditorGui:Clone()
+	
+	self.EditorGui = EditorGui:Clone()
 	self.HeaderHandler = HeaderHandler.new(self.EditorGui.HeaderFrame)
+
+	if parent:FindFirstChild("MeshCreator_EditorGui") then
+		parent:FindFirstChild("MeshCreator_EditorGui"):Destroy()
+	end
 
 	self.EditorGui.Parent = parent
 	
