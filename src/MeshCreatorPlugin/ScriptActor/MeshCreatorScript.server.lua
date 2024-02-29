@@ -97,9 +97,6 @@ local function OnSettingsChanged(attributeName)
 	local Attribute = SettingsHandler.SettingsFrame:GetAttribute(attributeName)
 	
 	if Settings[attributeName] ~= PreviousSetting[attributeName] then
-		plugin:SetSetting(attributeName, Attribute)
-		Settings[attributeName] = Attribute
-
 		if attributeName == "EA_Thickness" then
 			if Settings["GizmoVisible"] then
 				CurrentMeshCreator.MeshGizmo:SetEAs_Thickness(Attribute)
@@ -115,7 +112,9 @@ local function OnSettingsChanged(attributeName)
 				coroutine.close(EACHCoroutine)
 			end
 		end
-		
+
+		plugin:SetSetting(attributeName, Attribute)
+		Settings[attributeName] = Attribute
 		PreviousSetting[attributeName] = Attribute
 	end
 end

@@ -45,12 +45,16 @@ function MeshLoader:CreateEditableMesh()
 	self.EM = Instance.new("EditableMesh")
 	local newVertexIDs = {}
 	
+	assert(pcall(function()
+		self.EM:AddVertex(Vector3.one)
+	end), "Please enable EditableImage and EditableMesh in the beta features.")
+	
 	for _, Vertex in self.MeshSaveFile.Vertices do
 		local VertexUV = Vertex.VertexUV
 		local VertexPosition = Vertex.VA_Position / (self.MeshPart.Size / self.MeshPart.MeshSize) --VER
 		local VN = Vertex.VA_Normal --VA_Normal
 		local newVertexID = self.EM:AddVertex(VertexPosition)
-
+		
 		self.EM:SetVertexNormal(newVertexID, VN)
 		self.EM:SetUV(newVertexID, VertexUV)
 

@@ -30,6 +30,11 @@ end
 
 function MeshCreator:CreateEditableMesh(MeshSaveFile)
 	self.EM = Instance.new("EditableMesh")
+	assert(xpcall(function()
+		self.EM:AddVertex(Vector3.one)
+	end, function()
+		self:Remove()
+	end), "Please enable EditableImage and EditableMesh in the beta features.")
 
 	if MeshSaveFile then
 		local newVertexIDs = {}
