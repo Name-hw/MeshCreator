@@ -20,6 +20,21 @@ Enums.SelectMode = {
 	}::CEnumItem
 }
 
+Enums.Tool = {
+	AddVertexTool = {
+		Value = 1,
+		EnumType = Enums.Tool
+	}::CEnumItem, 
+	EdgeMode = {
+		Value = 2,
+		EnumType = Enums.SelectMode
+	}::CEnumItem, 
+	FaceMode = {
+		Value = 3,
+		EnumType = Enums.SelectMode
+	}::CEnumItem
+}
+
 Enums.MeshType = {
 	Plane = {
 		Value = 1,

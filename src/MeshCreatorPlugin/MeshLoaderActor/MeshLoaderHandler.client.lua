@@ -19,7 +19,7 @@ function LoadMesh(MeshPart: MeshPart)
 	end
 
 	MeshLoader.new(MeshPart, MeshLoader.LoadMeshSaveFile(MeshPart))
-	
+
 	MeshPart.ChildAdded:Connect(OnMeshSaveFileAdded)
 end
 

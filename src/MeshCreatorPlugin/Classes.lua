@@ -2,18 +2,18 @@ local Classes = {}
 
 local Enums = require(script.Parent.Enums)
 
-export type Mesh = {
-	MeshID: number,
+export type GeometryElement = {
+	ID: number
+}
+
+export type Mesh = GeometryElement & {
 	Vertices: {Vertex},
 	Triangles: {Triangle},
+	Faces: {Face}
 }
 
 export type CustomMesh = Mesh & {
 	MeshType: Enums.CEnumItem
-}
-
-export type GeometryElement = {
-	ID: number
 }
 
 export type Vertex = GeometryElement & {
@@ -35,8 +35,15 @@ export type Edge = EFElement & {
 
 export type Triangle = EFElement
 
+export type Face = EFElement & {
+	FaceAdornment: handle,
+	StartVertexAttachment: Attachment,
+	EndVertexAttachment: Attachment
+}
+
+--[[
 for _, Class in script:GetChildren() do
 	Classes[Class.Name] = require(Class)
 end
-
+]]
 return Classes

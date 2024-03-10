@@ -48,6 +48,7 @@ local ToolBarGui, CurrentMeshCreator, SelectingObject, SelectingObjects, EACHCor
 local LastSelectedEA: LineHandleAdornment
 
 local SelectMode = {}
+local CurrentTool = {}
 local PreviousSetting: Types.Settings = {}
 
 if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor") then
@@ -63,13 +64,18 @@ local function PluginExit()
 		IsMeshPartSelected = false
 		PluginGui.Enabled = false
 		EditorGuiHandler.EditorGui.Enabled = false
+		plugin:Deactivate()
 		MeshSaveLoadSystem.Save(CurrentMeshCreator)
 		CurrentMeshCreator:Remove()
 	end
 end
 
-local function SetSelectMode(newSelectMode)
-	SelectMode = Enums.SelectMode[newSelectMode]
+local function SetSelectMode(newSelectModeName)
+	SelectMode = Enums.SelectMode[newSelectModeName]
+end
+
+local function SetCurrentTool(CurrentToolName)
+	CurrentTool = Enums.Tool[CurrentToolName]
 end
 
 local function OnEAClicked(Edge: Classes.Edge)
@@ -127,6 +133,16 @@ local function OnHeaderChanged(attributeName)
 	end
 end
 
+local function OnToolChanged(attributeName)
+	local Attribute = EditorGuiHandler.ToolBarHandler.ToolBarFrame:GetAttribute(attributeName)
+	
+	if attributeName == "CurrentTool" then
+		SetCurrentTool(Attribute)
+	end
+	
+	plugin:Activate(false)
+end
+
 SetSelectMode("VertexMode")
 
 PluginButton.Click:Connect(function()
@@ -137,6 +153,7 @@ PluginButton.Click:Connect(function()
 	if IsPluginEnabled then
 		Selection.SelectionChanged:Connect(function()
 			if IsPluginEnabled then
+				local PluginMouse: PluginMouse = plugin:GetMouse()
 				SelectingObjects = Selection:Get()
 				SelectingObject = SelectingObjects[1]
 				
@@ -149,10 +166,13 @@ PluginButton.Click:Connect(function()
 						PluginGui.Enabled = IsPluginEnabled
 						EditorGuiHandler.EditorGui.Enabled = IsPluginEnabled
 						
-						if CurrentMeshCreator.EM:GetAttribute("CustomMesh") then
+						CurrentMeshCreator.MeshPart:SetAttribute("EditedByMeshCreator", true)
+						
+						print(MeshSaveFile, CurrentMeshCreator.NoMeshID)
+						if CurrentMeshCreator.EM:GetAttribute("NoMeshID") then
 							--CurrentMeshCreator.MeshPart.Size = Vector3.new(1, 1, 1)
-							--CurrentMeshCreator:CreatePlaneMesh(5, 5, Vector3.new(0, 5, 0), Vector3.new(0, 10, 0))
-							--CurrentMeshCreator:CreateCubeMesh(Vector3.new(1, 1, 1), Vector3.zero)
+							--CurrentMeshCreator:CreatePlaneMesh(CurrentMeshCreator.MeshPart.Size.X, CurrentMeshCreator.MeshPart.Size.Z, Vector3.new(0, 5, 0), Vector3.new(0, 10, 0))
+							CurrentMeshCreator:CreateCubeMesh(Vector3.one, Vector3.zero)
 						end
 						
 						CurrentMeshCreator:AddVertexAttachments(MeshSaveFile)
@@ -197,6 +217,7 @@ PluginButton.Click:Connect(function()
 						
 						SettingsHandler.SettingsFrame.AttributeChanged:Connect(OnSettingsChanged)
 						EditorGuiHandler.HeaderHandler.HeaderFrame.AttributeChanged:Connect(OnHeaderChanged)
+						EditorGuiHandler.ToolBarHandler.ToolBarFrame.AttributeChanged:Connect(OnToolChanged)
 					end
 					
 					for _, object in SelectingObjects do
@@ -212,6 +233,14 @@ PluginButton.Click:Connect(function()
 						LastSelectedEA.Color3 = Color3.new(0.0509804, 0.411765, 0.67451)
 					end
 				end
+
+				PluginMouse.Button1Down:Connect(function()
+					if CurrentMeshCreator then
+						if CurrentTool == Enums.Tool.AddVertexTool then
+							CurrentMeshCreator:AddVertex(PluginMouse.Hit.Position)
+						end
+					end
+				end)
 			end
 		end)
 		--[[
@@ -223,6 +252,13 @@ PluginButton.Click:Connect(function()
 		]]
 	else
 		PluginExit()
+	end
+end)
+
+plugin.Deactivation:Connect(function()
+	if EditorGuiHandler then
+		plugin:Deactivate()
+		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
 	end
 end)
 

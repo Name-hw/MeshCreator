@@ -63,33 +63,33 @@ end
 
 function DropdownClass.new(button, listFrame)
 	local self = setmetatable({}, DropdownClass)
-	
+
 	self._Maid = Lazy.Utilities.Maid.new()
 	self._ChangedBind = Instance.new("BindableEvent")
 	self._Options = {}
 	self._Selected = nil
-	
+
 	self.Button = button
 	self.ListFrame = listFrame
 	self.Changed = self._ChangedBind.Event
-	
+
 	init(self)
 	self:Set(self._Options[1])
-	
+
 	return self
 end
 
-function DropdownClass.Create(list, max)
+function DropdownClass.Create(list, max, button)
 	max = max or #list
+	button = button or DROP_BUTTON:Clone()
 	
-	local button = DROP_BUTTON:Clone()
 	local listFrame = Lazy.Constructors.List.Create(list, max)
-	
+
 	listFrame.Position = UDim2.new(0, 0, 1, 0)
 	listFrame.Size = UDim2.new(1, 0, max, 0)
 	listFrame.Visible = false
 	listFrame.Parent = button
-	
+
 	return DropdownClass.new(button, listFrame)
 end
 
@@ -98,33 +98,34 @@ end
 function init(self)
 	local button = self.Button
 	local listFrame = self.ListFrame
-	
+
 	local function contentSizeUpdate()
-		button.Arrow.Size = UDim2.new(0, 30, 0, 30)
-		button.Option.Size = UDim2.new(0.65, -12, 1, 0)
+		local absSize = button.AbsoluteSize
+		local ratio = absSize.y / absSize.x
+
+		button.Arrow.Size = UDim2.new(ratio, 0, 1, 0)
+		button.Option.Size = UDim2.new(1 - ratio, -12, 1, 0)
 	end
-	
+
 	contentSizeUpdate()
 	self._Maid:Mark(button:GetPropertyChangedSignal("AbsoluteSize"):Connect(contentSizeUpdate))
-	
+
 	for i, optionButton in next, listFrame.ScrollFrame:GetChildren() do
-		if not optionButton:IsA("UIListLayout") then
-			self._Options[i] = optionButton
-			optionButton.Activated:Connect(function()
-				self:Set(optionButton)
-			end)
-		end
+		self._Options[i] = optionButton
+		optionButton.Activated:Connect(function()
+			self:Set(optionButton)
+		end)
 	end
 
 	self._Maid:Mark(button.Activated:Connect(function()
 		self:Show(not listFrame.Visible)
 	end))
-	
+
 	self._Maid:Mark(UIS.InputBegan:Connect(function(input)
 		if (VALID_PRESS[input.UserInputType]) then
 			local p = input.Position
 			local p2 = Vector2.new(p.x, p.y)
-			
+
 			if (listFrame.Visible and not (isInFrame(listFrame, p2) or isInFrame(button, p2))) then
 				self:Show(false)
 			end

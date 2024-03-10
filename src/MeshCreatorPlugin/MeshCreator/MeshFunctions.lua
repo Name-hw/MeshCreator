@@ -7,13 +7,13 @@ local TableFunctions = require(Root.TableFunctions)
 local lib = Root.lib
 --local Table = require(lib.Table)
 
-local function CreateVertexAttachment(VP, VN, MeshPart)
+local function CreateVertexAttachment(MeshPart, VP, VN)
 	local VA = Instance.new("Attachment") --VertexAttachment
 			VA.Visible = true
 			VA.Archivable = false
 			VA.Name = "VertexAttachment"
 			VA.Position = VP
-			VA.Axis = VN
+			VA.Axis = VN or Vector3.zero
 			VA.Parent = MeshPart
 	return VA
 end
@@ -25,7 +25,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			local VP = Vertex.VA_Position --VA_Position
 			local VN = Vertex.VA_Normal --VA_Normal
 			
-			local VA = CreateVertexAttachment(VP, VN, self.MeshPart)
+			local VA = CreateVertexAttachment(self.MeshPart, VP, VN)
 			
 			Vertex.VertexAttachment = VA
 		end
@@ -36,8 +36,12 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 		for _, vertexID in EMVIDs do
 			local VertexPosition = self.EM:GetPosition(vertexID) --VA_Position
 			local VertexNormal = self.EM:GetVertexNormal(vertexID) --VA_Position
+			local VA = CreateVertexAttachment(self.MeshPart, VertexPosition * self.VA_Offset, VertexNormal) --VertexAttachment
 			
-			local VA = CreateVertexAttachment(VertexPosition * (self.MeshPart.Size / self.MeshPart.MeshSize), VertexNormal, self.MeshPart) --VertexAttachment
+			if self.MeshPart.MeshSize then
+				--local VA = CreateVertexAttachment(self.MeshPart, VertexPosition * self.VA_Offset, VertexNormal) --VertexAttachment
+			end
+			
 			
 			local VertexClass: Classes.Vertex = {
 				ID = vertexID,
@@ -59,9 +63,11 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 
 			self.Triangles[triangleID] = TriangleClass
 			
+			--[[
 			for _, triangleVertexID in ipairs(TVIDs) do
 				table.insert(MeshFace, triangleVertexID)
 			end
+			]]
 		end
 	end
 
@@ -75,7 +81,20 @@ function MeshFunctions:RemoveVertexAttachments()
 end
    
 function MeshFunctions:SetVertexPosition(vertexID, VA_Position)
-	self.EM:SetPosition(vertexID, VA_Position / (self.MeshPart.Size / self.MeshPart.MeshSize))
+	self.EM:SetPosition(vertexID, VA_Position / self.VA_Offset)
+end
+
+function MeshFunctions:AddVertex(mousePosition: Vector3)
+	local VertexID = (#self.Vertices + 1)
+	local VA = CreateVertexAttachment(self.MeshPart, mousePosition - self.MeshPart.Position)
+	
+	local VertexClass: Classes.Vertex = {
+		ID = VertexID,
+		VertexUV = Vector3.zero,
+		VertexAttachment = VA
+	}
+	print(VA.Parent)
+	self.Vertices[VertexID] = VertexClass
 end
 
 function MeshFunctions:RemoveVertex(Vertex: Classes.Vertex)
