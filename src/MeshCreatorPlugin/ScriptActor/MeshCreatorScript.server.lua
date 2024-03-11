@@ -168,7 +168,6 @@ PluginButton.Click:Connect(function()
 						
 						CurrentMeshCreator.MeshPart:SetAttribute("EditedByMeshCreator", true)
 						
-						print(MeshSaveFile, CurrentMeshCreator.NoMeshID)
 						if CurrentMeshCreator.EM:GetAttribute("NoMeshID") then
 							--CurrentMeshCreator.MeshPart.Size = Vector3.new(1, 1, 1)
 							--CurrentMeshCreator:CreatePlaneMesh(CurrentMeshCreator.MeshPart.Size.X, CurrentMeshCreator.MeshPart.Size.Z, Vector3.new(0, 5, 0), Vector3.new(0, 10, 0))
