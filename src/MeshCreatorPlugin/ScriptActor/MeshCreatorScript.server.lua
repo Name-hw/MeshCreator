@@ -1,6 +1,4 @@
-local RunService = game:GetService("RunService")
 local Selection = game:GetService("Selection")
-local AssetService = game:GetService("AssetService")
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local Root = script.Parent.Parent
@@ -336,6 +334,8 @@ plugin.Deactivation:Connect(function()
 		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
 	end
 end)
+
+plugin.Unloading:Connect(PluginExit)
 
 game.Close:Connect(PluginExit)
 --[[
