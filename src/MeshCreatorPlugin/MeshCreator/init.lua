@@ -1,25 +1,16 @@
 local MeshCreator = {}
 
 local AssetService = game:GetService("AssetService")
+local Root = script.Parent
 local MeshFunctions = require(script.MeshFunctions)
 local MeshGizmo = require(script.MeshGizmo)
-local Classes = require(script.Parent.Classes)
-local Enums = require(script.Parent.Enums)
-local TableFunctions = require(script.Parent.TableFunctions)
-local lib = script.Parent.lib
+local Classes = require(Root.Classes)
+local Enums = require(Root.Enums)
+local TableFunctions = require(Root.TableFunctions)
+local Vendor = Root.Vendor
+local Triangle3D = require(Vendor.Triangle3D)
+local lib = Root.lib
 --local Table = require(script.Parent.lib.Table)
-
-local function SetVA_Offset(MeshPart: MeshPart)
-	local VA_Offset
-	
-	if MeshPart.MeshSize ~= Vector3.zero then
-		VA_Offset = (MeshPart.Size / MeshPart.MeshSize)
-	else
-		VA_Offset = MeshPart.Size
-	end
-	
-	return VA_Offset
-end
 
 function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Settings)
 	local newMeshCreator = setmetatable(MeshCreator, MeshFunctions)
@@ -29,9 +20,8 @@ function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Setting
 	newMeshCreator.MeshPart.Locked = true
 	newMeshCreator.Vertices = {}
 	newMeshCreator.Triangles = {}
-	newMeshCreator.MeshGizmo = MeshGizmo.new(MeshPart, newMeshCreator.Settings)
-	
-	newMeshCreator.VA_Offset = SetVA_Offset(newMeshCreator.MeshPart)
+	newMeshCreator.Mesh = Classes.new("Mesh", {ID = 1, MeshPart = MeshPart})
+	newMeshCreator.MeshGizmo = MeshGizmo.new(newMeshCreator.Mesh, newMeshCreator.Settings)
 	
 	if newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh") and not MeshSaveFile then
 		newMeshCreator.EM = newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh")
@@ -39,10 +29,6 @@ function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Setting
 	else
 		newMeshCreator:CreateEditableMesh(MeshSaveFile)
 	end
-	
-	newMeshCreator.MeshPart:GetPropertyChangedSignal("Size"):Connect(function()
-		newMeshCreator.VA_Offset = SetVA_Offset(newMeshCreator.MeshPart)
-	end)
 	
 	return newMeshCreator
 end
@@ -65,7 +51,7 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 		
 		for _, Vertex: Classes.Vertex in MeshSaveFile.Vertices do
 			local VertexUV = Vertex.VertexUV
-			local VertexPosition = Vertex.VA_Position / self.VA_Offset
+			local VertexPosition = Vertex.VA_Position / self.Mesh.VA_Offset
 			local VN = Vertex.VA_Normal
 			local newVertexID = self.EM:AddVertex(VertexPosition)
 			
@@ -180,9 +166,7 @@ function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
 end
 
 function MeshCreator:Remove()
-	if self.Settings["GizmoVisible"] then
-		self.MeshGizmo:RemoveEdgeAdornments()
-	end
+	self.MeshGizmo:RemoveGizmo()
 	
 	self:RemoveVertexAttachments()
 	

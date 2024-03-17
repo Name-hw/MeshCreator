@@ -44,12 +44,16 @@ local lib = Root.lib
 local IsPluginEnabled = false
 local IsMeshPartSelected = false
 local IsEdgeSelected = false
+local IsTriangleSelected = false
 local ToolBarGui, CurrentMeshCreator, SelectingObject, SelectingObjects, EACHCoroutine, Connection: RBXScriptConnection --EAConnectHandlingCoroutine
 local LastSelectedEA: LineHandleAdornment
+local LastSelectedTriangle: Classes.Triangle
 
 local SelectMode = {}
 local CurrentTool = {}
 local PreviousSetting: Types.Settings = {}
+local HeldInputs = {}
+local SelectedTriangles: {Classes.Triangle} = {}
 
 if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor") then
 	game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
@@ -72,6 +76,10 @@ end
 
 local function SetSelectMode(newSelectModeName)
 	SelectMode = Enums.SelectMode[newSelectModeName]
+	
+	if CurrentMeshCreator then
+		CurrentMeshCreator.MeshGizmo:SetTPs_Visible(CurrentMeshCreator.Triangles, SelectMode == Enums.SelectMode.TriangleMode)
+	end
 end
 
 local function SetCurrentTool(CurrentToolName)
@@ -180,13 +188,17 @@ PluginButton.Click:Connect(function()
 							local VertexID = Vertex.ID
 							local VA = Vertex.VertexAttachment
 							
-							local function OnChanged(property)
-								if property == "Position" then
+							local function OnChanged(propertyName)
+								local PropertyValue = VA[propertyName]
+								
+								if propertyName == "Position" then
+									CurrentMeshCreator:SetVertexPosition(Vertex, VA.Position)
+									
 									if Settings["GizmoVisible"] then
-										CurrentMeshCreator.MeshGizmo:UpdateEA_PositionByVertexID(CurrentMeshCreator.Vertices, VertexID)
+										CurrentMeshCreator.MeshGizmo:UpdateEA_PositionByVertexID(VertexID)
 									end
-
-									CurrentMeshCreator:SetVertexPosition(VertexID, VA.Position)
+									
+									CurrentMeshCreator.MeshGizmo:UpdateTP_PositionByVertexID(CurrentMeshCreator.Vertices, CurrentMeshCreator.Triangles, VertexID)
 								end
 							end
 							
@@ -199,8 +211,8 @@ PluginButton.Click:Connect(function()
 								CurrentMeshCreator:RemoveVertex(Vertex)
 							end
 							
-							VA.Changed:Connect(function(property)
-								task.spawn(OnChanged, property)
+							VA.Changed:Connect(function(propertyName)
+								task.spawn(OnChanged, propertyName)
 							end)
 							
 							VA.AncestryChanged:Connect(function()
@@ -219,10 +231,55 @@ PluginButton.Click:Connect(function()
 						EditorGuiHandler.ToolBarHandler.ToolBarFrame.AttributeChanged:Connect(OnToolChanged)
 					end
 					
-					for _, object in SelectingObjects do
+					for _, SelectingObject in SelectingObjects do
 						if SelectingObject.Name == "VertexAttachment" and SelectMode ~= Enums.SelectMode.VertexMode then
-							if SelectMode ~= Enums.SelectMode.VertexMode and not IsEdgeSelected then
+							if not IsEdgeSelected and not IsTriangleSelected then
 								Selection:Set(Instance)
+							end
+						elseif SelectingObject.Parent == workspace.Camera.MeshCreator_TriangleGizmoFolder then
+							IsTriangleSelected = true
+							
+							if LastSelectedTriangle and SelectingObject ~= LastSelectedTriangle.Triangle3D.Model then
+								if not HeldInputs[Enum.KeyCode.LeftShift] then
+									for position, Triangle: Classes.Triangle in SelectedTriangles do
+										Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
+									end
+									
+									for _, Triangle: Classes.Triangle in CurrentMeshCreator.Triangles do
+										if SelectingObject == Triangle.Triangle3D.Model then
+											Selection:Set({Triangle.VertexAttachments[1], Triangle.VertexAttachments[2], Triangle.VertexAttachments[3], Triangle.Triangle3D.Model})
+											Triangle.Triangle3D:Set("BrickColor", BrickColor.new("Deep orange"))
+											LastSelectedTriangle = Triangle
+											
+											table.insert(SelectedTriangles, Triangle)
+										end
+									end
+								else
+									for _, Triangle: Classes.Triangle in CurrentMeshCreator.Triangles do
+										if SelectingObject == Triangle.Triangle3D.Model then
+											Selection:Add(Triangle.VertexAttachments)
+											Triangle.Triangle3D:Set("BrickColor", BrickColor.new("Deep orange"))
+											LastSelectedTriangle = Triangle
+											
+											table.insert(SelectedTriangles, Triangle)
+										end
+									end
+								end
+							else
+								for _, Triangle: Classes.Triangle in CurrentMeshCreator.Triangles do
+									if SelectingObject == Triangle.Triangle3D.Model then
+										Selection:Add(Triangle.VertexAttachments)
+										Triangle.Triangle3D:Set("BrickColor", BrickColor.new("Deep orange"))
+										LastSelectedTriangle = Triangle
+										
+										table.insert(SelectedTriangles, Triangle)
+									end
+								end
+							end
+							
+						elseif SelectedTriangles[1] and not table.find(LastSelectedTriangle.VertexAttachments, SelectingObject) and SelectingObject == LastSelectedTriangle.Triangle3D.Model then
+							if IsTriangleSelected then
+								Selection:Set({LastSelectedTriangle.VertexAttachments[1], LastSelectedTriangle.VertexAttachments[2], LastSelectedTriangle.VertexAttachments[3], LastSelectedTriangle.Triangle3D.Model})
 							end
 						end
 					end
@@ -231,8 +288,19 @@ PluginButton.Click:Connect(function()
 						IsEdgeSelected = false
 						LastSelectedEA.Color3 = Color3.new(0.0509804, 0.411765, 0.67451)
 					end
+					
+					if IsTriangleSelected then
+						IsTriangleSelected = false
+						
+						for position, Triangle: Classes.Triangle in SelectedTriangles do
+							Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
+							SelectedTriangles[position] = nil
+						end
+						
+						LastSelectedTriangle = nil
+					end
 				end
-
+				
 				PluginMouse.Button1Down:Connect(function()
 					if CurrentMeshCreator then
 						if CurrentTool == Enums.Tool.AddVertexTool then
@@ -252,6 +320,14 @@ PluginButton.Click:Connect(function()
 	else
 		PluginExit()
 	end
+end)
+
+UIS.InputBegan:Connect(function(input)
+	HeldInputs[input.KeyCode] = true
+end)
+
+UIS.InputEnded:Connect(function(input)
+	HeldInputs[input.KeyCode] = false
 end)
 
 plugin.Deactivation:Connect(function()

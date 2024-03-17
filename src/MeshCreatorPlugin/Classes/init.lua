@@ -9,7 +9,9 @@ export type GeometryElement = {
 export type Mesh = GeometryElement & {
 	Vertices: {Vertex},
 	Triangles: {Triangle},
-	Faces: {Face}
+	Faces: {Face},
+	MeshPart: MeshPart,
+	VA_Offset: Vector3
 }
 
 export type CustomMesh = Mesh & {
@@ -19,12 +21,13 @@ export type CustomMesh = Mesh & {
 export type Vertex = GeometryElement & {
 	VertexUV: Vector2,
 	VertexAttachment: Attachment,
-	VA_Position: Vector3,
+	VA_Position: Vector3 | string,
 	VA_Normal: Vector3
 }
 
 export type EFElement = GeometryElement & { --EdgeFaceElement
-	VertexIDs: {number}
+	VertexIDs: {number},
+	VertexAttachments: {Attachment}
 }
 
 export type Edge = EFElement & {
@@ -33,7 +36,9 @@ export type Edge = EFElement & {
 	EndVertexAttachment: Attachment
 }
 
-export type Triangle = EFElement
+export type Triangle = EFElement & {
+	Triangle3D: {}
+}
 
 export type Face = EFElement & {
 	FaceAdornment: handle,
@@ -41,9 +46,27 @@ export type Face = EFElement & {
 	EndVertexAttachment: Attachment
 }
 
---[[
-for _, Class in script:GetChildren() do
-	Classes[Class.Name] = require(Class)
+function Classes.new(className: string, data: {})
+	local Class = require(script[className])
+	local ParentClass = {}
+	
+	if Class.Parent then
+		ParentClass = Classes.new(Class.Parent.Name)
+	end
+	
+	local self = setmetatable(ParentClass, Class)
+	
+	if data then
+		for name, value in pairs(data) do
+			self[name] = value
+		end
+	end
+	
+	if self.Init then
+		self:Init()
+	end
+	
+	return self
 end
-]]
+
 return Classes

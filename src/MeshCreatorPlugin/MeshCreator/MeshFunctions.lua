@@ -29,25 +29,26 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			
 			Vertex.VertexAttachment = VA
 		end
+		
+		for _, Triangle: Classes.Triangle in self.Triangles do
+			Triangle.VertexAttachments = TableFunctions.FindVertexAttachmentsFromEFElement(self.Vertices, Triangle)
+		end
 	else
 		local EMVIDs = self.EM:GetVertices() --EditableMeshVertexIDs
 		local EMTIDs = self.EM:GetTriangles() --EditableMeshTriangleIDs
 
 		for _, vertexID in EMVIDs do
-			local VertexPosition = self.EM:GetPosition(vertexID) --VA_Position
-			local VertexNormal = self.EM:GetVertexNormal(vertexID) --VA_Position
-			local VA = CreateVertexAttachment(self.MeshPart, VertexPosition * self.VA_Offset, VertexNormal) --VertexAttachment
+			local VertexPosition = self.EM:GetPosition(vertexID)
+			local VertexNormal = self.EM:GetVertexNormal(vertexID)
+			local VA = CreateVertexAttachment(self.MeshPart, VertexPosition * self.Mesh.VA_Offset, VertexNormal) --VertexAttachment
 			
-			if self.MeshPart.MeshSize then
-				--local VA = CreateVertexAttachment(self.MeshPart, VertexPosition * self.VA_Offset, VertexNormal) --VertexAttachment
-			end
-			
-			
-			local VertexClass: Classes.Vertex = {
+			local VertexClass: Classes.Vertex = Classes.new("Vertex", {
 				ID = vertexID,
 				VertexUV = self.EM:GetUV(vertexID),
 				VertexAttachment = VA,
-			}
+				VA_Position = VA.Position,
+				VA_Normal = VertexNormal
+			})
 
 			self.Vertices[vertexID] = VertexClass
 		end
@@ -56,11 +57,14 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			local TVIDs = table.pack(self.EM:GetTriangleVertices(triangleID)) --TriangleVertexIDs
 			local MeshFace = {}
 			
-			local TriangleClass: Classes.Triangle = {
+			local TriangleClass: Classes.Triangle = Classes.new("Triangle", {
 				ID = triangleID,
+				
 				VertexIDs = TVIDs
-			}
-
+			})
+						
+			TriangleClass.VertexAttachments = TableFunctions.FindVertexAttachmentsFromEFElement(self.Vertices, TriangleClass)
+			
 			self.Triangles[triangleID] = TriangleClass
 			
 			--[[
@@ -70,7 +74,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			]]
 		end
 	end
-
+	
 	self.MeshGizmo:Create(self.Vertices, self.Triangles)
 end
 
@@ -80,8 +84,9 @@ function MeshFunctions:RemoveVertexAttachments()
 	end
 end
    
-function MeshFunctions:SetVertexPosition(vertexID, VA_Position)
-	self.EM:SetPosition(vertexID, VA_Position / self.VA_Offset)
+function MeshFunctions:SetVertexPosition(Vertex: Classes.Vertex, VA_Position)
+	Vertex.VA_Position = VA_Position
+	self.EM:SetPosition(Vertex.ID, VA_Position / self.Mesh.VA_Offset)
 end
 
 function MeshFunctions:AddVertex(mousePosition: Vector3)
@@ -115,6 +120,7 @@ function MeshFunctions:RemoveTriangleByVertexID(vertexID)
 			table.remove(self.Triangles, table.find(self.Triangles, Triangle))
 			--task.synchronize()
 			self.EM:RemoveTriangle(TriangleID)
+			Triangle.Triangle3D.Model:Destroy()
 		end
 	end
 end

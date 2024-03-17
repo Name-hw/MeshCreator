@@ -13,7 +13,7 @@ function HeaderHandler.new(HeaderFrame)
 	self.SelectModeFrame = self.HeaderFrame.SelectModeFrame
 	self.MenuFrame = self.HeaderFrame.MenuFrame
 	
-	self.SM_Dropdown = GuiClasses.Dropdown.Create({"Vertex", "Edge"}, 2, self.SelectModeFrame.DropdownButton)
+	self.SM_Dropdown = GuiClasses.Dropdown.Create({"Vertex", "Edge", "Triangle"}, 3, self.SelectModeFrame.DropdownButton)
 	self.AddMenu_Dropdown = GuiClasses.Dropdown.Create({"Plane", "Cube"}, 2, self.MenuFrame.AddMenu_Dropdown)
 	
 	--self.SM_Dropdown:Set(self.SM_Dropdown.ListFrame.ScrollFrame.Vertex_button)

@@ -13,9 +13,13 @@ Enums.SelectMode = {
 	EdgeMode = {
 		Value = 2,
 		EnumType = Enums.SelectMode
-	}::CEnumItem, 
-	FaceMode = {
+	}::CEnumItem,
+	TriangleMode = {
 		Value = 3,
+		EnumType = Enums.SelectMode
+	}::CEnumItem,
+	FaceMode = {
+		Value = 4,
 		EnumType = Enums.SelectMode
 	}::CEnumItem
 }
