@@ -18,7 +18,7 @@ function SaveLoadSystem.Save(MeshCreator)
 		Triangles = {}
 	}
 
-	for _, Vertex: Classes.Vertex in MeshCreator.Vertices do
+	for _, Vertex: Classes.Vertex in MeshCreator.Mesh.Vertices do
 		local VertexSaveData = table.clone(Vertex)
 
 		VertexSaveData.VertexUV = {VertexSaveData.VertexUV.X, VertexSaveData.VertexUV.Y}
@@ -29,7 +29,7 @@ function SaveLoadSystem.Save(MeshCreator)
 		table.insert(SaveData.Vertices, VertexSaveData)
 	end
 
-	for _, Triangle: Classes.Triangle in MeshCreator.Triangles do
+	for _, Triangle: Classes.Triangle in MeshCreator.Mesh.Triangles do
 		local TriangleSaveData = table.clone(Triangle)
 		--[[
 		local TriangleVertexIDs = {}

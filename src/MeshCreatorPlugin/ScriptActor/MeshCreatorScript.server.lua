@@ -76,7 +76,7 @@ local function SetSelectMode(newSelectModeName)
 	SelectMode = Enums.SelectMode[newSelectModeName]
 	
 	if CurrentMeshCreator then
-		CurrentMeshCreator.MeshGizmo:SetTPs_Visible(CurrentMeshCreator.Triangles, SelectMode == Enums.SelectMode.TriangleMode)
+		CurrentMeshCreator.MeshGizmo:SetTPs_Visible(SelectMode == Enums.SelectMode.TriangleMode)
 	end
 end
 
@@ -96,7 +96,7 @@ local function OnEAClicked(Edge: Classes.Edge)
 end
 
 local function EAConnectHandling()
-	for _, Edge: Classes.Edge in CurrentMeshCreator.MeshGizmo.Edges do
+	for _, Edge: Classes.Edge in CurrentMeshCreator.Mesh.Edges do
 		local EA = Edge.EdgeAdornment
 		
 		EA.MouseButton1Down:Connect(function()
@@ -175,14 +175,12 @@ PluginButton.Click:Connect(function()
 						CurrentMeshCreator.MeshPart:SetAttribute("EditedByMeshCreator", true)
 						
 						if CurrentMeshCreator.EM:GetAttribute("NoMeshID") then
-							--CurrentMeshCreator.MeshPart.Size = Vector3.new(1, 1, 1)
-							--CurrentMeshCreator:CreatePlaneMesh(CurrentMeshCreator.MeshPart.Size.X, CurrentMeshCreator.MeshPart.Size.Z, Vector3.new(0, 5, 0), Vector3.new(0, 10, 0))
 							CurrentMeshCreator:CreateCubeMesh(Vector3.one, Vector3.zero)
 						end
 						
 						CurrentMeshCreator:AddVertexAttachments(MeshSaveFile)
 						
-						for _, Vertex: Classes.Vertex in CurrentMeshCreator.Vertices do
+						for _, Vertex: Classes.Vertex in CurrentMeshCreator.Mesh.Vertices do
 							local VertexID = Vertex.ID
 							local VA = Vertex.VertexAttachment
 							
@@ -196,7 +194,7 @@ PluginButton.Click:Connect(function()
 										CurrentMeshCreator.MeshGizmo:UpdateEA_PositionByVertexID(VertexID)
 									end
 									
-									CurrentMeshCreator.MeshGizmo:UpdateTP_PositionByVertexID(CurrentMeshCreator.Vertices, CurrentMeshCreator.Triangles, VertexID)
+									CurrentMeshCreator.MeshGizmo:UpdateTP_PositionByVertexID(VertexID)
 								end
 							end
 							
@@ -243,7 +241,7 @@ PluginButton.Click:Connect(function()
 										Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
 									end
 									
-									for _, Triangle: Classes.Triangle in CurrentMeshCreator.Triangles do
+									for _, Triangle: Classes.Triangle in CurrentMeshCreator.Mesh.Triangles do
 										if SelectingObject == Triangle.Triangle3D.Model then
 											Selection:Set({Triangle.VertexAttachments[1], Triangle.VertexAttachments[2], Triangle.VertexAttachments[3], Triangle.Triangle3D.Model})
 											Triangle.Triangle3D:Set("BrickColor", BrickColor.new("Deep orange"))
@@ -253,7 +251,7 @@ PluginButton.Click:Connect(function()
 										end
 									end
 								else
-									for _, Triangle: Classes.Triangle in CurrentMeshCreator.Triangles do
+									for _, Triangle: Classes.Triangle in CurrentMeshCreator.Mesh.Triangles do
 										if SelectingObject == Triangle.Triangle3D.Model then
 											Selection:Add(Triangle.VertexAttachments)
 											Triangle.Triangle3D:Set("BrickColor", BrickColor.new("Deep orange"))
@@ -264,7 +262,7 @@ PluginButton.Click:Connect(function()
 									end
 								end
 							else
-								for _, Triangle: Classes.Triangle in CurrentMeshCreator.Triangles do
+								for _, Triangle: Classes.Triangle in CurrentMeshCreator.Mesh.Triangles do
 									if SelectingObject == Triangle.Triangle3D.Model then
 										Selection:Add(Triangle.VertexAttachments)
 										Triangle.Triangle3D:Set("BrickColor", BrickColor.new("Deep orange"))

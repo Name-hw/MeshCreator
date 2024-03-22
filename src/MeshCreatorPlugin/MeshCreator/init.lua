@@ -18,9 +18,7 @@ function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Setting
 	newMeshCreator.Settings = Settings
 	newMeshCreator.MeshPart = MeshPart
 	newMeshCreator.MeshPart.Locked = true
-	newMeshCreator.Vertices = {}
-	newMeshCreator.Triangles = {}
-	newMeshCreator.Mesh = Classes.new("Mesh", {ID = 1, MeshPart = MeshPart})
+	newMeshCreator.Mesh = Classes.new("Mesh", {ID = 1, Vertices = {}, Edges = {}, Triangles = {}, MeshPart = MeshPart})
 	newMeshCreator.MeshGizmo = MeshGizmo.new(newMeshCreator.Mesh, newMeshCreator.Settings)
 	
 	if newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh") and not MeshSaveFile then
@@ -61,7 +59,7 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 			newVertexIDs[Vertex.ID] = newVertexID
 			Vertex.ID = newVertexID
 			
-			table.insert(self.Vertices, Vertex)
+			table.insert(self.Mesh.Vertices, Vertex)
 		end
 		
 		for _, Triangle: Classes.Triangle in MeshSaveFile.Triangles do
@@ -75,7 +73,7 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 			Triangle.ID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
 			Triangle.VertexIDs = newTriangleVertexIDs
 			
-			table.insert(self.Triangles, Triangle)
+			table.insert(self.Mesh.Triangles, Triangle)
 		end
 	elseif self.MeshPart.MeshId ~= "" then
 		self.EM = AssetService:CreateEditableMeshFromPartAsync(self.MeshPart)

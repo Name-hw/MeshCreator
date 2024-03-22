@@ -7,7 +7,9 @@ export type GeometryElement = {
 }
 
 export type Mesh = GeometryElement & {
+	Name: string,
 	Vertices: {Vertex},
+	Egdes: {Edge},
 	Triangles: {Triangle},
 	Faces: {Face},
 	MeshPart: MeshPart,
@@ -41,9 +43,7 @@ export type Triangle = EFElement & {
 }
 
 export type Face = EFElement & {
-	FaceAdornment: handle,
-	StartVertexAttachment: Attachment,
-	EndVertexAttachment: Attachment
+	Triangles: {Triangle}
 }
 
 function Classes.new(className: string, data: {})

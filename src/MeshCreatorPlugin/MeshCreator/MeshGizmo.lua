@@ -47,7 +47,7 @@ function MeshGizmo:DrawLine(startVertex: Classes.Vertex, endVertex: Classes.Vert
 	local End = endVertex.VA_Position
 	local Redundant = false
 	
-	for _, Edge: Classes.Edge in self.Edges do
+	for _, Edge: Classes.Edge in self.Mesh.Edges do
 		if table.find(Edge.VertexIDs, startVertex.ID) and table.find(Edge.VertexIDs, endVertex.ID) then
 			Redundant = true
 		end
@@ -61,21 +61,20 @@ function MeshGizmo:DrawLine(startVertex: Classes.Vertex, endVertex: Classes.Vert
 		end
 		
 		local EdgeClass: Classes.Edge = Classes.new("Edge", {
-			ID = (#self.Edges + 1),
+			ID = (#self.Mesh.Edges + 1),
 			VertexIDs = {startVertex.ID, endVertex.ID},
 			EdgeAdornment = LineAdornment,
 			StartVertexAttachment = startVertex.VertexAttachment,
 			EndVertexAttachment = endVertex.VertexAttachment
 		})
 		
-		self.Edges[EdgeClass.ID] = EdgeClass
+		self.Mesh.Edges[EdgeClass.ID] = EdgeClass
 	end
 end
 
 function MeshGizmo.new(Mesh: Classes.Mesh, Settings)
 	local self = setmetatable({}, MeshGizmo)
 	
-	self.Edges = {}
 	self.Mesh = Mesh
 	self.Adornee = Mesh.MeshPart
 	self.Settings = Settings
@@ -83,12 +82,12 @@ function MeshGizmo.new(Mesh: Classes.Mesh, Settings)
 	return self
 end
 
-function MeshGizmo:Create(Vertices: {Classes.Vertex}, Triangles: {Classes.Triangle})
-	for _, Triangle: Classes.Triangle in Triangles do
+function MeshGizmo:Create()
+	for _, Triangle: Classes.Triangle in self.Mesh.Triangles do
 		local TriangleVertices = {}
 		
 		for _, triangleVertexID in ipairs(Triangle.VertexIDs) do
-			table.insert(TriangleVertices, TableFunctions.GetVertexByVertexID(Vertices, triangleVertexID))
+			table.insert(TriangleVertices, TableFunctions.GetVertexByVertexID(self.Mesh.Vertices, triangleVertexID))
 		end
 		
 		local TV1 = TriangleVertices[1]
@@ -114,13 +113,13 @@ function MeshGizmo:RemoveGizmo()
 end
 
 function MeshGizmo:RemoveEdge(Edge: Classes.Edge)
-	table.remove(self.Edges, table.find(self.Edges, Edge))
+	table.remove(self.Mesh.Edges, table.find(self.Mesh.Edges, Edge))
 	--task.synchronize()
 	Edge.EdgeAdornment:Destroy()
 end
 
 function MeshGizmo:RemoveEdgeByVertexID(vertexID)
-	local EdgesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Edges, vertexID)
+	local EdgesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Mesh.Edges, vertexID)
 	
 	for _, Edge: Classes.Edge in EdgesContainingVertex do
 		--task.desynchronize()
@@ -143,14 +142,14 @@ function MeshGizmo:RemoveTriangleParts()
 end
 
 function MeshGizmo:SetEAs_Thickness(thickness)
-	for _, Edge: Classes.Edge in self.Edges do
+	for _, Edge: Classes.Edge in self.Mesh.Edges do
 		Edge.EdgeAdornment.Thickness = thickness
 	end
 end
 
 function MeshGizmo:SetEAs_Visible(GizmoVisible)
 	if GizmoVisible then
-		for _, Edge: Classes.Edge in self.Edges do
+		for _, Edge: Classes.Edge in self.Mesh.Edges do
 			local Origin = Edge.StartVertexAttachment.Position
 			local End = Edge.EndVertexAttachment.Position
 			
@@ -161,16 +160,16 @@ function MeshGizmo:SetEAs_Visible(GizmoVisible)
 	end
 end
 
-function MeshGizmo:SetTPs_Visible(Triangles, TPsVisible)
+function MeshGizmo:SetTPs_Visible(TPsVisible)
 	if TPsVisible then
-		for _, Triangle: Classes.Triangle in Triangles do
+		for _, Triangle: Classes.Triangle in self.Mesh.Triangles do
 			Triangle.Triangle3D:Transparency(0)
 			Triangle.Triangle3D:Set("Locked", false)
 		end
 		
 		self.Adornee.Transparency = 1
 	elseif not TPsVisible then
-		for _, Triangle: Classes.Triangle in Triangles do
+		for _, Triangle: Classes.Triangle in self.Mesh.Triangles do
 			Triangle.Triangle3D:Transparency(1)
 			Triangle.Triangle3D:Set("Locked", true)
 		end
@@ -206,7 +205,7 @@ function MeshGizmo.SetTP_Position(Vertices: {Classes.Vertex}, Triangle: Classes.
 end
 
 function MeshGizmo:UpdateEA_PositionByVertexID(vertexID)
-	local EdgesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Edges, vertexID)
+	local EdgesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Mesh.Edges, vertexID)
 
 	for _, Edge: Classes.Edge in EdgesContainingVertex do
 		--task.desynchronize()
@@ -214,12 +213,12 @@ function MeshGizmo:UpdateEA_PositionByVertexID(vertexID)
 	end
 end
 
-function MeshGizmo:UpdateTP_PositionByVertexID(Vertices: {Classes.Vertex}, Triangles: {Classes.Triangle}, vertexID)
-	local TrianglesContainingVertex = TableFunctions.GetEFElementsByVertexID(Triangles, vertexID)
+function MeshGizmo:UpdateTP_PositionByVertexID(vertexID)
+	local TrianglesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Mesh.Triangles, vertexID)
 	
 	for _, Triangle: Classes.Triangle in TrianglesContainingVertex do
 		--task.desynchronize()
-		MeshGizmo.SetTP_Position(Vertices, Triangle)
+		MeshGizmo.SetTP_Position(self.Mesh.Vertices, Triangle)
 	end
 end
 
