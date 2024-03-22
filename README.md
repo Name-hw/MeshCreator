@@ -10,3 +10,4 @@ This repository contains the source code of MeshCreator Plugin.
 - [Zlib128](https://github.com/jiwonz/zlib128.luau)
 - [ImGizmo](https://github.com/JakeyWasTaken/CeiveImGizmo) (Source code reference)
 - [RbxGuiLibrary](https://devforum.roblox.com/t/gui-components-library/719287)
+- [Triangle3D](https://devforum.roblox.com/t/3d-triangle-from-3-points-tutorial/1251867)
