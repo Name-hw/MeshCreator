@@ -163,6 +163,10 @@ function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
 	return newCubeMesh
 end
 
+function MeshCreator:ExtrudeRegion()
+	print("ToolActivated")
+end
+
 function MeshCreator:Remove()
 	self.MeshGizmo:RemoveGizmo()
 	

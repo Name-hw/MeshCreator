@@ -14,10 +14,11 @@ function ToolBarHandler.new(ToolBarFrame: Frame)
 
 	self.ToolButtons = {}
 	
-	for _, toolButton in self.ToolBarFrame:GetDescendants() do
+	for _, toolButton: ImageButton? in self.ToolBarFrame:GetDescendants() do
 		if toolButton:IsA("ImageButton") then
+			local HintLabel: TextLabel = toolButton:FindFirstChild("HintLabel")
 			local IsToolSelected = false
-			
+
 			table.insert(self.ToolButtons, toolButton)
 			
 			local function OnActivated(inputObject: InputObject, clickCount: number)
@@ -30,7 +31,17 @@ function ToolBarHandler.new(ToolBarFrame: Frame)
 				end
 			end
 			
+			local function OnMouseEnter(inputObject: InputObject, clickCount: number)
+				HintLabel.Visible = true
+			end
+
+			local function OnMouseLeave(inputObject: InputObject, clickCount: number)
+				HintLabel.Visible = false
+			end
+
 			toolButton.Activated:Connect(OnActivated)
+			toolButton.MouseEnter:Connect(OnMouseEnter)
+			toolButton.MouseLeave:Connect(OnMouseLeave)
 		end
 	end
 	
