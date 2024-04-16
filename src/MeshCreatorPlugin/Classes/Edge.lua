@@ -1,5 +1,5 @@
 EdgeClass = {
-	Parent = script.Parent.EFElement
+	ParentClass = script.Parent.EFElement
 }
 EdgeClass.__index = EdgeClass
 

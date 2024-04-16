@@ -1,3 +1,4 @@
+local LocalizationService = game:GetService("LocalizationService")
 local MeshFunctions = {}
 MeshFunctions.__index = MeshFunctions
 
@@ -44,6 +45,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			
 			local VertexClass: Classes.Vertex = Classes.new("Vertex", {
 				ID = vertexID,
+				Parent = self.Mesh,
 				VertexUV = self.EM:GetUV(vertexID),
 				VertexAttachment = VA,
 				VA_Position = VA.Position,
@@ -59,7 +61,7 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 			
 			local TriangleClass: Classes.Triangle = Classes.new("Triangle", {
 				ID = triangleID,
-				
+				Parent = self.Mesh,
 				VertexIDs = TVIDs
 			})
 						
@@ -89,17 +91,19 @@ function MeshFunctions:SetVertexPosition(Vertex: Classes.Vertex, VA_Position)
 	self.EM:SetPosition(Vertex.ID, VA_Position / self.Mesh.VA_Offset)
 end
 
-function MeshFunctions:AddVertex(mousePosition: Vector3)
-	local VertexID = (#self.Vertices + 1)
-	local VA = CreateVertexAttachment(self.MeshPart, mousePosition - self.MeshPart.Position)
+function MeshFunctions:AddVertex(worldPosition: Vector3)
+	local VertexID = self.EM:AddVertex((worldPosition - self.MeshPart.Position) / self.Mesh.VA_Offset)
+	local VA = CreateVertexAttachment(self.MeshPart, worldPosition - self.MeshPart.Position)
 	
 	local VertexClass: Classes.Vertex = {
 		ID = VertexID,
 		VertexUV = Vector3.zero,
 		VertexAttachment = VA
 	}
-	print(VA.Parent)
-	self.Vertices[VertexID] = VertexClass
+	
+	self.Mesh.Vertices[VertexID] = VertexClass
+	
+	return VertexClass
 end
 
 function MeshFunctions:RemoveVertex(Vertex: Classes.Vertex)
@@ -123,6 +127,34 @@ function MeshFunctions:RemoveTriangleByVertexID(vertexID)
 			Triangle.Triangle3D.Model:Destroy()
 		end
 	end
+end
+
+function MeshFunctions:AddTriangle(vertexPositions: {Vector3})
+	local TVIDs = {} -- TrinagleVertexIDs
+	local TVAs = {} -- TrinagleVertexAttachments
+
+	for _, vertexPosition in vertexPositions do
+		local Vertex: Classes.Vertex = self:AddVertex(vertexPosition)
+
+		table.insert(TVIDs, Vertex.ID)
+		table.insert(TVAs, Vertex.VertexAttachment)
+	end
+
+	local TriangleID = self.EM:AddTriangle(table.unpack(TVIDs))
+
+	local TriangleClass: Classes.Triangle = Classes.new("Triangle", {
+		ID = TriangleID,
+		Parent = self.Mesh,
+		VertexIDs = TVIDs
+	})
+				
+	TriangleClass.VertexAttachments = TVAs
+	
+	self.Mesh.Triangles[TriangleID] = TriangleClass
+
+	self.MeshGizmo:DrawTriangle(TriangleClass, TriangleClass.VertexAttachments)
+
+	return TriangleClass
 end
 
 return MeshFunctions

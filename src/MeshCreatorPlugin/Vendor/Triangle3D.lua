@@ -78,10 +78,17 @@ function Triangle3D:Build()
 	wedge1.TopSurface = Enum.SurfaceType.Smooth
 	wedge1.BottomSurface = Enum.SurfaceType.Smooth
 	wedge1.Locked = true--wedge1.Parent = Model
-	
+
+	local WeldConstraint = Instance.new("WeldConstraint")
+	WeldConstraint.Part0 = wedge1
+	WeldConstraint.Parent = wedge1
+
 	self.Model = Model
 	self.Wedge1 = wedge1
 	self.Wedge2 = wedge1:Clone()
+
+	self.Wedge1.WeldConstraint.Part1 = self.Wedge2
+	self.Wedge2.WeldConstraint.Part1 = self.Wedge1
 end
 
 -- Set properties of the drawn triangle (Wedge1, Wedge2)

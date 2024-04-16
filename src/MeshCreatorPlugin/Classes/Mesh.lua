@@ -1,6 +1,6 @@
 --Mesh Class
 MeshClass = {
-	Parent = script.Parent.GeometryElement
+	ParentClass = script.Parent.GeometryElement
 }
 MeshClass.__index = MeshClass
 

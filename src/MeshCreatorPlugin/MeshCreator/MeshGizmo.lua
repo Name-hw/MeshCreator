@@ -7,20 +7,11 @@ local Classes = require(Root.Classes)
 local TableFunctions = require(Root.TableFunctions)
 local Vendor = Root.Vendor
 local Triangle3D = require(Vendor.Triangle3D)
-local EdgeGizmoFolder = CoreGui:FindFirstChild("MeshCreator_EdgeGizmoFolder")
-local TriangleGizmoFolder = workspace.Camera:FindFirstChild("MeshCreator_TriangleGizmoFolder")
+local EdgeGizmoFolder = CoreGui:FindFirstChild("MeshCreator_EdgeGizmoFolder") or Instance.new("Folder", CoreGui)
+local TriangleGizmoFolder = workspace.Camera:FindFirstChild("MeshCreator_TriangleGizmoFolder") or Instance.new("Folder", workspace.Camera)
 
-if not EdgeGizmoFolder then
-	EdgeGizmoFolder = Instance.new("Folder")
-	EdgeGizmoFolder.Name = "MeshCreator_EdgeGizmoFolder"
-	EdgeGizmoFolder.Parent = CoreGui
-end
-
-if not TriangleGizmoFolder then
-	TriangleGizmoFolder = Instance.new("Folder")
-	TriangleGizmoFolder.Name = "MeshCreator_TriangleGizmoFolder"
-	TriangleGizmoFolder.Parent = workspace.Camera
-end
+EdgeGizmoFolder.Name = "MeshCreator_EdgeGizmoFolder"
+TriangleGizmoFolder.Name = "MeshCreator_TriangleGizmoFolder"
 
 local TriangleDrawPreset = {
 	build = true, -- Build?
@@ -62,6 +53,7 @@ function MeshGizmo:DrawLine(startVertex: Classes.Vertex, endVertex: Classes.Vert
 		
 		local EdgeClass: Classes.Edge = Classes.new("Edge", {
 			ID = (#self.Mesh.Edges + 1),
+			Parent = self.Mesh,
 			VertexIDs = {startVertex.ID, endVertex.ID},
 			EdgeAdornment = LineAdornment,
 			StartVertexAttachment = startVertex.VertexAttachment,
@@ -70,6 +62,18 @@ function MeshGizmo:DrawLine(startVertex: Classes.Vertex, endVertex: Classes.Vert
 		
 		self.Mesh.Edges[EdgeClass.ID] = EdgeClass
 	end
+end
+
+function MeshGizmo:DrawTriangle(Triangle: Classes.Vertex, TriangleVertexAttachments: {Attachment})
+	local TVA1 = TriangleVertexAttachments[1]
+	local TVA2 = TriangleVertexAttachments[2]
+	local TVA3 = TriangleVertexAttachments[3]
+
+	Triangle.Triangle3D = Triangle3D.new(
+		TVA1.WorldPosition,
+		TVA2.WorldPosition,
+		TVA3.WorldPosition,
+		TriangleDrawPreset)
 end
 
 function MeshGizmo.new(Mesh: Classes.Mesh, Settings)
@@ -97,12 +101,8 @@ function MeshGizmo:Create()
 		self:DrawLine(TV1, TV2)
 		self:DrawLine(TV2, TV3)
 		self:DrawLine(TV3, TV1)
-		
-		Triangle.Triangle3D = Triangle3D.new(
-			TV1.VertexAttachment.WorldPosition,
-			TV2.VertexAttachment.WorldPosition,
-			TV3.VertexAttachment.WorldPosition,
-			TriangleDrawPreset)
+
+		self:DrawTriangle(Triangle, Triangle.VertexAttachments)
 		Triangle.Triangle3D:Transparency(1)
 	end
 end

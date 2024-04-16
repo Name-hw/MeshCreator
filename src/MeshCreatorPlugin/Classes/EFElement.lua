@@ -1,6 +1,6 @@
 --EFElement Class
 EFElementClass = {
-	Parent = script.Parent.GeometryElement
+	ParentClass = script.Parent.GeometryElement
 }
 EFElementClass.__index = EFElementClass
 

@@ -1,6 +1,6 @@
 --Triangle Class
 TriangleClass = {
-	Parent = script.Parent.EFElement
+	ParentClass = script.Parent.EFElement
 }
 TriangleClass.__index = TriangleClass
 

@@ -3,11 +3,13 @@ local Classes = {}
 local Enums = require(script.Parent.Enums)
 
 export type GeometryElement = {
-	ID: number
+	ID: number,
+	Parent: GeometryElement
 }
 
 export type Mesh = GeometryElement & {
 	Name: string,
+	MeshCreator: {},
 	Vertices: {Vertex},
 	Egdes: {Edge},
 	Triangles: {Triangle},
@@ -50,8 +52,8 @@ function Classes.new(className: string, data: {})
 	local Class = require(script[className])
 	local ParentClass = {}
 	
-	if Class.Parent then
-		ParentClass = Classes.new(Class.Parent.Name)
+	if Class.ParentClass then
+		ParentClass = Classes.new(Class.ParentClass.Name)
 	end
 	
 	local self = setmetatable(ParentClass, Class)
