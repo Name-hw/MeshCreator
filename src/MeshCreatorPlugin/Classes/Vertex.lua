@@ -38,6 +38,13 @@ function VertexClass:Init()
 	end)
 end
 
+function VertexClass:SetUV(VertexUV: Vector2)
+	local MeshCreator = self.Parent.MeshCreator
+	self.VertexUV = VertexUV
+
+	MeshCreator.EM:SetUV(VertexUV)
+end
+
 function VertexClass:Destroy()
 	local MeshCreator = self.Parent.MeshCreator
 

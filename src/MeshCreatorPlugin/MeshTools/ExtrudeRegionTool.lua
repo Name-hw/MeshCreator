@@ -116,7 +116,9 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
             local Vertices: {Classes.Vertex} = {}
 
             for _, VAPosition in VAPositions do
-                table.insert(Vertices, MeshCreator:AddVertexByVertexAttachmentPosition(VAPosition))
+                local Vertex: Classes.Vertex = MeshCreator:AddVertexByVertexAttachmentPosition(VAPosition)
+                --Vertex:SetUV()
+                table.insert(Vertices, Vertex)
             end
             
             local Triangle1: Classes.Triangle = MeshCreator:AddTriangleFromVertices({Vertices[1], Vertices[4], Vertices[2]})
