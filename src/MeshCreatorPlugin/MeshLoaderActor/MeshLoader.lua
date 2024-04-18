@@ -36,7 +36,7 @@ function MeshLoader.LoadMeshSaveFile(MeshPart: MeshPart)
 				Triangles = HttpService:JSONDecode(Zlib128.decompress(EncodedSaveData.Triangles))
 			}
 
-			for _, Vertex: Classes.Vertex in SaveData.Vertices do
+			for _, Vertex in SaveData.Vertices do
 				Vertex.VertexUV = Vector2.new(Vertex.VertexUV[1], Vertex.VertexUV[2])
 				Vertex.VA_Position = Vector3.new(Vertex.VA_Position[1], Vertex.VA_Position[2], Vertex.VA_Position[3])
 				Vertex.VA_Normal = Vector3.new(Vertex.VA_Normal[1], Vertex.VA_Normal[2], Vertex.VA_Normal[3])
@@ -52,7 +52,7 @@ function MeshLoader:CreateEditableMesh()
 	local newVertexIDs = {}
 	
 	assert(pcall(function()
-		self.EM:GetVertices(Vector3.one)
+		self.EM:GetVertices()
 	end), "Please enable EditableImage and EditableMesh in the beta features.")
 	
 	for _, Vertex in self.MeshSaveFile.Vertices do
@@ -65,7 +65,6 @@ function MeshLoader:CreateEditableMesh()
 		self.EM:SetUV(newVertexID, VertexUV)
 
 		newVertexIDs[Vertex.ID] = newVertexID
-		Vertex.ID = newVertexID
 	end
 	
 	for _, Triangle in self.MeshSaveFile.Triangles do
@@ -75,9 +74,8 @@ function MeshLoader:CreateEditableMesh()
 		for _, TriangleVertexID in ipairs(TriangleVertexIDs) do
 			table.insert(newTriangleVertexIDs, newVertexIDs[TriangleVertexID])
 		end
-
-		Triangle.ID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
-		Triangle.VertexIDs = newTriangleVertexIDs
+		
+		self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
 	end
 	
 	self.EM.Name = "EditableMesh"
