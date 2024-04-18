@@ -162,11 +162,11 @@ function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
 	self:AddPlaneMeshFromVertexIDs({VertexIDs[3], VertexIDs[2], VertexIDs[7], VertexIDs[6]}) --Left
 	
 	--local TriangleIDs = self:AddTriangles(VertexIDs)
-	
+	--[[
 	for position, vertexID in VertexIDs do
-		self.EM:SetVertexNormal(vertexID, VertexPositions[position].Unit)
+		--self.EM:SetVertexNormal(vertexID, VertexPositions[position].Unit)
 	end
-	
+	]]
 	local newCubeMesh: Classes.CustomMesh = {
 		MeshID = 1,
 		MeshType = Enums.MeshType.Cube,

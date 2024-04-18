@@ -28,7 +28,7 @@ function TriangleClass:Init()
 	end
 	
 	local function OnAncestryChanged()
-		if table.find(self.Parent.Triangles, self) then
+		if MeshCreator.IsPluginEnabled and table.find(self.Parent.Triangles, self) then
 			self:Destroy()
 		end
 	end

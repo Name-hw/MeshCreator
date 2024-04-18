@@ -24,7 +24,7 @@ function VertexClass:Init()
 	end
 	
 	local function OnAncestryChanged()
-		if MeshCreator.IspluginEnabled then
+		if MeshCreator.IsPluginEnabled then
 			self:Destroy()
 		end
 	end
@@ -39,9 +39,11 @@ function VertexClass:Init()
 end
 
 function VertexClass:Destroy()
-	table.remove(self.Mesh.Vertices, table.find(self.Mesh.Vertices, self))
+	local MeshCreator = self.Parent.MeshCreator
+
+	table.remove(self.Parent.Vertices, table.find(self.Parent.Vertices, self))
 	
-	self.EM:RemoveVertex(self.ID)
+	MeshCreator.EM:RemoveVertex(self.ID)
 end
 
 return VertexClass

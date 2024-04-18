@@ -84,7 +84,7 @@ function MeshFunctions:AddVertex(vertexPosition: Vector3)
 		VA_Normal = Vector3.zero
 	})
 	
-	self.Mesh.Vertices[VertexID] = VertexClass
+	table.insert(self.Mesh.Vertices, VertexClass)
 	
 	return VertexClass
 end
@@ -100,7 +100,7 @@ function MeshFunctions:AddVertexByVertexAttachmentPosition(vertexAttachmentPosit
 		VA_Normal = Vector3.zero
 	})
 	
-	self.Mesh.Vertices[VertexID] = VertexClass
+	table.insert(self.Mesh.Vertices, VertexClass)
 	
 	return VertexClass
 end
