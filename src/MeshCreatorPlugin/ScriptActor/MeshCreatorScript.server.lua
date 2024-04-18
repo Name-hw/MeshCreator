@@ -88,7 +88,7 @@ local function OnEAClicked(Edge: Classes.Edge)
 	local EA = Edge.EdgeAdornment
 
 	if SelectMode == Enums.SelectMode.EdgeMode and not IsEdgeSelected then
-		Selection:Set({Edge.StartVertexAttachment, Edge.EndVertexAttachment})
+		Selection:Set(Edge.VertexAttachments)
 		EA.Color3 = Color3.new(1, 0.584314, 0)
 		IsEdgeSelected = true
 		LastSelectedEA = EA

@@ -47,19 +47,19 @@ function TableFunctions.GetVertexFromEFElement(Vertices: {Classes.Vertex}, EFEle
 	return VerticesInEFElement
 end
 
-function TableFunctions.FindVertexAttachmentsFromVertices(VerticesToFind: {Classes.Vertex})
-	local VertexAttachments: {Attachment} = {}
+function TableFunctions.FindDatasFromElements(ElementsToFind: {}, DataToFind: string)
+	local Datas = {}
 	
-	for _, Vertex: Classes.Vertex in ipairs(VerticesToFind) do
-		table.insert(VertexAttachments, Vertex.VertexAttachment)
+	for _, Element in ipairs(ElementsToFind) do
+		table.insert(Datas, Element[DataToFind])
 	end
 	
-	return VertexAttachments
+	return Datas
 end
 
 function TableFunctions.FindVertexAttachmentsFromEFElement(Vertices: {Classes.Vertex}, EFElement: Classes.EFElement)
 	local VerticesInEFElement = TableFunctions.GetVertexFromEFElement(Vertices, EFElement)
-	local VertexAttachments = TableFunctions.FindVertexAttachmentsFromVertices(VerticesInEFElement)
+	local VertexAttachments = TableFunctions.FindDatasFromElements(VerticesInEFElement, "VertexAttachment")
 	
 	return VertexAttachments
 end

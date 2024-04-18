@@ -21,6 +21,7 @@ function SaveLoadSystem.Save(MeshCreator)
 	for _, Vertex: Classes.Vertex in MeshCreator.Mesh.Vertices do
 		local VertexSaveData = table.clone(Vertex)
 
+		VertexSaveData.Parent = nil
 		VertexSaveData.VertexUV = {VertexSaveData.VertexUV.X, VertexSaveData.VertexUV.Y}
 		VertexSaveData.VA_Position = {Vertex.VertexAttachment.Position.X, Vertex.VertexAttachment.Position.Y, Vertex.VertexAttachment.Position.Z}
 		VertexSaveData.VA_Normal = {Vertex.VertexAttachment.Axis.X, Vertex.VertexAttachment.Axis.Y, Vertex.VertexAttachment.Axis.Z}
@@ -40,6 +41,9 @@ function SaveLoadSystem.Save(MeshCreator)
 		
 		TriangleSaveData.VertexIDs = TriangleVertices
 		]]
+
+		TriangleSaveData.Parent = nil
+
 		table.insert(SaveData.Triangles, TriangleSaveData)
 	end
 	task.synchronize()

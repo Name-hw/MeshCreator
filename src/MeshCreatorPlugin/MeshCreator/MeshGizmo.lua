@@ -33,13 +33,13 @@ function MeshGizmo:CreateEdgeAdornment(Origin, End)
 	return LineAdornment
 end
 
-function MeshGizmo:DrawLine(startVertex: Classes.Vertex, endVertex: Classes.Vertex)
-	local Origin = startVertex.VA_Position
-	local End = endVertex.VA_Position
+function MeshGizmo:DrawLine(startVertexData: Classes.Vertex, endVertexData: Classes.Vertex)
+	local Origin = startVertexData.VA_Position
+	local End = endVertexData.VA_Position
 	local Redundant = false
 	
 	for _, Edge: Classes.Edge in self.Mesh.Edges do
-		if table.find(Edge.VertexIDs, startVertex.ID) and table.find(Edge.VertexIDs, endVertex.ID) then
+		if table.find(Edge.VertexIDs, startVertexData.ID) and table.find(Edge.VertexIDs, endVertexData.ID) then
 			Redundant = true
 		end
 	end
@@ -54,14 +54,43 @@ function MeshGizmo:DrawLine(startVertex: Classes.Vertex, endVertex: Classes.Vert
 		local EdgeClass: Classes.Edge = Classes.new("Edge", {
 			ID = (#self.Mesh.Edges + 1),
 			Parent = self.Mesh,
-			VertexIDs = {startVertex.ID, endVertex.ID},
+			VertexIDs = {startVertexData.ID, endVertexData.ID},
 			EdgeAdornment = LineAdornment,
-			StartVertexAttachment = startVertex.VertexAttachment,
-			EndVertexAttachment = endVertex.VertexAttachment
+			VertexAttachments = {startVertexData.VertexAttachment, endVertexData.VertexAttachment}
 		})
 		
 		self.Mesh.Edges[EdgeClass.ID] = EdgeClass
 	end
+end
+
+function MeshGizmo:DrawLineFromVertexData(vertexData1, vertexData2, vertexData3)
+	self:DrawLine(vertexData1, vertexData2)
+	self:DrawLine(vertexData2, vertexData3)
+	self:DrawLine(vertexData3, vertexData1)
+	
+	return self
+end
+
+function MeshGizmo:DrawLineFromTriangle(Triangle: Classes.Triangle)
+	local TVD1: Classes.Vertex = { --TriangleVertexData
+		ID = Triangle.VertexIDs[1],
+		VertexAttachment = Triangle.VertexAttachments[1],
+		VA_Position = Triangle.VertexAttachments[1].Position
+	}
+	local TVD2: Classes.Vertex = { --TriangleVertexData
+		ID = Triangle.VertexIDs[2],
+		VertexAttachment = Triangle.VertexAttachments[2],
+		VA_Position = Triangle.VertexAttachments[2].Position
+	}
+	local TVD3: Classes.Vertex = { --TriangleVertexData
+	ID = Triangle.VertexIDs[3],
+	VertexAttachment = Triangle.VertexAttachments[3],
+	VA_Position = Triangle.VertexAttachments[3].Position
+	}
+	
+	self:DrawLineFromVertexData(TVD1, TVD2, TVD3)
+	
+	return self
 end
 
 function MeshGizmo:DrawTriangle(Triangle: Classes.Vertex, TriangleVertexAttachments: {Attachment})
@@ -88,20 +117,7 @@ end
 
 function MeshGizmo:Create()
 	for _, Triangle: Classes.Triangle in self.Mesh.Triangles do
-		local TriangleVertices = {}
-		
-		for _, triangleVertexID in ipairs(Triangle.VertexIDs) do
-			table.insert(TriangleVertices, TableFunctions.GetVertexByVertexID(self.Mesh.Vertices, triangleVertexID))
-		end
-		
-		local TV1 = TriangleVertices[1]
-		local TV2 = TriangleVertices[2]
-		local TV3 = TriangleVertices[3]
-		
-		self:DrawLine(TV1, TV2)
-		self:DrawLine(TV2, TV3)
-		self:DrawLine(TV3, TV1)
-
+		self:DrawLineFromTriangle(Triangle)
 		self:DrawTriangle(Triangle, Triangle.VertexAttachments)
 		Triangle.Triangle3D:Transparency(1)
 	end
@@ -110,21 +126,6 @@ end
 function MeshGizmo:RemoveGizmo()
 	self:RemoveTriangleParts()
 	self:RemoveEdgeAdornments()
-end
-
-function MeshGizmo:RemoveEdge(Edge: Classes.Edge)
-	table.remove(self.Mesh.Edges, table.find(self.Mesh.Edges, Edge))
-	--task.synchronize()
-	Edge.EdgeAdornment:Destroy()
-end
-
-function MeshGizmo:RemoveEdgeByVertexID(vertexID)
-	local EdgesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Mesh.Edges, vertexID)
-	
-	for _, Edge: Classes.Edge in EdgesContainingVertex do
-		--task.desynchronize()
-		self:RemoveEdge(Edge)
-	end
 end
 
 function MeshGizmo:RemoveEdgeAdornments()
@@ -150,8 +151,8 @@ end
 function MeshGizmo:SetEAs_Visible(GizmoVisible)
 	if GizmoVisible then
 		for _, Edge: Classes.Edge in self.Mesh.Edges do
-			local Origin = Edge.StartVertexAttachment.Position
-			local End = Edge.EndVertexAttachment.Position
+			local Origin = Edge.VertexAttachments[1].Position
+			local End = Edge.VertexAttachments[2].Position
 			
 			Edge.EdgeAdornment = self:CreateEdgeAdornment(Origin, End)
 		end
@@ -175,50 +176,6 @@ function MeshGizmo:SetTPs_Visible(TPsVisible)
 		end
 		
 		self.Adornee.Transparency = 0
-	end
-end
-
-function MeshGizmo.SetEA_Position(Edge: Classes.Edge) --SetEdgeAdornmentPosition
-	local Origin = Edge.StartVertexAttachment.Position
-	local End = Edge.EndVertexAttachment.Position
-	--task.synchronize()
-	Edge.EdgeAdornment.CFrame =  CFrame.new(Origin, End)
-	Edge.EdgeAdornment.Length = (End - Origin).Magnitude
-end
-
-function MeshGizmo.SetTP_Position(Vertices: {Classes.Vertex}, Triangle: Classes.Triangle)
-	local TriangleVertices = {}
-
-	for _, triangleVertexID in ipairs(Triangle.VertexIDs) do
-		table.insert(TriangleVertices, TableFunctions.GetVertexByVertexID(Vertices, triangleVertexID))
-	end
-
-	local TV1 = TriangleVertices[1]
-	local TV2 = TriangleVertices[2]
-	local TV3 = TriangleVertices[3]
-	--task.synchronize()
-	Triangle.Triangle3D:AnimateVertices(
-		TV1.VertexAttachment.WorldPosition,
-		TV2.VertexAttachment.WorldPosition,
-		TV3.VertexAttachment.WorldPosition
-	)
-end
-
-function MeshGizmo:UpdateEA_PositionByVertexID(vertexID)
-	local EdgesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Mesh.Edges, vertexID)
-
-	for _, Edge: Classes.Edge in EdgesContainingVertex do
-		--task.desynchronize()
-		MeshGizmo.SetEA_Position(Edge)
-	end
-end
-
-function MeshGizmo:UpdateTP_PositionByVertexID(vertexID)
-	local TrianglesContainingVertex = TableFunctions.GetEFElementsByVertexID(self.Mesh.Triangles, vertexID)
-	
-	for _, Triangle: Classes.Triangle in TrianglesContainingVertex do
-		--task.desynchronize()
-		MeshGizmo.SetTP_Position(self.Mesh.Vertices, Triangle)
 	end
 end
 

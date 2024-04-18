@@ -57,13 +57,20 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 			local VN = Vertex.VA_Normal
 			local newVertexID = self.EM:AddVertex(VertexPosition)
 			
+			local VertexClass: Classes.Vertex = Classes.new("Vertex", {
+				ID = newVertexID,
+				Parent = self.Mesh,
+				VertexUV = Vertex.VertexUV,
+				VA_Position = Vertex.VA_Position,
+				VA_Normal = VN
+			})
+			
 			self.EM:SetVertexNormal(newVertexID, VN)
 			self.EM:SetUV(newVertexID, VertexUV)
 			
 			newVertexIDs[Vertex.ID] = newVertexID
-			Vertex.ID = newVertexID
-			
-			table.insert(self.Mesh.Vertices, Vertex)
+
+			table.insert(self.Mesh.Vertices, VertexClass)
 		end
 		
 		for _, Triangle: Classes.Triangle in MeshSaveFile.Triangles do
@@ -74,10 +81,13 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 				table.insert(newTriangleVertexIDs, newVertexIDs[TriangleVertexID])
 			end
 			
-			Triangle.ID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs))
-			Triangle.VertexIDs = newTriangleVertexIDs
-			
-			table.insert(self.Mesh.Triangles, Triangle)
+			local TriangleClass: Classes.Vertex = Classes.new("Triangle", {
+				ID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs)),
+				Parent = self.Mesh,
+				VertexIDs = newTriangleVertexIDs
+			})
+
+			table.insert(self.Mesh.Triangles, TriangleClass)
 		end
 	elseif self.MeshPart.MeshId ~= "" then
 		self.EM = AssetService:CreateEditableMeshFromPartAsync(self.MeshPart)
@@ -90,7 +100,7 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 	self.EM.Parent = self.MeshPart
 end
 
-function MeshCreator:AddPlaneMesh(vertexIDs)
+function MeshCreator:AddPlaneMeshFromVertexIDs(vertexIDs)
 	local TriangleIDs = {}
 	
 	table.insert(TriangleIDs, self.EM:AddTriangle(vertexIDs[1], vertexIDs[4], vertexIDs[2]))
@@ -106,7 +116,7 @@ function MeshCreator:CreatePlaneMesh(width, height, offset: Vector3, normal: Vec
 		self.EM:AddVertex(Vector3.new(-width/2, 0, -height/2) + offset),
 		self.EM:AddVertex(Vector3.new(width/2, 0, -height/2) + offset)
 	}
-	local TriangleIDs = self:AddPlaneMesh(VertexIDs)
+	local TriangleIDs = self:AddPlaneMeshFromVertexIDs(VertexIDs)
 	
 	for _, vertexID in VertexIDs do
 		self.EM:SetVertexNormal(vertexID, normal)
@@ -144,12 +154,12 @@ function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
 		table.insert(VertexIDs, self.EM:AddVertex(vertexPosition))
 	end
 
-	self:AddPlaneMesh({VertexIDs[1], VertexIDs[2], VertexIDs[3], VertexIDs[4]}) --Top
-	self:AddPlaneMesh({VertexIDs[4], VertexIDs[3], VertexIDs[6], VertexIDs[5]}) --Front
-	self:AddPlaneMesh({VertexIDs[5], VertexIDs[6], VertexIDs[7], VertexIDs[8]}) --Bottom
-	self:AddPlaneMesh({VertexIDs[2], VertexIDs[1], VertexIDs[8], VertexIDs[7]}) --Back
-	self:AddPlaneMesh({VertexIDs[1], VertexIDs[4], VertexIDs[5], VertexIDs[8]}) --Right
-	self:AddPlaneMesh({VertexIDs[3], VertexIDs[2], VertexIDs[7], VertexIDs[6]}) --Left
+	self:AddPlaneMeshFromVertexIDs({VertexIDs[1], VertexIDs[2], VertexIDs[3], VertexIDs[4]}) --Top
+	self:AddPlaneMeshFromVertexIDs({VertexIDs[4], VertexIDs[3], VertexIDs[6], VertexIDs[5]}) --Front
+	self:AddPlaneMeshFromVertexIDs({VertexIDs[5], VertexIDs[6], VertexIDs[7], VertexIDs[8]}) --Bottom
+	self:AddPlaneMeshFromVertexIDs({VertexIDs[2], VertexIDs[1], VertexIDs[8], VertexIDs[7]}) --Back
+	self:AddPlaneMeshFromVertexIDs({VertexIDs[1], VertexIDs[4], VertexIDs[5], VertexIDs[8]}) --Right
+	self:AddPlaneMeshFromVertexIDs({VertexIDs[3], VertexIDs[2], VertexIDs[7], VertexIDs[6]}) --Left
 	
 	--local TriangleIDs = self:AddTriangles(VertexIDs)
 	

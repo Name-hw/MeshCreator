@@ -1,7 +1,13 @@
 local ExtrudeRegionTool = {}
-ExtrudeRegionTool.IsExtruded = false
 
 local Root = script.Parent.Parent
+local Classes = require(Root.Classes)
+local TableFunctions = require(Root.TableFunctions)
+local IsExtruded = false
+local ExtrudedVertices = {}
+local OriginalVertexAttachments = {}
+
+local OriginalTriangleModelCFrame
 
 function ExtrudeRegionTool.CreateToolGizmo(Adornee: BasePart)
     --[[
@@ -47,37 +53,92 @@ function ExtrudeRegionTool.OnMouseEnter(MeshCreator)
 end
 
 function ExtrudeRegionTool.OnMouseLeave(MeshCreator)
-    ExtrudeRegionTool.IsExtruded = false
+    IsExtruded = false
     ExtrudeRegionTool.ExtrudedTriangle = nil
+    ExtrudedVertices = {}
 end
 
 function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
-    if ExtrudeRegionTool.IsExtruded then
+    if IsExtruded then
         for tablePosition, vertexAttachment: Attachment in ExtrudeRegionTool.ExtrudedTriangle.VertexAttachments do
-            ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model:MoveTo(ExtrudeRegionTool.OriginalTriangle.Triangle3D.Model:GetPivot() * Vector3.new(distance, 0, 0))
+            vertexAttachment.Position = OriginalVertexAttachments[tablePosition].Position + OriginalTriangleModelCFrame.RightVector * distance
+        end
 
-            vertexAttachment.Position = ExtrudeRegionTool.OriginalTriangle.VertexAttachments[tablePosition].Position + ExtrudeRegionTool.OriginalTriangle.Triangle3D.Model:GetPivot().RightVector * distance
+        for tablePosition, Vertex: Classes.Vertex in ExtrudedVertices do
+            local VA: Attachment = Vertex.VertexAttachment
+            local OriginalVertexAttachment
+            
+            if tablePosition == 1 or tablePosition == 6 then
+                OriginalVertexAttachment = OriginalVertexAttachments[1]
+            elseif tablePosition == 2 or tablePosition == 3 then
+                OriginalVertexAttachment = OriginalVertexAttachments[2]
+            elseif tablePosition == 4 or tablePosition == 5 then
+                OriginalVertexAttachment = OriginalVertexAttachments[3]
+            end
+
+            VA.Position = OriginalVertexAttachment.Position + OriginalTriangleModelCFrame.RightVector * distance
         end
     else
-        ExtrudeRegionTool.IsExtruded = true
+        IsExtruded = true
         
-        local SelectedTriangle = MeshCreator.LastSelectedTriangle
-        local TriangleVertexPositions = {}
+        local TVAPositions = {} --TriangleVertexAttachmentPositions
         
-        for _, vertexAttachment in SelectedTriangle.VertexAttachments do
-            table.insert(TriangleVertexPositions, vertexAttachment.WorldPosition)
+        for _, vertexAttachment in ExtrudeRegionTool.SelectedTriangle.VertexAttachments do
+            table.insert(TVAPositions, vertexAttachment.Position)
         end
         
-        ExtrudeRegionTool.ExtrudedTriangle = MeshCreator:AddTriangle(TriangleVertexPositions)
+        ExtrudeRegionTool.ExtrudedTriangle = MeshCreator:AddTriangleByVertexAttachmentPositions(TVAPositions)
         ExtrudeRegionTool.ToolGizmo.Adornee = ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model.TriangleMesh
-        ExtrudeRegionTool.OriginalTriangle = SelectedTriangle
+        OriginalTriangleModelCFrame = ExtrudeRegionTool.SelectedTriangle.Triangle3D.Model:GetPivot()
+        OriginalVertexAttachments = ExtrudeRegionTool.SelectedTriangle.VertexAttachments
 
+        MeshCreator.MeshGizmo:DrawLineFromTriangle(ExtrudeRegionTool.ExtrudedTriangle)
+
+        for i = 1, 3, 1 do
+            local VAPositions: {Vector3} = {} --VertexAttachmentPositions
+
+            if i < 3 then
+                VAPositions = {
+                    TVAPositions[i],
+                    TVAPositions[i + 1],
+                    TVAPositions[i + 1],
+                    TVAPositions[i]
+                }
+            else
+                VAPositions = {
+                    TVAPositions[3],
+                    TVAPositions[1],
+                    TVAPositions[1],
+                    TVAPositions[3]
+                }
+            end
+
+            local Vertices: {Classes.Vertex} = {}
+
+            for _, VAPosition in VAPositions do
+                table.insert(Vertices, MeshCreator:AddVertexByVertexAttachmentPosition(VAPosition))
+            end
+            
+            local Triangle1: Classes.Triangle = MeshCreator:AddTriangleFromVertices({Vertices[1], Vertices[4], Vertices[2]})
+            local Triangle2: Classes.Triangle = MeshCreator:AddTriangleFromVertices({Vertices[3], Vertices[2], Vertices[4]})
+
+            MeshCreator.MeshGizmo:DrawLineFromVertexData(Vertices[1], Vertices[4], Vertices[2])
+            MeshCreator.MeshGizmo:DrawLineFromVertexData(Vertices[3], Vertices[2], Vertices[4])
+
+            Triangle1.Triangle3D:Set("Locked", false)
+            Triangle2.Triangle3D:Set("Locked", false)
+
+            table.insert(ExtrudedVertices, Vertices[1])
+            table.insert(ExtrudedVertices, Vertices[2])
+        end
+
+        ExtrudeRegionTool.SelectedTriangle:Destroy()
         MeshCreator:SelectTriangle(ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model, false)
     end
 end
 
 function ExtrudeRegionTool.Disable()
-    ExtrudeRegionTool.IsExtruded = false
+    IsExtruded = false
 end
 
 return ExtrudeRegionTool

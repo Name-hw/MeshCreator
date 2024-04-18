@@ -35,9 +35,7 @@ export type EFElement = GeometryElement & { --EdgeFaceElement
 }
 
 export type Edge = EFElement & {
-	EdgeAdornment: LineHandleAdornment,
-	StartVertexAttachment: Attachment,
-	EndVertexAttachment: Attachment
+	EdgeAdornment: LineHandleAdornment
 }
 
 export type Triangle = EFElement & {
@@ -48,7 +46,7 @@ export type Face = EFElement & {
 	Triangles: {Triangle}
 }
 
-function Classes.new(className: string, data: {})
+function Classes.new(className: string, data: {}, NoInit: boolean)
 	local Class = require(script[className])
 	local ParentClass = {}
 	
@@ -64,7 +62,7 @@ function Classes.new(className: string, data: {})
 		end
 	end
 	
-	if self.Init then
+	if self.Init and not NoInit then
 		self:Init()
 	end
 	

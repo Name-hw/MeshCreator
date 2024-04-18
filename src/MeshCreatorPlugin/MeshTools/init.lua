@@ -24,6 +24,7 @@ function MeshTools.Enable(MeshCreator, ToolName: string, Adornee: BasePart)
     MeshTools.Tool.ToolTpye = Enums.Tool[ToolName]
     MeshTools.Tool.ToolGizmo = Tool.CreateToolGizmo(Adornee)
     MeshTools.Tool.ToolGizmo.Parent = ToolGizmoFolder
+    MeshTools.MeshCreator = MeshCreator
 
     MeshTools.IsToolEnabled = true
 
@@ -43,7 +44,7 @@ function MeshTools.Enable(MeshCreator, ToolName: string, Adornee: BasePart)
         MeshTools.Tool.IsMouseEntered = true
 
         MeshTools.ChangeGizmoAdornmentProperty(Tool.ToolGizmo, "Color3", Color3.new(1, 0.690196, 0))
-        MeshTools.Tool.OnMouseEnter(MeshCreator)
+        MeshTools.Tool.OnMouseEnter(MeshTools.MeshCreator)
     end)
 
     MeshTools.Tool.ToolGizmo.MouseLeave:Connect(function()
@@ -51,7 +52,7 @@ function MeshTools.Enable(MeshCreator, ToolName: string, Adornee: BasePart)
             MeshTools.Tool.IsMouseEntered = false
 
             MeshTools.ChangeGizmoAdornmentProperty(Tool.ToolGizmo, "Color3", Color3.new(0.0509804, 0.411765, 0.67451))
-            MeshTools.Tool.OnMouseLeave(MeshCreator)
+            MeshTools.Tool.OnMouseLeave(MeshTools.MeshCreator)
         end
     end)
 
@@ -64,13 +65,19 @@ function MeshTools.Enable(MeshCreator, ToolName: string, Adornee: BasePart)
     end)
 
     MeshTools.Tool.ToolGizmo.MouseDrag:Connect(function(face: Faces, distance: number)
-        MeshTools.Tool.OnDragged(MeshCreator, face, distance)
+        MeshTools.Tool.SelectedTriangle = MeshTools.MeshCreator.LastSelectedTriangle
+
+        MeshTools.Tool.OnDragged(MeshTools.MeshCreator, face, distance)
     end)
 end
 
 function MeshTools.Disable()
     if MeshTools.IsToolEnabled then
         MeshTools.IsToolEnabled = false
+        MeshTools.Tool.IsMouseEntered = false
+
+        MeshTools.ChangeGizmoAdornmentProperty(MeshTools.Tool.ToolGizmo, "Color3", Color3.new(0.0509804, 0.411765, 0.67451))
+        MeshTools.Tool.OnMouseLeave(MeshTools.MeshCreator)
         MeshTools.Tool.ToolGizmo:Destroy()
         MeshTools.Tool.Disable()
         MeshTools.Tool = nil
