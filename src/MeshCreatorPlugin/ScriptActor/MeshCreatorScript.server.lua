@@ -189,44 +189,46 @@ PluginButton.Click:Connect(function()
 						EditorGuiHandler.ToolBarHandler.ToolBarFrame.AttributeChanged:Connect(OnToolChanged)
 					end
 					
-					for _, SelectingObject in SelectingObjects do
-						local IsSelectingObjectInLST --IsSelectingObjectInLastSelectedTriangle
+					if CurrentMeshCreator then
+						for _, SelectingObject in SelectingObjects do
+							local IsSelectingObjectInLST --IsSelectingObjectInLastSelectedTriangle
 
-						if CurrentMeshCreator.LastSelectedTriangle and table.find(CurrentMeshCreator.LastSelectedTriangle.VertexAttachments, SelectingObject) then
-							IsSelectingObjectInLST = true
-						else
-							IsSelectingObjectInLST = false
-						end
-
-						if SelectingObject.Name == "VertexAttachment" and SelectMode ~= Enums.SelectMode.VertexMode then
-							if not IsEdgeSelected and not IsSelectingObjectInLST then
-								Selection:Set(Instance)
-								MeshTools.Disable()
+							if CurrentMeshCreator.LastSelectedTriangle and table.find(CurrentMeshCreator.LastSelectedTriangle.VertexAttachments, SelectingObject) then
+								IsSelectingObjectInLST = true
+							else
+								IsSelectingObjectInLST = false
 							end
-						elseif SelectingObject.Parent == workspace.Camera.MeshCreator_TriangleGizmoFolder then
-							IsTriangleSelected = true
 
-							if CurrentMeshCreator.LastSelectedTriangle and SelectingObject ~= CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model and not HeldInputs[Enum.KeyCode.LeftShift] then
-								for _, Triangle: Classes.Triangle in CurrentMeshCreator.SelectedTriangles do
-									Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
+							if SelectingObject.Name == "VertexAttachment" and SelectMode ~= Enums.SelectMode.VertexMode then
+								if not IsEdgeSelected and not IsSelectingObjectInLST then
+									Selection:Set(Instance)
+									MeshTools.Disable()
+								end
+							elseif SelectingObject.Parent == workspace.Camera.MeshCreator_TriangleGizmoFolder then
+								IsTriangleSelected = true
+
+								if CurrentMeshCreator.LastSelectedTriangle and SelectingObject ~= CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model and not HeldInputs[Enum.KeyCode.LeftShift] then
+									for _, Triangle: Classes.Triangle in CurrentMeshCreator.SelectedTriangles do
+										Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
+									end
+
+									MeshCreator:SelectTriangle(SelectingObject, false)
+									MeshTools.Disable()
+								else
+									MeshCreator:SelectTriangle(SelectingObject, true)
 								end
 
-								MeshCreator:SelectTriangle(SelectingObject, false)
-								MeshTools.Disable()
-							else
-								MeshCreator:SelectTriangle(SelectingObject, true)
-							end
-
-							if CurrentTool == Enums.Tool.ExtrudeRegionTool and not MeshTools.IsToolEnabled then
-								MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.TriangleMesh)
-							end
-						elseif CurrentMeshCreator.SelectedTriangles[1] and not IsSelectingObjectInLST and SelectingObject == CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model then
-							print("Bug?")
-							if IsTriangleSelected then
-								Selection:Set({CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[1],
-								CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[2],
-								CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[3],
-								CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model})
+								if CurrentTool == Enums.Tool.ExtrudeRegionTool and not MeshTools.IsToolEnabled then
+									MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.TriangleMesh)
+								end
+							elseif CurrentMeshCreator.SelectedTriangles[1] and not IsSelectingObjectInLST and SelectingObject == CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model then
+								print("Bug?")
+								if IsTriangleSelected then
+									Selection:Set({CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[1],
+									CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[2],
+									CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[3],
+									CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model})
+								end
 							end
 						end
 					end
