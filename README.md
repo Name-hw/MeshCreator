@@ -6,7 +6,7 @@ This repository contains the source code of MeshCreator Plugin.
 
 - DevForum(with tutorial): https://devforum.roblox.com/t/meshcreator-edit-meshes-easily-with-free-plugin/2788604
 
-##How to Contribute
+## How to Contribute
 
 1. Documentation Improvement: Help improve the project documentation to make it easier for users to understand and use the project.
 2. Bug Fixes or New Feature Addition: Find and resolve issues or propose new features.
