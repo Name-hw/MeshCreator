@@ -184,6 +184,10 @@ PluginButton.Click:Connect(function()
 							EACHCoroutine = task.spawn(EAConnectHandling)
 						end
 						
+						if EditorGuiHandler.HeaderHandler.HeaderFrame:GetAttribute("SelectMode") then
+							SetSelectMode(EditorGuiHandler.HeaderHandler.HeaderFrame:GetAttribute("SelectMode"))
+						end
+
 						SettingsHandler.SettingsFrame.AttributeChanged:Connect(OnSettingsChanged)
 						EditorGuiHandler.HeaderHandler.HeaderFrame.AttributeChanged:Connect(OnHeaderChanged)
 						EditorGuiHandler.ToolBarHandler.ToolBarFrame.AttributeChanged:Connect(OnToolChanged)
