@@ -93,6 +93,7 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
         OriginalTriangleModelCFrame = ExtrudeRegionTool.SelectedTriangle.Triangle3D.Model:GetPivot()
         OriginalVertexAttachments = ExtrudeRegionTool.SelectedTriangle.VertexAttachments
 
+        ExtrudeRegionTool.ExtrudedTriangle.Triangle3D:Set("Locked", false)
         MeshCreator.MeshGizmo:DrawLineFromTriangle(ExtrudeRegionTool.ExtrudedTriangle)
 
         for i = 1, 3, 1 do
