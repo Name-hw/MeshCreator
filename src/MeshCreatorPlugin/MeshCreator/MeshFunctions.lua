@@ -160,8 +160,8 @@ function MeshFunctions:AddTriangleByVertexAttachmentPositions(vertexAttachmentPo
 	local TVIDs = {} -- TrinagleVertexIDs
 	local TVAs = {} -- TrinagleVertexAttachments
 
-	for _, vertexPosition in vertexAttachmentPositions do
-		local Vertex: Classes.Vertex = self:AddVertex(vertexPosition)
+	for _, vertexAttachmentPosition in vertexAttachmentPositions do
+		local Vertex: Classes.Vertex = self:AddVertexByVertexAttachmentPosition(vertexAttachmentPosition)
 
 		table.insert(TVIDs, Vertex.ID)
 		table.insert(TVAs, Vertex.VertexAttachment)

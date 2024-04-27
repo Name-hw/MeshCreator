@@ -9,8 +9,8 @@ local OriginalVertexAttachments = {}
 
 local OriginalTriangleModelCFrame
 
+--[[
 function ExtrudeRegionTool.CreateToolGizmo(Adornee: BasePart)
-    --[[
     local ToolGizmoModel = Instance.new("Model")
     ToolGizmoModel.Name = "ToolGizmo"
 
@@ -37,16 +37,16 @@ function ExtrudeRegionTool.CreateToolGizmo(Adornee: BasePart)
     ConeHandleAdornment.Parent = ToolGizmoModel
 
     return ToolGizmoModel
-    ]]
-
+    
     local ToolGizmoHandles = Instance.new("Handles")
     ToolGizmoHandles.Name = "ToolGizmoHandles"
     ToolGizmoHandles.Style = Enum.HandlesStyle.Movement
     ToolGizmoHandles.Adornee = Adornee
     ToolGizmoHandles.Faces = Faces.new(Enum.NormalId.Left)
-
+    
     return ToolGizmoHandles
 end
+]]
 
 function ExtrudeRegionTool.OnMouseEnter(MeshCreator)
     
@@ -88,7 +88,8 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
         end
         
         ExtrudeRegionTool.ExtrudedTriangle = MeshCreator:AddTriangleByVertexAttachmentPositions(TVAPositions)
-        ExtrudeRegionTool.ToolGizmo.Adornee = ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model.TriangleMesh
+        ExtrudeRegionTool.ArrowGizmo.Adornee = ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model.TriangleMesh
+        --ExtrudeRegionTool.SphereGizmo.Adornee = ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model.TriangleMesh
         OriginalTriangleModelCFrame = ExtrudeRegionTool.SelectedTriangle.Triangle3D.Model:GetPivot()
         OriginalVertexAttachments = ExtrudeRegionTool.SelectedTriangle.VertexAttachments
 

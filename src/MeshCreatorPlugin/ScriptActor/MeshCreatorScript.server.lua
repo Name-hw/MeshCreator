@@ -264,6 +264,15 @@ PluginButton.Click:Connect(function()
 			end
 		end)
 		--[[
+		PluginMouse.DragEnter:Connect(function(instances)
+			local Object = instances[1]
+			print("DragEntered")
+			if MeshTools.Tool.IsSphereGizmoClicked then
+				CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model:TranslateBy(PluginMouse.Origin.Position)
+			end
+		end)
+		]]
+		--[[
 		UIS.InputEnded:ConnectParallel(function(Input)
 			if Input.UserInputType == Enum.UserInputType.MouseMovement then
 				PluginExit()

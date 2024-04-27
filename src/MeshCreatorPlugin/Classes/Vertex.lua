@@ -4,6 +4,7 @@ VertexClass = {
 }
 VertexClass.__index = VertexClass
 
+local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local Root = script.Parent.Parent
 local Classes = require(script.Parent)
 
@@ -14,6 +15,8 @@ function VertexClass:Init()
 
 	local VertexID = self.ID
 	local VA = self.VertexAttachment
+	local LastVAPosition: Vector3
+	local VAMovedRecording
 
 	local function OnChanged(propertyName)
 		local PropertyValue = VA[propertyName]

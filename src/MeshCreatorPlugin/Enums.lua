@@ -34,6 +34,16 @@ Enums.Tool = {
 	ExtrudeRegionTool = {
 		Value = 1,
 		EnumType = Enums.Tool
+	}::CEnumItem,
+
+
+	UndoTool = {
+		Value = 11,
+		EnumType = Enums.Tool
+	}::CEnumItem,
+	RedoTool = {
+		Value = 12,
+		EnumType = Enums.Tool
 	}::CEnumItem
 }
 
