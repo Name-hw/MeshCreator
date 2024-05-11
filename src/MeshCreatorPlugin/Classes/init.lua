@@ -23,14 +23,16 @@ export type CustomMesh = Mesh & {
 }
 
 export type Vertex = GeometryElement & {
+	EMVertexIDs: {number},
+	VertexNormals: {Vector3},
 	VertexUV: Vector2,
 	VertexAttachment: Attachment,
 	VA_Position: Vector3 | string,
-	VA_Normal: Vector3
 }
 
 export type EFElement = GeometryElement & { --EdgeFaceElement
 	VertexIDs: {number},
+	EMVertexIDs: {number},
 	VertexAttachments: {Attachment}
 }
 

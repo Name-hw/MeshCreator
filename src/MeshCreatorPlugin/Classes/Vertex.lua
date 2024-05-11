@@ -11,9 +11,9 @@ local Classes = require(script.Parent)
 function VertexClass:Init()
 	local MeshCreator = self.Parent.MeshCreator
 
-	self.VertexAttachment = MeshCreator.CreateVertexAttachment(self.Parent.MeshPart, self.VA_Position, self.VA_Normal)
-
-	local VertexID = self.ID
+	self.VertexAttachment = MeshCreator.CreateVertexAttachment(self.Parent.MeshPart, self.VA_Position)
+	
+	local EMVertexIDs = self.EMVertexIDs
 	local VA = self.VertexAttachment
 	local LastVAPosition: Vector3
 	local VAMovedRecording
@@ -53,7 +53,9 @@ function VertexClass:Destroy()
 
 	table.remove(self.Parent.Vertices, table.find(self.Parent.Vertices, self))
 	
-	MeshCreator.EM:RemoveVertex(self.ID)
+	for _, EMVertexID in self.EMVertexIDs do
+		MeshCreator.EM:RemoveVertex(EMVertexID)
+	end
 end
 
 return VertexClass

@@ -83,9 +83,9 @@ function MeshGizmo:DrawLineFromTriangle(Triangle: Classes.Triangle)
 		VA_Position = Triangle.VertexAttachments[2].Position
 	}
 	local TVD3: Classes.Vertex = { --TriangleVertexData
-	ID = Triangle.VertexIDs[3],
-	VertexAttachment = Triangle.VertexAttachments[3],
-	VA_Position = Triangle.VertexAttachments[3].Position
+		ID = Triangle.VertexIDs[3],
+		VertexAttachment = Triangle.VertexAttachments[3],
+		VA_Position = Triangle.VertexAttachments[3].Position
 	}
 	
 	self:DrawLineFromVertexData(TVD1, TVD2, TVD3)

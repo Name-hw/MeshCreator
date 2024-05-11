@@ -5,7 +5,7 @@ local s = "[MeshCreator] - "
 local function CheckBetaFeatureEnabled()
 	local EM = Instance.new("EditableMesh")
 
-	EM:AddVertex(Vector3.one)
+	EM:GetVertices()
 end
 
 Root.ScriptActor.MeshCreatorScript.Enabled = false

@@ -14,9 +14,19 @@ function TableFunctions.VerticesToVertexIDs(Vertices: {Classes.Vertex}, vertexID
 end
 
 function TableFunctions.GetVertexByVertexID(Vertices: {Classes.Vertex}, vertexID)
-	for _, Vertex in Vertices do
+	for _, Vertex: Classes.Vertex in Vertices do
 		if Vertex.ID == vertexID then
 			return Vertex
+		end
+	end
+end
+
+function TableFunctions.GetVertexIDByEMVertexID(Vertices: {Classes.Vertex}, EMVertexID: number)
+	for _, Vertex: Classes.Vertex in Vertices do
+		for _, emVertexID: number in Vertex.EMVertexIDs do
+			if emVertexID == EMVertexID then
+				return Vertex.ID
+			end
 		end
 	end
 end
@@ -37,8 +47,8 @@ function TableFunctions.GetEFElementsByVertexID(EFElements: Classes.EFElement, v
 	return EFElementsContainingVertex
 end
 
-function TableFunctions.GetVertexFromEFElement(Vertices: {Classes.Vertex}, EFElement: Classes.EFElement)
-	local VerticesInEFElement: {Classes.EFElement} = {}
+function TableFunctions.GetVerticesFromEFElement(Vertices: {Classes.Vertex}, EFElement: Classes.EFElement)
+	local VerticesInEFElement: {Classes.Vertex} = {}
 	
 	for _, EFElementVertexID in ipairs(EFElement.VertexIDs) do
 		table.insert(VerticesInEFElement, TableFunctions.GetVertexByVertexID(Vertices, EFElementVertexID))
@@ -58,7 +68,7 @@ function TableFunctions.FindDatasFromElements(ElementsToFind: {}, DataToFind: st
 end
 
 function TableFunctions.FindVertexAttachmentsFromEFElement(Vertices: {Classes.Vertex}, EFElement: Classes.EFElement)
-	local VerticesInEFElement = TableFunctions.GetVertexFromEFElement(Vertices, EFElement)
+	local VerticesInEFElement = TableFunctions.GetVerticesFromEFElement(Vertices, EFElement)
 	local VertexAttachments = TableFunctions.FindDatasFromElements(VerticesInEFElement, "VertexAttachment")
 	
 	return VertexAttachments

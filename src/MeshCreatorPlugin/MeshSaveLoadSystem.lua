@@ -24,9 +24,12 @@ function SaveLoadSystem.Save(MeshCreator)
 		VertexSaveData.Parent = nil
 		VertexSaveData.VertexUV = {VertexSaveData.VertexUV.X, VertexSaveData.VertexUV.Y}
 		VertexSaveData.VA_Position = {Vertex.VertexAttachment.Position.X, Vertex.VertexAttachment.Position.Y, Vertex.VertexAttachment.Position.Z}
-		VertexSaveData.VA_Normal = {Vertex.VertexAttachment.Axis.X, Vertex.VertexAttachment.Axis.Y, Vertex.VertexAttachment.Axis.Z}
 		VertexSaveData.VertexAttachment = nil
 		
+		for index, vertexNormal: Vector3 in VertexSaveData.VertexNormals do
+			VertexSaveData.VertexNormals[index] = {vertexNormal.X, vertexNormal.Y, vertexNormal.Z}
+		end
+
 		table.insert(SaveData.Vertices, VertexSaveData)
 	end
 
@@ -72,7 +75,10 @@ function SaveLoadSystem.LoadMeshSaveFile(MeshPart: MeshPart)
 			for _, Vertex: Classes.Vertex in SaveData.Vertices do
 				Vertex.VertexUV = Vector2.new(Vertex.VertexUV[1], Vertex.VertexUV[2])
 				Vertex.VA_Position = Vector3.new(Vertex.VA_Position[1], Vertex.VA_Position[2], Vertex.VA_Position[3])
-				Vertex.VA_Normal = Vector3.new(Vertex.VA_Normal[1], Vertex.VA_Normal[2], Vertex.VA_Normal[3])
+
+				for index, vertexNormal: {} in Vertex.VertexNormals do
+					Vertex.VertexNormals[index] = Vector3.new(vertexNormal[1], vertexNormal[2], vertexNormal[3])
+				end
 			end
 			
 			return SaveData

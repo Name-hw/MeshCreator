@@ -1,4 +1,3 @@
-local LocalizationService = game:GetService("LocalizationService")
 local MeshFunctions = {}
 MeshFunctions.__index = MeshFunctions
 
@@ -8,13 +7,12 @@ local TableFunctions = require(Root.TableFunctions)
 local lib = Root.lib
 --local Table = require(lib.Table)
 
-function MeshFunctions.CreateVertexAttachment(MeshPart, VP, VN)
+function MeshFunctions.CreateVertexAttachment(MeshPart, VP)
 	local VA = Instance.new("Attachment") --VertexAttachment
 			VA.Visible = true
 			VA.Archivable = false
 			VA.Name = "VertexAttachment"
 			VA.Position = VP
-			VA.Axis = VN or Vector3.zero
 			VA.Parent = MeshPart
 	return VA
 end
@@ -24,32 +22,53 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 		local EMVIDs = self.EM:GetVertices() --EditableMeshVertexIDs
 		local EMTIDs = self.EM:GetTriangles() --EditableMeshTriangleIDs
 
-		for _, vertexID in EMVIDs do
-			local VertexPosition = self.EM:GetPosition(vertexID)
-			local VertexNormal = self.EM:GetVertexNormal(vertexID)
-			
-			local VertexClass: Classes.Vertex = Classes.new("Vertex", {
-				ID = vertexID,
-				Parent = self.Mesh,
-				VertexUV = self.EM:GetUV(vertexID),
-				VA_Position = VertexPosition * self.Mesh.VA_Offset,
-				VA_Normal = VertexNormal
-			})
+		for _, EMVertexID in EMVIDs do
+			local VertexPosition = self.EM:GetPosition(EMVertexID)
+			local VertexNormal = self.EM:GetVertexNormal(EMVertexID)
+			local IsVertexExists = false
 
-			self.Mesh.Vertices[vertexID] = VertexClass
+			for _, Vertex: Classes.Vertex in self.Mesh.Vertices do
+				if Vertex.VA_Position == VertexPosition * self.Mesh.VA_Offset then
+					IsVertexExists = true
+
+					table.insert(Vertex.EMVertexIDs, EMVertexID)
+					table.insert(Vertex.VertexNormals, VertexNormal)
+				end
+			end
+
+			if not IsVertexExists then
+				local VertexClass: Classes.Vertex = Classes.new("Vertex", {
+					ID = #self.Mesh.Vertices + 1,
+					Parent = self.Mesh,
+					EMVertexIDs = {EMVertexID},
+					VertexNormals = {VertexNormal},
+					VertexUV = self.EM:GetUV(EMVertexID),
+					VA_Position = VertexPosition * self.Mesh.VA_Offset
+				})
+				
+				table.insert(self.Mesh.Vertices, VertexClass)
+			end
 		end
 
-		for _, triangleID in EMTIDs do
-			local TVIDs = table.pack(self.EM:GetTriangleVertices(triangleID)) --TriangleVertexIDs
+		for _, EMTriangleID in EMTIDs do
+			local EMTVIDs = table.pack(self.EM:GetTriangleVertices(EMTriangleID)) --EditableMesh TriangleVertexIDs
+			local TVIDs = {} --TriangleVertexIDs
 			local MeshFace = {}
 			
+			for _, EMTriangleVertexID in ipairs(EMTVIDs) do
+				local TriangleVertexID = TableFunctions.GetVertexIDByEMVertexID(self.Mesh.Vertices, EMTriangleVertexID)
+
+				table.insert(TVIDs, TriangleVertexID)
+			end
+
 			local TriangleClass: Classes.Triangle = Classes.new("Triangle", {
-				ID = triangleID,
+				ID = EMTriangleID,
 				Parent = self.Mesh,
-				VertexIDs = TVIDs
+				VertexIDs = TVIDs,
+				EMVertexIDs = EMTVIDs,
 			})
 			
-			self.Mesh.Triangles[triangleID] = TriangleClass
+			self.Mesh.Triangles[EMTriangleID] = TriangleClass
 			
 			--[[
 			for _, triangleVertexID in ipairs(TVIDs) do
@@ -70,7 +89,10 @@ end
    
 function MeshFunctions:SetVertexPosition(Vertex: Classes.Vertex, VA_Position)
 	Vertex.VA_Position = VA_Position
-	self.EM:SetPosition(Vertex.ID, VA_Position / self.Mesh.VA_Offset)
+	
+	for _, vertexID in Vertex.EMVertexIDs do
+		self.EM:SetPosition(vertexID, VA_Position / self.Mesh.VA_Offset)
+	end
 end
 
 function MeshFunctions:AddVertex(vertexPosition: Vector3)
@@ -90,14 +112,15 @@ function MeshFunctions:AddVertex(vertexPosition: Vector3)
 end
 
 function MeshFunctions:AddVertexByVertexAttachmentPosition(vertexAttachmentPosition: Vector3)
-	local VertexID = self.EM:AddVertex(vertexAttachmentPosition / self.Mesh.VA_Offset)
+	local EMVertexID = self.EM:AddVertex(vertexAttachmentPosition / self.Mesh.VA_Offset)
 	
 	local VertexClass: Classes.Vertex = Classes.new("Vertex", {
-		ID = VertexID,
+		ID = #self.Mesh.Vertices + 1,
 		Parent = self.Mesh,
+		EMVertexIDs = {EMVertexID},
+		VertexNormals = {Vector3.zero},
 		VertexUV = Vector3.zero,
 		VA_Position = vertexAttachmentPosition,
-		VA_Normal = Vector3.zero
 	})
 	
 	table.insert(self.Mesh.Vertices, VertexClass)
@@ -158,22 +181,25 @@ end
 
 function MeshFunctions:AddTriangleByVertexAttachmentPositions(vertexAttachmentPositions: {Vector3})
 	local TVIDs = {} -- TrinagleVertexIDs
+	local EMTVIDs = {} -- EditableMesh TrinagleVertexIDs
 	local TVAs = {} -- TrinagleVertexAttachments
 
 	for _, vertexAttachmentPosition in vertexAttachmentPositions do
 		local Vertex: Classes.Vertex = self:AddVertexByVertexAttachmentPosition(vertexAttachmentPosition)
 
 		table.insert(TVIDs, Vertex.ID)
+		table.insert(EMTVIDs, Vertex.ID)
 		table.insert(TVAs, Vertex.VertexAttachment)
 	end
 
-	local TriangleID = self.EM:AddTriangle(table.unpack(TVIDs))
+	local TriangleID = self.EM:AddTriangle(table.unpack(EMTVIDs))
 
 	local TriangleClass: Classes.Triangle = Classes.new("Triangle", {
 		ID = TriangleID,
 		Parent = self.Mesh,
+		VertexIDs = TVIDs,
+		EMVertexIDs = EMTVIDs,
 		VertexAttachments = TVAs,
-		VertexIDs = TVIDs
 	})
 	
 	self.Mesh.Triangles[TriangleID] = TriangleClass

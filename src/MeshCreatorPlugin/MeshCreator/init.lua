@@ -46,45 +46,65 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 	
 	if MeshSaveFile then
 		local newVertexIDs = {}
+		local newEMVertexIDsArray = {}
 		
 		if self.MeshPart:FindFirstChildOfClass("EditableMesh") then
 			self.MeshPart:FindFirstChildOfClass("EditableMesh"):Destroy()
 		end
 		
 		for _, Vertex: Classes.Vertex in MeshSaveFile.Vertices do
+			local VertexNormals = Vertex.VertexNormals
 			local VertexUV = Vertex.VertexUV
 			local VertexPosition = Vertex.VA_Position / self.Mesh.VA_Offset
-			local VN = Vertex.VA_Normal
-			local newVertexID = self.EM:AddVertex(VertexPosition)
+			local newEMVertexIDs = {}
+
+			for i = 1, #Vertex.EMVertexIDs do
+				table.insert(newEMVertexIDs, self.EM:AddVertex(VertexPosition))
+			end
 			
 			local VertexClass: Classes.Vertex = Classes.new("Vertex", {
-				ID = newVertexID,
+				ID = #self.Mesh.Vertices + 1,
 				Parent = self.Mesh,
+				EMVertexIDs = newEMVertexIDs,
+				VertexNormals = VertexNormals,
 				VertexUV = Vertex.VertexUV,
-				VA_Position = Vertex.VA_Position,
-				VA_Normal = VN
+				VA_Position = Vertex.VA_Position
 			})
-			
-			self.EM:SetVertexNormal(newVertexID, VN)
-			self.EM:SetUV(newVertexID, VertexUV)
-			
-			newVertexIDs[Vertex.ID] = newVertexID
 
+			for index, newEMVertexID in newEMVertexIDs do
+				self.EM:SetVertexNormal(newEMVertexID, VertexNormals[index])
+				self.EM:SetUV(newEMVertexID, VertexUV)
+			end
+			
+			newVertexIDs[Vertex.ID] = VertexClass.ID
+
+			for index, EMVertexID in ipairs(Vertex.EMVertexIDs) do
+				newEMVertexIDsArray[EMVertexID] = newEMVertexIDs[index]
+			end
+			
 			table.insert(self.Mesh.Vertices, VertexClass)
 		end
 		
 		for _, Triangle: Classes.Triangle in MeshSaveFile.Triangles do
 			local TriangleVertexIDs = Triangle.VertexIDs
 			local newTriangleVertexIDs = {}
+			local newTriangleEMVertexIDs = {}
 			
 			for _, TriangleVertexID in ipairs(TriangleVertexIDs) do
 				table.insert(newTriangleVertexIDs, newVertexIDs[TriangleVertexID])
 			end
 			
+			for _, TriangleEMVertexID in ipairs(Triangle.EMVertexIDs) do
+				table.insert(newTriangleEMVertexIDs, newEMVertexIDsArray[TriangleEMVertexID])
+			end
+
+			local newTriangleID = self.EM:AddTriangle(table.unpack(newTriangleEMVertexIDs))
+			
 			local TriangleClass: Classes.Vertex = Classes.new("Triangle", {
-				ID = self.EM:AddTriangle(table.unpack(newTriangleVertexIDs)),
+				ID = newTriangleID,
 				Parent = self.Mesh,
-				VertexIDs = newTriangleVertexIDs
+				VertexIDs = newTriangleVertexIDs,
+				EMVertexIDs = newTriangleEMVertexIDs
 			})
 
 			table.insert(self.Mesh.Triangles, TriangleClass)
