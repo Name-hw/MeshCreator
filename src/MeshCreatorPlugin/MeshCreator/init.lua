@@ -129,18 +129,39 @@ function MeshCreator:AddPlaneMeshFromVertexIDs(vertexIDs)
 	return TriangleIDs
 end
 
-function MeshCreator:CreatePlaneMesh(width, height, offset: Vector3, normal: Vector3)
-	local VertexIDs = {
-		self.EM:AddVertex(Vector3.new(width/2, 0, height/2) + offset),
-		self.EM:AddVertex(Vector3.new(-width/2, 0, height/2) + offset),
-		self.EM:AddVertex(Vector3.new(-width/2, 0, -height/2) + offset),
-		self.EM:AddVertex(Vector3.new(width/2, 0, -height/2) + offset)
-	}
-	local TriangleIDs = self:AddPlaneMeshFromVertexIDs(VertexIDs)
-	
-	for _, vertexID in VertexIDs do
-		self.EM:SetVertexNormal(vertexID, normal)
+function MeshCreator:CreatePlaneMesh(width: number, height: number, orientation: Vector3, localUp: number, offset: Vector3)
+	local OffsetCFrame = CFrame.new(offset) * CFrame.fromEulerAnglesYXZ(math.rad(orientation.X), math.rad(orientation.Y), math.rad(orientation.Z))
+	local OffsetCFrameTable = table.pack(OffsetCFrame:GetComponents())
+	local MaxDecimalPlace: number = 0
+
+	for _, value: number in {width, height, localUp} do
+		local _, FractionalPart = math.modf(value)
+		local DecimalPlace = 0
+
+		if FractionalPart ~= 0 then
+			DecimalPlace = #(tostring(value):split(".")[2])
+		end
+
+		if MaxDecimalPlace < DecimalPlace then
+			MaxDecimalPlace = DecimalPlace
+		end
 	end
+	
+	for index, value in pairs(OffsetCFrameTable) do
+		OffsetCFrameTable[index] = math.round(value * 10^MaxDecimalPlace)/10^MaxDecimalPlace
+	end
+
+	OffsetCFrame = CFrame.new(table.unpack(OffsetCFrameTable))
+
+	local VertexIDs = {
+		self.EM:AddVertex((OffsetCFrame * Vector3.new(width/2, localUp, height/2))),
+		self.EM:AddVertex((OffsetCFrame * Vector3.new(-width/2, localUp, height/2))),
+		self.EM:AddVertex((OffsetCFrame * Vector3.new(-width/2, localUp, -height/2))),
+		self.EM:AddVertex((OffsetCFrame * Vector3.new(width/2, localUp, -height/2)))
+	}
+	
+	--local TriangleIDs = self:AddPlaneMeshFromVertexIDs(VertexIDs)
+	self:AddPlaneMeshFromVertexIDs(VertexIDs)
 	
 	local newPlaneMesh: Classes.CustomMesh = {
 		MeshID = 1,
@@ -153,12 +174,7 @@ function MeshCreator:CreatePlaneMesh(width, height, offset: Vector3, normal: Vec
 end
 
 function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
-	local HalfScale = scale/2
-	local HalfScaleX = HalfScale.X
-	local HalfScaleY = HalfScale.Y
-	local HalfScaleZ = HalfScale.Z
-	local VertexIDs = {}
-	
+	--[[
 	local VertexPositions = {
 		Vector3.new(HalfScaleX, HalfScaleY, HalfScaleZ) + offset,
 		Vector3.new(-HalfScaleX, HalfScaleY, HalfScaleZ) + offset,
@@ -180,13 +196,21 @@ function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
 	self:AddPlaneMeshFromVertexIDs({VertexIDs[2], VertexIDs[1], VertexIDs[8], VertexIDs[7]}) --Back
 	self:AddPlaneMeshFromVertexIDs({VertexIDs[1], VertexIDs[4], VertexIDs[5], VertexIDs[8]}) --Right
 	self:AddPlaneMeshFromVertexIDs({VertexIDs[3], VertexIDs[2], VertexIDs[7], VertexIDs[6]}) --Left
-	
+	]]
 	--local TriangleIDs = self:AddTriangles(VertexIDs)
 	--[[
 	for position, vertexID in VertexIDs do
 		--self.EM:SetVertexNormal(vertexID, VertexPositions[position].Unit)
 	end
 	]]
+
+	self:CreatePlaneMesh(scale.X, scale.Z, Vector3.new(0, 0, 0), scale.Y/2, offset) --Top
+	self:CreatePlaneMesh(scale.X, scale.Z, Vector3.new(0, 0, 180), scale.Y/2, offset) --Bottom
+	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(-90, -180, 0), scale.Z/2, offset) --Back
+	self:CreatePlaneMesh(scale.X, scale.Y, Vector3.new(-90, 0, 0), scale.Z/2, offset) --Front
+	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(-90, -90, 0), scale.X/2, offset) --Left
+	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(-90, 90, 0), scale.X/2, offset) --Right
+
 	local newCubeMesh: Classes.CustomMesh = {
 		MeshID = 1,
 		MeshType = Enums.MeshType.Cube,
