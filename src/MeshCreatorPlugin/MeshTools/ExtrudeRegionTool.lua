@@ -63,31 +63,17 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
         for tablePosition, vertexAttachment: Attachment in ExtrudeRegionTool.ExtrudedTriangle.VertexAttachments do
             vertexAttachment.Position = OriginalVertexAttachments[tablePosition].Position + OriginalTriangleModelCFrame.RightVector * distance
         end
-
-        for tablePosition, Vertex: Classes.Vertex in ExtrudedVertices do
-            local VA: Attachment = Vertex.VertexAttachment
-            local OriginalVertexAttachment
-            
-            if tablePosition == 1 or tablePosition == 6 then
-                OriginalVertexAttachment = OriginalVertexAttachments[1]
-            elseif tablePosition == 2 or tablePosition == 3 then
-                OriginalVertexAttachment = OriginalVertexAttachments[2]
-            elseif tablePosition == 4 or tablePosition == 5 then
-                OriginalVertexAttachment = OriginalVertexAttachments[3]
-            end
-
-            VA.Position = OriginalVertexAttachment.Position + OriginalTriangleModelCFrame.RightVector * distance
-        end
     else
         IsExtruded = true
         
+        local TVs = TableFunctions.GetVerticesFromEFElement(MeshCreator.Mesh.Vertices, ExtrudeRegionTool.SelectedTriangle) --TriangleVertices
         local TVAPositions = {} --TriangleVertexAttachmentPositions
         
         for _, vertexAttachment in ExtrudeRegionTool.SelectedTriangle.VertexAttachments do
             table.insert(TVAPositions, vertexAttachment.Position)
         end
         
-        ExtrudeRegionTool.ExtrudedTriangle = MeshCreator:AddTriangleByVertexAttachmentPositions(TVAPositions)
+        ExtrudeRegionTool.ExtrudedTriangle, ExtrudedVertices = MeshCreator:AddTriangleByVertexAttachmentPositions(TVAPositions)
         ExtrudeRegionTool.ArrowGizmo.Adornee = ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model.TriangleMesh
         --ExtrudeRegionTool.SphereGizmo.Adornee = ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model.TriangleMesh
         OriginalTriangleModelCFrame = ExtrudeRegionTool.SelectedTriangle.Triangle3D.Model:GetPivot()
@@ -97,43 +83,11 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
         MeshCreator.MeshGizmo:DrawLineFromTriangle(ExtrudeRegionTool.ExtrudedTriangle)
 
         for i = 1, 3, 1 do
-            local VAPositions: {Vector3} = {} --VertexAttachmentPositions
-
-            if i < 3 then
-                VAPositions = {
-                    TVAPositions[i],
-                    TVAPositions[i + 1],
-                    TVAPositions[i + 1],
-                    TVAPositions[i]
-                }
+            if i ~= 3 then
+                MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[i + 1], TVs[i + 1], TVs[i]})
             else
-                VAPositions = {
-                    TVAPositions[3],
-                    TVAPositions[1],
-                    TVAPositions[1],
-                    TVAPositions[3]
-                }
+                MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[1], TVs[1], TVs[i]})
             end
-
-            local Vertices: {Classes.Vertex} = {}
-
-            for _, VAPosition in VAPositions do
-                local Vertex: Classes.Vertex = MeshCreator:AddVertexByVertexAttachmentPosition(VAPosition)
-                --Vertex:SetUV()
-                table.insert(Vertices, Vertex)
-            end
-            
-            local Triangle1: Classes.Triangle = MeshCreator:AddTriangleFromVertices({Vertices[1], Vertices[4], Vertices[2]})
-            local Triangle2: Classes.Triangle = MeshCreator:AddTriangleFromVertices({Vertices[3], Vertices[2], Vertices[4]})
-
-            MeshCreator.MeshGizmo:DrawLineFromVertexData(Vertices[1], Vertices[4], Vertices[2])
-            MeshCreator.MeshGizmo:DrawLineFromVertexData(Vertices[3], Vertices[2], Vertices[4])
-
-            Triangle1.Triangle3D:Set("Locked", false)
-            Triangle2.Triangle3D:Set("Locked", false)
-
-            table.insert(ExtrudedVertices, Vertices[1])
-            table.insert(ExtrudedVertices, Vertices[2])
         end
 
         ExtrudeRegionTool.SelectedTriangle:Destroy()

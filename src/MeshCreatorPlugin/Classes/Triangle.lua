@@ -4,8 +4,9 @@ TriangleClass = {
 }
 TriangleClass.__index = TriangleClass
 
-local Root = script.Parent.Parent
 local Classes = require(script.Parent)
+
+local Root = script.Parent.Parent
 local TableFunctions = require(Root.TableFunctions)
 
 function TriangleClass:Init()

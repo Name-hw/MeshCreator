@@ -4,9 +4,10 @@ VertexClass = {
 }
 VertexClass.__index = VertexClass
 
+local Classes = require(script.Parent)
+
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local Root = script.Parent.Parent
-local Classes = require(script.Parent)
 
 function VertexClass:Init()
 	local MeshCreator = self.Parent.MeshCreator
@@ -46,6 +47,16 @@ function VertexClass:SetUV(VertexUV: Vector2)
 	self.VertexUV = VertexUV
 
 	MeshCreator.EM:SetUV(VertexUV)
+end
+
+function VertexClass:AddEMVertex()
+	local MeshCreator = self.Parent.MeshCreator
+	local AddedEMVertexID = MeshCreator.EM:AddVertex(self.VA_Position / self.Parent.VA_Offset)
+
+	table.insert(self.EMVertexIDs, AddedEMVertexID)
+	table.insert(self.VertexNormals, MeshCreator.EM:GetVertexNormal(AddedEMVertexID))
+
+	return AddedEMVertexID
 end
 
 function VertexClass:Destroy()

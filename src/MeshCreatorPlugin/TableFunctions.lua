@@ -47,6 +47,14 @@ function TableFunctions.GetEFElementsByVertexID(EFElements: Classes.EFElement, v
 	return EFElementsContainingVertex
 end
 
+function TableFunctions.GetVertexFromVertexAttachment(Vertices: {Classes.Vertex}, vertexAttachment: Attachment)
+	for _, Vertex: Classes.Vertex in Vertices do
+		if Vertex.VertexAttachment == vertexAttachment then
+			return Vertex
+		end
+	end
+end
+
 function TableFunctions.GetVerticesFromEFElement(Vertices: {Classes.Vertex}, EFElement: Classes.EFElement)
 	local VerticesInEFElement: {Classes.Vertex} = {}
 	
