@@ -56,6 +56,7 @@ function SaveLoadSystem.Save(MeshCreator)
 		MeshSaveFile.Parent = MeshCreator.MeshPart
 	end
 	
+	MeshSaveFile:SetAttribute("Version", script.Parent.Version.Value)
 	MeshSaveFile:SetAttribute("Vertices", Zlib128.compress(HttpService:JSONEncode(SaveData.Vertices)))
 	MeshSaveFile:SetAttribute("Triangles", Zlib128.compress(HttpService:JSONEncode(SaveData.Triangles)))
 end
@@ -66,22 +67,44 @@ function SaveLoadSystem.LoadMeshSaveFile(MeshPart: MeshPart)
 	if MeshSaveFile then
 		local EncodedSaveData = MeshSaveFile:GetAttributes()
 		
-		if EncodedSaveData.Vertices and EncodedSaveData.Triangles then
-			local SaveData = {
-				Vertices = HttpService:JSONDecode(Zlib128.decompress(EncodedSaveData.Vertices)),
-				Triangles = HttpService:JSONDecode(Zlib128.decompress(EncodedSaveData.Triangles))
-			}
-			
-			for _, Vertex: Classes.Vertex in SaveData.Vertices do
-				Vertex.VertexUV = Vector2.new(Vertex.VertexUV[1], Vertex.VertexUV[2])
-				Vertex.VA_Position = Vector3.new(Vertex.VA_Position[1], Vertex.VA_Position[2], Vertex.VA_Position[3])
-
-				for index, vertexNormal: {} in Vertex.VertexNormals do
-					Vertex.VertexNormals[index] = Vector3.new(vertexNormal[1], vertexNormal[2], vertexNormal[3])
+		if EncodedSaveData.Version == "v0.2.5" then
+			if EncodedSaveData.Vertices and EncodedSaveData.Triangles then
+				local SaveData = {
+					Vertices = HttpService:JSONDecode(Zlib128.decompress(EncodedSaveData.Vertices)),
+					Triangles = HttpService:JSONDecode(Zlib128.decompress(EncodedSaveData.Triangles))
+				}
+				
+				for _, Vertex: Classes.Vertex in SaveData.Vertices do
+					Vertex.VertexUV = Vector2.new(Vertex.VertexUV[1], Vertex.VertexUV[2])
+					Vertex.VA_Position = Vector3.new(Vertex.VA_Position[1], Vertex.VA_Position[2], Vertex.VA_Position[3])
+	
+					for index, vertexNormal: {} in Vertex.VertexNormals do
+						Vertex.VertexNormals[index] = Vector3.new(vertexNormal[1], vertexNormal[2], vertexNormal[3])
+					end
 				end
+				
+				return SaveData
 			end
-			
-			return SaveData
+		else
+			if EncodedSaveData.Vertices and EncodedSaveData.Triangles then
+				local SaveData = {
+					Vertices = HttpService:JSONDecode(Zlib128.decompress(EncodedSaveData.Vertices)),
+					Triangles = HttpService:JSONDecode(Zlib128.decompress(EncodedSaveData.Triangles))
+				}
+				
+				for _, Vertex: Classes.Vertex in SaveData.Vertices do
+					Vertex.EMVertexIDs = {Vertex.ID}
+					Vertex.VertexUV = Vector2.new(Vertex.VertexUV[1], Vertex.VertexUV[2])
+					Vertex.VA_Position = Vector3.new(Vertex.VA_Position[1], Vertex.VA_Position[2], Vertex.VA_Position[3])
+					Vertex.VertexNormals = {Vector3.new(Vertex.VA_Normal[1], Vertex.VA_Normal[2], Vertex.VA_Normal[3])}
+				end
+				
+				for _, Triangle: Classes.Triangle in SaveData.Triangles do
+					Triangle.EMVertexIDs = Triangle.VertexIDs
+				end
+
+				return SaveData
+			end
 		end
 	end
 end

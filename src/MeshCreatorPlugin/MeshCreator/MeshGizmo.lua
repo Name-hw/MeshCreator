@@ -105,21 +105,30 @@ function MeshGizmo:DrawTriangle(Triangle: Classes.Vertex, TriangleVertexAttachme
 		TriangleDrawPreset)
 end
 
-function MeshGizmo.new(Mesh: Classes.Mesh, Settings)
+function MeshGizmo.new(Mesh: Classes.Mesh, Settings, EditorGuiHandler)
 	local self = setmetatable({}, MeshGizmo)
 	
 	self.Mesh = Mesh
 	self.Adornee = Mesh.MeshPart
 	self.Settings = Settings
+	self.EditorGuiHandler = EditorGuiHandler
 	
 	return self
 end
 
 function MeshGizmo:Create()
-	for _, Triangle: Classes.Triangle in self.Mesh.Triangles do
+	self.EditorGuiHandler.LoadingWindowHandler:SetTask("Creating edges and triangle parts", #self.Mesh.Triangles)
+
+	for i, Triangle: Classes.Triangle in self.Mesh.Triangles do
 		self:DrawLineFromTriangle(Triangle)
 		self:DrawTriangle(Triangle, Triangle.VertexAttachments)
 		Triangle.Triangle3D:Transparency(1)
+
+		self.EditorGuiHandler.LoadingWindowHandler:UpdateProgressByCurrentProgress(i)
+
+		if i % 100 == 0 then
+   			task.wait(0.1)
+ 		end
 	end
 end
 

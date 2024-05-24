@@ -8,6 +8,7 @@ local UI = Root.UI
 local EditorGui = UI.MeshCreator_EditorGui
 local HeaderHandler = require(script.HeaderHandler)
 local ToolBarHandler = require(script.ToolBarHandler)
+local LoadingWindowHandler = require(script.LoadingWindowHandler)
 
 function EditorGuiHandler.new(parent)
 	local self = setmetatable(EditorGuiHandler, {})
@@ -15,6 +16,7 @@ function EditorGuiHandler.new(parent)
 	self.EditorGui = EditorGui:Clone()
 	self.HeaderHandler = HeaderHandler.new(self.EditorGui.HeaderFrame)
 	self.ToolBarHandler = ToolBarHandler.new(self.EditorGui.ToolBarFrame)
+	self.LoadingWindowHandler = LoadingWindowHandler.new(self.EditorGui.LoadingWindowFrame)
 
 	if parent:FindFirstChild("MeshCreator_EditorGui") then
 		parent:FindFirstChild("MeshCreator_EditorGui"):Destroy()

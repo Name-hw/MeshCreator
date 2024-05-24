@@ -22,7 +22,9 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 		local EMVIDs = self.EM:GetVertices() --EditableMeshVertexIDs
 		local EMTIDs = self.EM:GetTriangles() --EditableMeshTriangleIDs
 
-		for _, EMVertexID in EMVIDs do
+		self.EditorGuiHandler.LoadingWindowHandler:SetTask("Creating vertex attachments", #EMVIDs)
+
+		for i, EMVertexID in EMVIDs do
 			local VertexPosition = self.EM:GetPosition(EMVertexID)
 			local VertexNormal = self.EM:GetVertexNormal(EMVertexID)
 			local IsVertexExists = false
@@ -48,9 +50,17 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 				
 				table.insert(self.Mesh.Vertices, VertexClass)
 			end
+			
+			self.EditorGuiHandler.LoadingWindowHandler:UpdateProgressByCurrentProgress(i)
+
+			if i % 100 == 0 then --waits 0.01 seconds every 100 attachments spawned
+   				task.wait(0.01)
+ 			end
 		end
 
-		for _, EMTriangleID in EMTIDs do
+		self.EditorGuiHandler.LoadingWindowHandler:SetTask("Loading triangle datas", #EMTIDs)
+
+		for i, EMTriangleID in EMTIDs do
 			local EMTVIDs = table.pack(self.EM:GetTriangleVertices(EMTriangleID)) --EditableMesh TriangleVertexIDs
 			local TVIDs = {} --TriangleVertexIDs
 			local MeshFace = {}
@@ -75,10 +85,18 @@ function MeshFunctions:AddVertexAttachments(MeshSaveFile)
 				table.insert(MeshFace, triangleVertexID)
 			end
 			]]
+
+			self.EditorGuiHandler.LoadingWindowHandler:UpdateProgressByCurrentProgress(i)
+
+			if i % 100 == 0 then
+   				task.wait(0.01)
+ 			end
 		end
 	end
 	
 	self.MeshGizmo:Create()
+
+	self.EditorGuiHandler.LoadingWindowHandler:Close()
 end
 
 function MeshFunctions:RemoveVertexAttachments()

@@ -167,7 +167,7 @@ PluginButton.Click:Connect(function()
 						IsMeshPartSelected = true
 						
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
-						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings)
+						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings, EditorGuiHandler)
 						PluginGui.Enabled = MeshCreator.IsPluginEnabled
 						EditorGuiHandler.EditorGui.Enabled = MeshCreator.IsPluginEnabled
 						PluginMouse.TargetFilter = SelectingObject

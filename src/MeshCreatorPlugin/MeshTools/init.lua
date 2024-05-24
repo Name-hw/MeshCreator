@@ -18,7 +18,7 @@ function MeshTools.ChangeGizmoAdornmentProperty(ToolGizmo, propertyName, propert
     ToolGizmo[propertyName] = propertyValue
 end
 
-local function CreateArrowGizmo(Adornee)
+local function CreateArrowGizmo(Adornee: BasePart)
     local ArrowGizmo = Instance.new("Handles")
     ArrowGizmo.Name = "ToolGizmoHandles"
     ArrowGizmo.Style = Enum.HandlesStyle.Movement

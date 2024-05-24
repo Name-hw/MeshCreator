@@ -15,14 +15,15 @@ local Triangle3D = require(Vendor.Triangle3D)
 local lib = Root.lib
 --local Table = require(script.Parent.lib.Table)
 
-function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Settings)
+function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Settings, EditorGuiHandler)
 	local newMeshCreator = setmetatable(MeshCreator, MeshFunctions)
 	
 	newMeshCreator.Settings = Settings
 	newMeshCreator.MeshPart = MeshPart
 	newMeshCreator.MeshPart.Locked = true
 	newMeshCreator.Mesh = Classes.new("Mesh", {ID = 1, MeshCreator = newMeshCreator, Vertices = {}, Edges = {}, Triangles = {}, MeshPart = MeshPart})
-	newMeshCreator.MeshGizmo = MeshGizmo.new(newMeshCreator.Mesh, newMeshCreator.Settings)
+	newMeshCreator.EditorGuiHandler = EditorGuiHandler
+	newMeshCreator.MeshGizmo = MeshGizmo.new(newMeshCreator.Mesh, newMeshCreator.Settings, newMeshCreator.EditorGuiHandler)
 	newMeshCreator.SelectedTriangles = {}
 	
 	if newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh") and not MeshSaveFile then
@@ -52,13 +53,15 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 			self.MeshPart:FindFirstChildOfClass("EditableMesh"):Destroy()
 		end
 		
-		for _, Vertex: Classes.Vertex in MeshSaveFile.Vertices do
+		self.EditorGuiHandler.LoadingWindowHandler:SetTask("Creating vertex attachments", #MeshSaveFile.Vertices)
+
+		for i, Vertex: Classes.Vertex in MeshSaveFile.Vertices do
 			local VertexNormals = Vertex.VertexNormals
 			local VertexUV = Vertex.VertexUV
 			local VertexPosition = Vertex.VA_Position / self.Mesh.VA_Offset
 			local newEMVertexIDs = {}
 
-			for i = 1, #Vertex.EMVertexIDs do
+			for _ = 1, #Vertex.EMVertexIDs do
 				table.insert(newEMVertexIDs, self.EM:AddVertex(VertexPosition))
 			end
 			
@@ -83,9 +86,17 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 			end
 			
 			table.insert(self.Mesh.Vertices, VertexClass)
+
+			self.EditorGuiHandler.LoadingWindowHandler:UpdateProgressByCurrentProgress(i)
+
+			if i % 100 == 0 then --waits 0.01 seconds every 100 attachments spawned
+   				task.wait(0.01)
+ 			end
 		end
 		
-		for _, Triangle: Classes.Triangle in MeshSaveFile.Triangles do
+		self.EditorGuiHandler.LoadingWindowHandler:SetTask("Loading triangle datas", #MeshSaveFile.Triangles)
+
+		for i, Triangle: Classes.Triangle in MeshSaveFile.Triangles do
 			local TriangleVertexIDs = Triangle.VertexIDs
 			local newTriangleVertexIDs = {}
 			local newTriangleEMVertexIDs = {}
@@ -108,7 +119,15 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
 			})
 
 			table.insert(self.Mesh.Triangles, TriangleClass)
+
+			self.EditorGuiHandler.LoadingWindowHandler:UpdateProgressByCurrentProgress(i)
+
+			if i % 100 == 0 then
+   				task.wait(0.01)
+ 			end
 		end
+
+		self.EditorGuiHandler.LoadingWindowHandler:Close()
 	elseif self.MeshPart.MeshId ~= "" then
 		self.EM = AssetService:CreateEditableMeshFromPartAsync(self.MeshPart)
 	else
