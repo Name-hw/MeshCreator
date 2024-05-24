@@ -4,7 +4,7 @@ local UIS = game:GetService("UserInputService")
 local Root = script.Parent.Parent
 local PluginToolbar = plugin:CreateToolbar("MeshCreator")
 local PluginButton = PluginToolbar:CreateButton(
-	"Mesh Creator", --Text that will appear below button
+	"MeshCreator " .. script.Parent.Parent.Version.Value, --Text that will appear below button
 	"MeshCreator by 396255584(ID)", --Text that will appear if you hover your mouse on button
 	"rbxassetid://15797735617" --Button icon
 )
