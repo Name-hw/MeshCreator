@@ -25,4 +25,4 @@ When forking the repository to make changes, follow these steps:
 - [Triangle3D](https://devforum.roblox.com/t/3d-triangle-from-3-points-tutorial/1251867)
 
 ---
-Visit [documentation](name-hw.github.io/MeshCreator/)
+Visit [documentation](https://name-hw.github.io/MeshCreator/)
