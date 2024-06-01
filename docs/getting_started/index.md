@@ -1,3 +1,0 @@
-MeshCreator
-
-- [Installation](/installation.md)

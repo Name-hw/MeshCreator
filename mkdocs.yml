@@ -1,0 +1,8 @@
+site_name: MeshCreator
+site_url: https://name-hw.github.io/MeshCreator
+nav:
+  - Home: index.md
+  - Tutorials:
+      tutorials/index.md
+theme:
+  name: material
