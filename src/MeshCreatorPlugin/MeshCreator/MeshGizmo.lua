@@ -93,7 +93,7 @@ function MeshGizmo:DrawLineFromTriangle(Triangle: Classes.Triangle)
 	return self
 end
 
-function MeshGizmo:DrawTriangle(Triangle: Classes.Vertex, TriangleVertexAttachments: {Attachment})
+function MeshGizmo:DrawTriangle(Triangle: Classes.Triangle, TriangleVertexAttachments: {Attachment})
 	local TVA1 = TriangleVertexAttachments[1]
 	local TVA2 = TriangleVertexAttachments[2]
 	local TVA3 = TriangleVertexAttachments[3]

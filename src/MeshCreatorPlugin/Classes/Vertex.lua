@@ -15,7 +15,7 @@ function VertexClass:Init()
 	self.VertexAttachment = MeshCreator.CreateVertexAttachment(self.Parent.MeshPart, self.VA_Position)
 	
 	local EMVertexIDs = self.EMVertexIDs
-	local VA = self.VertexAttachment
+	local VA: Attachment = self.VertexAttachment
 	local LastVAPosition: Vector3
 	local VAMovedRecording
 

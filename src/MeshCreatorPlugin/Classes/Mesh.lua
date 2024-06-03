@@ -42,7 +42,7 @@ function MeshClass:NewFaceFromVertices(vertices: {Classes.Vertex})
 	for i = 1, #vertices - 2, 1 do
 		--local TriangleVertices: {Classes.Vertex} = {vertices[i], vertices[i + 1], vertices[#vertices]}
 		local TriangleVertices: {Classes.Vertex} = {vertices[#vertices], vertices[i], vertices[i + 1]}
-		local TriangleEMVertexIDs: {number} = {AddedEMVertexIDs[i + 1], AddedEMVertexIDs[i], AddedEMVertexIDs[#vertices]}
+		local TriangleEMVertexIDs: {number} = {AddedEMVertexIDs[1], AddedEMVertexIDs[i + 1], AddedEMVertexIDs[i + 2]}
 
 		local TriangleID: number = MeshCreator.EM:AddTriangle(table.unpack(TriangleEMVertexIDs))
 
@@ -54,8 +54,8 @@ function MeshClass:NewFaceFromVertices(vertices: {Classes.Vertex})
 			VertexAttachments = TableFunctions.FindDatasFromElements(TriangleVertices, "VertexAttachment"),
 		})
 
-		MeshCreator.MeshGizmo:DrawTriangle(TriangleClass, TriangleClass.VertexAttachments)
 		--MeshCreator.MeshGizmo:DrawLineFromVertexData(TriangleVertices)
+		MeshCreator.MeshGizmo:DrawTriangle(TriangleClass, TriangleClass.VertexAttachments)
 
         TriangleClass.Triangle3D:Set("Locked", false)
 

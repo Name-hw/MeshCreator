@@ -142,8 +142,8 @@ end
 function MeshCreator:AddPlaneMeshFromVertexIDs(vertexIDs)
 	local TriangleIDs = {}
 	
-	table.insert(TriangleIDs, self.EM:AddTriangle(vertexIDs[1], vertexIDs[4], vertexIDs[2]))
-	table.insert(TriangleIDs, self.EM:AddTriangle(vertexIDs[3], vertexIDs[2], vertexIDs[4]))
+	table.insert(TriangleIDs, self.EM:AddTriangle(vertexIDs[1], vertexIDs[2], vertexIDs[3]))
+	table.insert(TriangleIDs, self.EM:AddTriangle(vertexIDs[4], vertexIDs[2], vertexIDs[1]))
 	
 	return TriangleIDs
 end
@@ -173,10 +173,10 @@ function MeshCreator:CreatePlaneMesh(width: number, height: number, orientation:
 	OffsetCFrame = CFrame.new(table.unpack(OffsetCFrameTable))
 
 	local VertexIDs = {
-		self.EM:AddVertex((OffsetCFrame * Vector3.new(width/2, localUp, height/2))),
-		self.EM:AddVertex((OffsetCFrame * Vector3.new(-width/2, localUp, height/2))),
-		self.EM:AddVertex((OffsetCFrame * Vector3.new(-width/2, localUp, -height/2))),
-		self.EM:AddVertex((OffsetCFrame * Vector3.new(width/2, localUp, -height/2)))
+		self.EM:AddVertex((OffsetCFrame * Vector3.new(-width/2, height/2, localUp))),
+		self.EM:AddVertex((OffsetCFrame * Vector3.new(width/2, -height/2, localUp))),
+		self.EM:AddVertex((OffsetCFrame * Vector3.new(width/2, height/2, localUp))),
+		self.EM:AddVertex((OffsetCFrame * Vector3.new(-width/2, -height/2, localUp))),
 	}
 	
 	--local TriangleIDs = self:AddPlaneMeshFromVertexIDs(VertexIDs)
@@ -193,42 +193,12 @@ function MeshCreator:CreatePlaneMesh(width: number, height: number, orientation:
 end
 
 function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
-	--[[
-	local VertexPositions = {
-		Vector3.new(HalfScaleX, HalfScaleY, HalfScaleZ) + offset,
-		Vector3.new(-HalfScaleX, HalfScaleY, HalfScaleZ) + offset,
-		Vector3.new(-HalfScaleX, HalfScaleY, -HalfScaleZ) + offset,
-		Vector3.new(HalfScaleX, HalfScaleY, -HalfScaleZ) + offset,
-		Vector3.new(HalfScaleX, -HalfScaleY, -HalfScaleZ) + offset,
-		Vector3.new(-HalfScaleX, -HalfScaleY, -HalfScaleZ) + offset,
-		Vector3.new(-HalfScaleX, -HalfScaleY, HalfScaleZ) + offset,
-		Vector3.new(HalfScaleX, -HalfScaleY, HalfScaleZ) + offset
-	}
-
-	for _, vertexPosition in VertexPositions do
-		table.insert(VertexIDs, self.EM:AddVertex(vertexPosition))
-	end
-
-	self:AddPlaneMeshFromVertexIDs({VertexIDs[1], VertexIDs[2], VertexIDs[3], VertexIDs[4]}) --Top
-	self:AddPlaneMeshFromVertexIDs({VertexIDs[4], VertexIDs[3], VertexIDs[6], VertexIDs[5]}) --Front
-	self:AddPlaneMeshFromVertexIDs({VertexIDs[5], VertexIDs[6], VertexIDs[7], VertexIDs[8]}) --Bottom
-	self:AddPlaneMeshFromVertexIDs({VertexIDs[2], VertexIDs[1], VertexIDs[8], VertexIDs[7]}) --Back
-	self:AddPlaneMeshFromVertexIDs({VertexIDs[1], VertexIDs[4], VertexIDs[5], VertexIDs[8]}) --Right
-	self:AddPlaneMeshFromVertexIDs({VertexIDs[3], VertexIDs[2], VertexIDs[7], VertexIDs[6]}) --Left
-	]]
-	--local TriangleIDs = self:AddTriangles(VertexIDs)
-	--[[
-	for position, vertexID in VertexIDs do
-		--self.EM:SetVertexNormal(vertexID, VertexPositions[position].Unit)
-	end
-	]]
-
-	self:CreatePlaneMesh(scale.X, scale.Z, Vector3.new(0, 0, 0), scale.Y/2, offset) --Top
-	self:CreatePlaneMesh(scale.X, scale.Z, Vector3.new(0, 0, 180), scale.Y/2, offset) --Bottom
-	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(-90, -180, 0), scale.Z/2, offset) --Back
-	self:CreatePlaneMesh(scale.X, scale.Y, Vector3.new(-90, 0, 0), scale.Z/2, offset) --Front
-	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(-90, -90, 0), scale.X/2, offset) --Left
-	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(-90, 90, 0), scale.X/2, offset) --Right
+	self:CreatePlaneMesh(scale.X, scale.Z, Vector3.new(90, 0, 0), scale.Y/2, offset) --Top
+	self:CreatePlaneMesh(scale.X, scale.Z, Vector3.new(-90, 0, 0), scale.Y/2, offset) --Bottom
+	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(0, 0, 0), scale.Z/2, offset) --Back
+	self:CreatePlaneMesh(scale.X, scale.Y, Vector3.new(0, 180, 0), scale.Z/2, offset) --Front
+	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(0, 90, 0), scale.X/2, offset) --Left
+	self:CreatePlaneMesh(scale.Z, scale.Y, Vector3.new(0, -90, 0), scale.X/2, offset) --Right
 
 	local newCubeMesh: Classes.CustomMesh = {
 		MeshID = 1,

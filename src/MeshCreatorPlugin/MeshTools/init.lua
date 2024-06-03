@@ -23,7 +23,7 @@ local function CreateArrowGizmo(Adornee: BasePart)
     ArrowGizmo.Name = "ToolGizmoHandles"
     ArrowGizmo.Style = Enum.HandlesStyle.Movement
     ArrowGizmo.Adornee = Adornee
-    ArrowGizmo.Faces = Faces.new(Enum.NormalId.Left)
+    ArrowGizmo.Faces = Faces.new(Enum.NormalId.Right)
 
     return ArrowGizmo
 end
