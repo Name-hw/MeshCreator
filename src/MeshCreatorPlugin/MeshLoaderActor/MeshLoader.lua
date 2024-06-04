@@ -30,7 +30,7 @@ function MeshLoader.LoadMeshSaveFile(MeshPart: MeshPart)
 	if MeshSaveFile then
 		local EncodedSaveData = MeshSaveFile:GetAttributes()
 
-		if EncodedSaveData.Version == "v0.2.5" then
+		if EncodedSaveData.Version == "v0.2.5" or "v0.2.6" then
 			if EncodedSaveData.Vertices and EncodedSaveData.Triangles then
 				local SaveData = {
 					Vertices = HttpService:JSONDecode(Zlib128.decompress(EncodedSaveData.Vertices)),
