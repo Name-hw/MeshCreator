@@ -6,3 +6,15 @@ nav:
       tutorials/index.md
 theme:
   name: material
+  palette:
+    scheme: slate
+    primary: black
+    accent: indigo
+  font:
+    text: Noto Sans
+  language: en
+extra:
+  version:
+    provider: mike
+    default: stable
+    alias: true

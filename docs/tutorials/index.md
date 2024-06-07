@@ -32,7 +32,6 @@ You can edit the triangle by changing Select mode to Triangle.
 You can select multiple triangles by holding down Shift.
 
 When you select a triangle, the vertices included in that triangle are also selected.
-
 You can move triangle with Roblox Studio's move tool.
 
 When you remove an triangle, the vertices included in that triangle are also removed.
@@ -47,6 +46,4 @@ You can change the select mode to determine selectable elements.
 ### Tools
 
 #### Extrude Region Tool
-To use this feature, please enable the DoubleSided property of the MeshPart.
-
 You can select a triangle and drag the arrow to extrude the triangle.
