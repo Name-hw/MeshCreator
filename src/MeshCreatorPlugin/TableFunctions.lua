@@ -75,9 +75,9 @@ function TableFunctions.FindDatasFromElements(ElementsToFind: {}, DataToFind: st
 	return Datas
 end
 
-function TableFunctions.FindVertexAttachmentsFromEFElement(Vertices: {Classes.Vertex}, EFElement: Classes.EFElement)
+function TableFunctions.FindVertexDataFromEFElement(Vertices: {Classes.Vertex}, EFElement: Classes.EFElement, DataToFind: string)
 	local VerticesInEFElement = TableFunctions.GetVerticesFromEFElement(Vertices, EFElement)
-	local VertexAttachments = TableFunctions.FindDatasFromElements(VerticesInEFElement, "VertexAttachment")
+	local VertexAttachments = TableFunctions.FindDatasFromElements(VerticesInEFElement, DataToFind)
 	
 	return VertexAttachments
 end

@@ -103,6 +103,8 @@ function MeshGizmo:DrawTriangle(Triangle: Classes.Triangle, TriangleVertexAttach
 		TVA2.WorldPosition,
 		TVA3.WorldPosition,
 		TriangleDrawPreset)
+
+	Triangle:SetTriangle3DPrimaryPart()
 end
 
 function MeshGizmo.new(Mesh: Classes.Mesh, Settings, EditorGuiHandler)

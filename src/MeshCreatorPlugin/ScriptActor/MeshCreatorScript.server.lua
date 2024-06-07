@@ -223,7 +223,7 @@ PluginButton.Click:Connect(function()
 								end
 
 								if CurrentTool == Enums.Tool.ExtrudeRegionTool and not MeshTools.IsToolEnabled then
-									MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.TriangleMesh)
+									MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.PrimaryPart								)
 								end
 							elseif CurrentMeshCreator.SelectedTriangles[1] and not IsSelectingObjectInLST and SelectingObject == CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model then
 								print("Bug?")

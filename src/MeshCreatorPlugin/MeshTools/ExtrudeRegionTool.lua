@@ -4,10 +4,8 @@ local Root = script.Parent.Parent
 local Classes = require(Root.Classes)
 local TableFunctions = require(Root.TableFunctions)
 local IsExtruded = false
-local ExtrudedVertices = {}
+local ExtrudedVertices: {Classes.Vertex} = {}
 local OriginalVertexAttachments = {}
-
-local OriginalTriangleModelCFrame
 
 --[[
 function ExtrudeRegionTool.CreateToolGizmo(Adornee: BasePart)
@@ -61,7 +59,7 @@ end
 function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
     if IsExtruded then
         for tablePosition, vertexAttachment: Attachment in ExtrudeRegionTool.ExtrudedTriangle.VertexAttachments do
-            vertexAttachment.Position = OriginalVertexAttachments[tablePosition].Position + OriginalTriangleModelCFrame.RightVector * distance
+            vertexAttachment.Position = OriginalVertexAttachments[tablePosition].Position + ExtrudeRegionTool.ExtrudedTriangle.TriangleNormal / MeshCreator.Mesh.VA_Offset * distance * 5
         end
     else
         IsExtruded = true
@@ -76,11 +74,15 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
         ExtrudeRegionTool.ExtrudedTriangle, ExtrudedVertices = MeshCreator:AddTriangleByVertexAttachmentPositions(TVAPositions)
         ExtrudeRegionTool.ArrowGizmo.Adornee = ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model.TriangleMesh
         --ExtrudeRegionTool.SphereGizmo.Adornee = ExtrudeRegionTool.ExtrudedTriangle.Triangle3D.Model.TriangleMesh
-        OriginalTriangleModelCFrame = ExtrudeRegionTool.SelectedTriangle.Triangle3D.Model:GetPivot()
         OriginalVertexAttachments = ExtrudeRegionTool.SelectedTriangle.VertexAttachments
 
         ExtrudeRegionTool.ExtrudedTriangle.Triangle3D:Set("Locked", false)
         MeshCreator.MeshGizmo:DrawLineFromTriangle(ExtrudeRegionTool.ExtrudedTriangle)
+
+        for _, Vertex: Classes.Vertex in ExtrudedVertices do
+            Vertex:SetVAPosition(Vertex.VertexAttachment.Position + ExtrudeRegionTool.ExtrudedTriangle.TriangleNormal / MeshCreator.Mesh.VA_Offset * distance)
+            print(Vertex.VertexAttachment.Position + ExtrudeRegionTool.ExtrudedTriangle.TriangleNormal / MeshCreator.Mesh.VA_Offset * distance)
+        end
 
         for i = 1, 3, 1 do
             if i ~= 3 then

@@ -143,7 +143,7 @@ function MeshCreator:AddPlaneMeshFromVertexIDs(vertexIDs)
 	local TriangleIDs = {}
 	
 	table.insert(TriangleIDs, self.EM:AddTriangle(vertexIDs[1], vertexIDs[2], vertexIDs[3]))
-	table.insert(TriangleIDs, self.EM:AddTriangle(vertexIDs[4], vertexIDs[2], vertexIDs[1]))
+	table.insert(TriangleIDs, self.EM:AddTriangle(vertexIDs[1], vertexIDs[4], vertexIDs[2]))
 	
 	return TriangleIDs
 end

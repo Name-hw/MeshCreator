@@ -40,9 +40,8 @@ function MeshClass:NewFaceFromVertices(vertices: {Classes.Vertex})
 	end
 
 	for i = 1, #vertices - 2, 1 do
-		--local TriangleVertices: {Classes.Vertex} = {vertices[i], vertices[i + 1], vertices[#vertices]}
-		local TriangleVertices: {Classes.Vertex} = {vertices[#vertices], vertices[i], vertices[i + 1]}
-		local TriangleEMVertexIDs: {number} = {AddedEMVertexIDs[1], AddedEMVertexIDs[i + 1], AddedEMVertexIDs[i + 2]}
+		local TriangleVertices: {Classes.Vertex} = {vertices[1], vertices[i + 2], vertices[i + 1]}
+		local TriangleEMVertexIDs: {number} = {AddedEMVertexIDs[1], AddedEMVertexIDs[i + 2], AddedEMVertexIDs[i + 1]}
 
 		local TriangleID: number = MeshCreator.EM:AddTriangle(table.unpack(TriangleEMVertexIDs))
 

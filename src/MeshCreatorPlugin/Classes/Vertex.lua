@@ -1,10 +1,9 @@
---Vertex Class
-VertexClass = {
+local Classes = require(script.Parent)
+
+local VertexClass: Classes.Vertex = {
 	ParentClass = script.Parent.GeometryElement
 }
 VertexClass.__index = VertexClass
-
-local Classes = require(script.Parent)
 
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local Root = script.Parent.Parent
@@ -57,6 +56,10 @@ function VertexClass:AddEMVertex()
 	table.insert(self.VertexNormals, MeshCreator.EM:GetVertexNormal(AddedEMVertexID))
 
 	return AddedEMVertexID
+end
+
+function VertexClass:SetVAPosition(position: Vector3)
+	self.VertexAttachment.Position = position
 end
 
 function VertexClass:Destroy()
