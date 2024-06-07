@@ -33,8 +33,7 @@ function TriangleClass:Init()
 	end
 
 	local VAs: {Attachment} = self.VertexAttachments
-
-	task.wait()
+	
 	self:UpdateTriangleNormal()
 
 	local function OnChanged(propertyName)
@@ -68,9 +67,6 @@ function TriangleClass:SetTriangle3DPrimaryPart()
 	local TransformedTriangleNormal1: Vector3 = ((self.Parent.MeshPart.CFrame:ToObjectSpace(self.Triangle3D.Wedge1.CFrame)):VectorToObjectSpace(self.TriangleNormal))
 	local TransformedTriangleNormal2: Vector3 = ((self.Parent.MeshPart.CFrame:ToObjectSpace(self.Triangle3D.Wedge2.CFrame)):VectorToObjectSpace(self.TriangleNormal))
 
-	print(self.Triangle3D.Wedge1.CFrame, self.TriangleNormal)
-	print(getMaxAbsComponent(TransformedTriangleNormal1))
-	print(getMaxAbsComponent(TransformedTriangleNormal2))
 	if getMaxAbsComponent(TransformedTriangleNormal1) > 0 then
 		self.Triangle3D.Model.PrimaryPart = self.Triangle3D.Wedge1
 	elseif getMaxAbsComponent(TransformedTriangleNormal2) > 0 then

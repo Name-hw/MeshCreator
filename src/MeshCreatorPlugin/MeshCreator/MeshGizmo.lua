@@ -8,16 +8,15 @@ local TableFunctions = require(Root.TableFunctions)
 local Vendor = Root.Vendor
 local Triangle3D = require(Vendor.Triangle3D)
 local EdgeGizmoFolder = CoreGui:FindFirstChild("MeshCreator_EdgeGizmoFolder") or Instance.new("Folder", CoreGui)
-local TriangleGizmoFolder = workspace.Camera:FindFirstChild("MeshCreator_TriangleGizmoFolder") or Instance.new("Folder", workspace.Camera)
+local TriangleGizmoFolder: Folder
 
 EdgeGizmoFolder.Name = "MeshCreator_EdgeGizmoFolder"
-TriangleGizmoFolder.Name = "MeshCreator_TriangleGizmoFolder"
 
 local TriangleDrawPreset = {
 	build = true, -- Build?
 	render = true, -- Render?
 	draw = true, -- Draw? requires "build" and "render"
-	parent = TriangleGizmoFolder -- Parent? requires "build"
+	--parent = TriangleGizmoFolder -- Parent? requires "build"
 }
 
 function MeshGizmo:CreateEdgeAdornment(Origin, End)
@@ -114,6 +113,12 @@ function MeshGizmo.new(Mesh: Classes.Mesh, Settings, EditorGuiHandler)
 	self.Adornee = Mesh.MeshPart
 	self.Settings = Settings
 	self.EditorGuiHandler = EditorGuiHandler
+
+	TriangleGizmoFolder = Instance.new("Folder", workspace.Camera)
+	TriangleGizmoFolder.Name = "MeshCreator_TriangleGizmoFolder"
+	TriangleGizmoFolder.Archivable = false
+	
+	TriangleDrawPreset.parent = TriangleGizmoFolder
 	
 	return self
 end
@@ -137,6 +142,8 @@ end
 function MeshGizmo:RemoveGizmo()
 	self:RemoveTriangleParts()
 	self:RemoveEdgeAdornments()
+
+	TriangleGizmoFolder:Destroy()
 end
 
 function MeshGizmo:RemoveEdgeAdornments()

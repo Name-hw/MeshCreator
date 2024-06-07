@@ -44,7 +44,7 @@ function MeshClass:NewFaceFromVertices(vertices: {Classes.Vertex})
 		local TriangleEMVertexIDs: {number} = {AddedEMVertexIDs[1], AddedEMVertexIDs[i + 2], AddedEMVertexIDs[i + 1]}
 
 		local TriangleID: number = MeshCreator.EM:AddTriangle(table.unpack(TriangleEMVertexIDs))
-
+		task.wait()
 		local TriangleClass: Classes.Triangle = Classes.new("Triangle", {
 			ID = TriangleID,
 			Parent = self,

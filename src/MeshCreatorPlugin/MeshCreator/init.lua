@@ -126,8 +126,6 @@ function MeshCreator:CreateEditableMesh(MeshSaveFile)
    				task.wait(0.01)
  			end
 		end
-
-		self.EditorGuiHandler.LoadingWindowHandler:Close()
 	elseif self.MeshPart.MeshId ~= "" then
 		self.EM = AssetService:CreateEditableMeshFromPartAsync(self.MeshPart)
 	else

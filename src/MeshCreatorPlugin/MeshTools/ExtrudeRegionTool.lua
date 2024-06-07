@@ -81,7 +81,6 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
 
         for _, Vertex: Classes.Vertex in ExtrudedVertices do
             Vertex:SetVAPosition(Vertex.VertexAttachment.Position + ExtrudeRegionTool.ExtrudedTriangle.TriangleNormal / MeshCreator.Mesh.VA_Offset * distance)
-            print(Vertex.VertexAttachment.Position + ExtrudeRegionTool.ExtrudedTriangle.TriangleNormal / MeshCreator.Mesh.VA_Offset * distance)
         end
 
         for i = 1, 3, 1 do

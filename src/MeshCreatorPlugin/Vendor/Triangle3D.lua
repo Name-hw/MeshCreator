@@ -70,7 +70,6 @@ end
 function Triangle3D:Build()
 	local Model = Instance.new("Model")
 	Model.Name = "TriangleModel"
-	Model.Archivable = false
 	
 	local wedge1 = TriangleMesh:Clone()
 	wedge1.CastShadow = false
