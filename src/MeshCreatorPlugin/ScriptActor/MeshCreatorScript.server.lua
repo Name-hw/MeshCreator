@@ -63,6 +63,8 @@ local function PluginExit()
 	if CurrentMeshCreator then
 		IsMeshPartSelected = false
 		PluginGui.Enabled = false
+		EditorGuiHandler.HeaderHandler.HeaderFrame.Visible = false
+		EditorGuiHandler.ToolBarHandler.ToolBarFrame.Visible = false
 		EditorGuiHandler.EditorGui.Enabled = false
 		PluginMouse.TargetFilter = nil
 		plugin:Deactivate()
@@ -168,7 +170,6 @@ PluginButton.Click:Connect(function()
 						
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
 						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings, EditorGuiHandler)
-						PluginGui.Enabled = MeshCreator.IsPluginEnabled
 						EditorGuiHandler.EditorGui.Enabled = MeshCreator.IsPluginEnabled
 						PluginMouse.TargetFilter = SelectingObject
 						
@@ -180,6 +181,10 @@ PluginButton.Click:Connect(function()
 						
 						CurrentMeshCreator:AddVertexAttachments(MeshSaveFile)
 						
+						PluginGui.Enabled = MeshCreator.IsPluginEnabled
+						EditorGuiHandler.HeaderHandler.HeaderFrame.Visible = MeshCreator.IsPluginEnabled
+						EditorGuiHandler.ToolBarHandler.ToolBarFrame.Visible = MeshCreator.IsPluginEnabled
+
 						if Settings["GizmoVisible"] then
 							EACHCoroutine = task.spawn(EAConnectHandling)
 						end
@@ -223,7 +228,7 @@ PluginButton.Click:Connect(function()
 								end
 
 								if CurrentTool == Enums.Tool.ExtrudeRegionTool and not MeshTools.IsToolEnabled then
-									MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.PrimaryPart								)
+									MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.PrimaryPart)
 								end
 							elseif CurrentMeshCreator.SelectedTriangles[1] and not IsSelectingObjectInLST and SelectingObject == CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model then
 								print("Bug?")
