@@ -21,6 +21,29 @@ local PluginGui = plugin:CreateDockWidgetPluginGui("MeshCreatorPlugin", PluginGu
 PluginGui.Name = "MeshCreator"
 PluginGui.Title = "MeshCreator"
 local PluginMouse: PluginMouse = plugin:GetMouse()
+
+--PluginActions(MeshTools)
+local ExtrudeRegionAction: PluginAction = plugin:CreatePluginAction(
+	"ExtrudeRegionAction",
+	"MeshCreator_Extrude Region",
+	"Extrude the triangle.",
+	"rbxassetid://11295291707",
+	true
+)
+
+local NewFaceFromVerticesAction: PluginAction = plugin:CreatePluginAction(
+	"NewFaceFromVertices",
+	"MeshCreator_New Face From Vertices",
+	"Create New Face from Vertices"
+)
+
+--PluginMenus
+local VertexMenu: PluginMenu = plugin:CreatePluginMenu(
+	"VertexMenu",
+	"Extrude Region"
+)
+VertexMenu:AddAction(NewFaceFromVerticesAction)
+
 local Classes = require(Root.Classes)
 local Enums = require(Root.Enums)
 local Types = require(Root.Types)
@@ -295,10 +318,48 @@ end)
 
 UIS.InputBegan:Connect(function(input)
 	HeldInputs[input.KeyCode] = true
+
+	--[[
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then
+
+	end
+	]]
 end)
 
 UIS.InputEnded:Connect(function(input)
 	HeldInputs[input.KeyCode] = false
+
+	--[[
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then
+		if MeshCreator.IsPluginEnabled then
+			if SelectMode == Enums.SelectMode.VertexMode then
+				VertexMenu:ShowAsync()
+			end
+		end
+	end
+	]]
+end)
+
+EditorGuiHandler.HeaderHandler.VertexMenuButton.MouseButton1Click:Connect(function()
+	VertexMenu:ShowAsync()
+end)
+
+NewFaceFromVerticesAction.Triggered:Connect(function()
+	if MeshCreator.IsPluginEnabled then
+		local Vertices: {Classes.Vertex} = {}
+
+		for _, SelectingObject: Instance | Attachment in SelectingObjects do
+			assert(SelectingObject:IsA("Attachment"), "Please select only VertexAttachment.")
+
+			table.insert(Vertices, TableFunctions.GetVertexFromVertexAttachment(MeshCreator.Mesh.Vertices, SelectingObject))
+		end
+
+		local NewTriangles = MeshCreator.Mesh:NewFaceFromVertices(Vertices)
+
+		for _, Triangle: Classes.Triangle in NewTriangles do
+			Triangle.Triangle3D:Transparency(1)
+		end
+	end
 end)
 
 plugin.Deactivation:Connect(function()

@@ -85,9 +85,19 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
 
         for i = 1, 3, 1 do
             if i ~= 3 then
-                MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[i + 1], TVs[i + 1], TVs[i]})
+                local NewTriangles: {Classes.Triangle} = MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[i + 1], TVs[i + 1], TVs[i]})
+
+                for _, Triangle: Classes.Triangle in NewTriangles do
+                    Triangle.Triangle3D:Set("Locked", false)
+                    Triangle.Triangle3D:Transparency(0)
+                end
             else
-                MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[1], TVs[1], TVs[i]})
+                local NewTriangles: {Classes.Triangle} = MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[1], TVs[1], TVs[i]})
+
+                for _, Triangle: Classes.Triangle in NewTriangles do
+                    Triangle.Triangle3D:Set("Locked", false)
+                    Triangle.Triangle3D:Transparency(0)
+                end
             end
         end
 
