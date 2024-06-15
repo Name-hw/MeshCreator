@@ -23,7 +23,6 @@ function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Setting
 	newMeshCreator.MeshPart.Locked = true
 	newMeshCreator.Mesh = Classes.new("Mesh", {ID = 1, MeshCreator = newMeshCreator, Vertices = {}, Edges = {}, Triangles = {}, MeshPart = MeshPart})
 	newMeshCreator.EditorGuiHandler = EditorGuiHandler
-	newMeshCreator.MeshGizmo = MeshGizmo.new(newMeshCreator.Mesh, newMeshCreator.Settings, newMeshCreator.EditorGuiHandler)
 	newMeshCreator.SelectedTriangles = {}
 	
 	if newMeshCreator.MeshPart:FindFirstChildOfClass("EditableMesh") and not MeshSaveFile then
@@ -33,6 +32,18 @@ function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Setting
 		newMeshCreator:CreateEditableMesh(MeshSaveFile)
 	end
 	
+	newMeshCreator.Mesh.EM = newMeshCreator.EM
+
+	--[[
+	newMeshCreator.VertexAttachmentFolder = Instance.new("Folder", newMeshCreator.EM)
+	newMeshCreator.VertexAttachmentFolder.Name = "VertexAttachmentFolder"
+	]]
+
+	newMeshCreator.TriangleGizmoFolder = Instance.new("Folder", newMeshCreator.EM)
+	newMeshCreator.TriangleGizmoFolder.Name = "TriangleGizmoFolder"
+
+	newMeshCreator.MeshGizmo = MeshGizmo.new(newMeshCreator.Mesh, newMeshCreator.Settings, newMeshCreator.EditorGuiHandler)
+
 	return newMeshCreator
 end
 

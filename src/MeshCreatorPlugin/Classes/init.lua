@@ -10,6 +10,7 @@ export type GeometryElement = {
 export type Mesh = GeometryElement & {
 	Name: string,
 	MeshCreator: {},
+	EM: EditableMesh,
 	Vertices: {Vertex},
 	Egdes: {Edge},
 	Triangles: {Triangle},

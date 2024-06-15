@@ -7,13 +7,13 @@ local TableFunctions = require(Root.TableFunctions)
 local lib = Root.lib
 --local Table = require(lib.Table)
 
-function MeshFunctions.CreateVertexAttachment(MeshPart, VP)
+function MeshFunctions.CreateVertexAttachment(parent: Instance, VP: Vector3)
 	local VA = Instance.new("Attachment") --VertexAttachment
 			VA.Visible = true
 			VA.Archivable = false
 			VA.Name = "VertexAttachment"
 			VA.Position = VP
-			VA.Parent = MeshPart
+			VA.Parent = parent
 	return VA
 end
 

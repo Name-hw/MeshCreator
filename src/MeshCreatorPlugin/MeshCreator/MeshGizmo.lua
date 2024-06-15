@@ -113,11 +113,8 @@ function MeshGizmo.new(Mesh: Classes.Mesh, Settings, EditorGuiHandler)
 	self.Adornee = Mesh.MeshPart
 	self.Settings = Settings
 	self.EditorGuiHandler = EditorGuiHandler
-
-	TriangleGizmoFolder = Instance.new("Folder", workspace.Camera)
-	TriangleGizmoFolder.Name = "MeshCreator_TriangleGizmoFolder"
-	TriangleGizmoFolder.Archivable = false
 	
+	TriangleGizmoFolder = Mesh.EM:FindFirstChild("TriangleGizmoFolder")
 	TriangleDrawPreset.parent = TriangleGizmoFolder
 	
 	return self

@@ -194,7 +194,7 @@ PluginButton.Click:Connect(function()
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
 						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings, EditorGuiHandler)
 						EditorGuiHandler.EditorGui.Enabled = MeshCreator.IsPluginEnabled
-						PluginMouse.TargetFilter = SelectingObject
+						--PluginMouse.TargetFilter = SelectingObject
 						
 						CurrentMeshCreator.MeshPart:SetAttribute("EditedByMeshCreator", true)
 						
@@ -236,7 +236,7 @@ PluginButton.Click:Connect(function()
 									Selection:Set(Instance)
 									MeshTools.Disable()
 								end
-							elseif SelectingObject.Parent == workspace.Camera.MeshCreator_TriangleGizmoFolder then
+							elseif SelectingObject.Parent == MeshCreator.EM:FindFirstChild("TriangleGizmoFolder") then
 								IsTriangleSelected = true
 
 								if CurrentMeshCreator.LastSelectedTriangle and SelectingObject ~= CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model and not HeldInputs[Enum.KeyCode.LeftShift] then
