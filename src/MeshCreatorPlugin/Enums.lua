@@ -25,12 +25,10 @@ Enums.SelectMode = {
 }
 
 Enums.Tool = {
-	--[[]
 	AddVertexTool = {
-		Value = 1,
+		Value = 0,
 		EnumType = Enums.Tool
 	}::CEnumItem,
-	]]
 	ExtrudeRegionTool = {
 		Value = 1,
 		EnumType = Enums.Tool

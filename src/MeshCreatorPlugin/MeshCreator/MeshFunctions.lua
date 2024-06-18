@@ -114,14 +114,15 @@ function MeshFunctions:SetVertexPosition(Vertex: Classes.Vertex, VA_Position)
 end
 
 function MeshFunctions:AddVertex(vertexPosition: Vector3)
-	local VertexID = self.EM:AddVertex(vertexPosition)
+	local EMVertexID = self.EM:AddVertex(vertexPosition)
 	
 	local VertexClass: Classes.Vertex = Classes.new("Vertex", {
-		ID = VertexID,
+		ID = #self.Mesh.Vertices + 1,
 		Parent = self.Mesh,
+		EMVertexIDs = {EMVertexID},
+		VertexNormals = {self.EM:GetVertexNormal(EMVertexID)},
 		VertexUV = Vector3.zero,
 		VA_Position = vertexPosition * self.Mesh.VA_Offset,
-		VA_Normal = Vector3.zero
 	})
 	
 	table.insert(self.Mesh.Vertices, VertexClass)
@@ -165,7 +166,7 @@ function MeshFunctions:AddVertexByVertexAttachmentPosition(vertexAttachmentPosit
 end
 
 function MeshFunctions:AddVertexByWorldPosition(worldPosition: Vector3)
-	local VertexPosition = worldPosition - self.MeshPart.Position / self.Mesh.VA_Offset
+	local VertexPosition = (worldPosition - self.MeshPart.Position) / self.Mesh.VA_Offset
 	
 	return self:AddVertex(VertexPosition)
 end

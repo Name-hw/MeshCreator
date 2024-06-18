@@ -22,25 +22,27 @@ PluginGui.Name = "MeshCreator"
 PluginGui.Title = "MeshCreator"
 local PluginMouse: PluginMouse = plugin:GetMouse()
 
---PluginActions(MeshTools)
+--PluginActions
+--[[
 local ExtrudeRegionAction: PluginAction = plugin:CreatePluginAction(
-	"ExtrudeRegionAction",
-	"MeshCreator_Extrude Region",
+	"MeshCreator_ExtrudeRegionAction",
+	"Extrude Region",
 	"Extrude the triangle.",
 	"rbxassetid://11295291707",
 	true
 )
+]]
 
 local NewFaceFromVerticesAction: PluginAction = plugin:CreatePluginAction(
-	"NewFaceFromVertices",
-	"MeshCreator_New Face From Vertices",
+	"MeshCreator_NewFaceFromVertices",
+	"New Face From Vertices",
 	"Create New Face from Vertices"
 )
 
 --PluginMenus
 local VertexMenu: PluginMenu = plugin:CreatePluginMenu(
 	"VertexMenu",
-	"Extrude Region"
+	"Vertex Menu"
 )
 VertexMenu:AddAction(NewFaceFromVerticesAction)
 
@@ -66,7 +68,7 @@ local MeshTools = require(Root.MeshTools)
 local IsMeshPartSelected = false
 local IsEdgeSelected = false
 local IsTriangleSelected = false
-local ToolBarGui, CurrentMeshCreator, SelectingObject, SelectingObjects, EACHCoroutine --EAConnectHandlingCoroutine
+local CurrentMeshCreator, SelectingObject, SelectingObjects, EACHCoroutine --EAConnectHandlingCoroutine
 local LastSelectedEA: LineHandleAdornment
 
 local SelectMode = {}
@@ -107,6 +109,12 @@ end
 
 local function SetCurrentTool(CurrentToolName)
 	CurrentTool = Enums.Tool[CurrentToolName]
+
+	--[[
+	if CurrentMeshCreator.LastSelectedTriangle then
+		MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.PrimaryPart)
+	end
+	]]
 end
 
 local function OnEAClicked(Edge: Classes.Edge)
@@ -288,10 +296,16 @@ PluginButton.Click:Connect(function()
 
 		PluginMouse.Button1Down:Connect(function()
 			if CurrentMeshCreator then
-				if PluginMouse.Target and not PluginMouse.Target.Locked and PluginMouse.Target.Parent.Name == "TriangleModel" then
-					Selection:Add({PluginMouse.Target.Parent})
+				if CurrentTool then
+					if CurrentTool == Enums.Tool.AddVertexTool then
+						CurrentMeshCreator:AddVertexByWorldPosition(PluginMouse.Hit.Position)
+					end
 				else
-					Selection:Set(Instance)
+					if PluginMouse.Target and not PluginMouse.Target.Locked and PluginMouse.Target.Parent.Name == "TriangleModel" then
+						Selection:Add({PluginMouse.Target.Parent})
+					else
+						Selection:Set(Instance)
+					end
 				end
 			end
 		end)
@@ -304,6 +318,7 @@ PluginButton.Click:Connect(function()
 			end
 		end)
 		]]
+
 		--[[
 		UIS.InputEnded:ConnectParallel(function(Input)
 			if Input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -365,6 +380,7 @@ end)
 plugin.Deactivation:Connect(function()
 	if EditorGuiHandler then
 		plugin:Deactivate()
+		MeshTools.Disable()
 		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
 	end
 end)
