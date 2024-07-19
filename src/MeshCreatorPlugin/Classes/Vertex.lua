@@ -16,13 +16,26 @@ function VertexClass:Init()
 	local EMVertexIDs = self.EMVertexIDs
 	local VA: Attachment = self.VertexAttachment
 	local LastVAPosition: Vector3
-	local VAMovedRecording
 
 	local function OnChanged(propertyName)
 		local PropertyValue = VA[propertyName]
 		
 		if propertyName == "Position" then
 			MeshCreator:SetVertexPosition(self, PropertyValue)
+
+			--[[
+			-- Try to begin a recording with a specific identifier
+			local VAMovedRecording: string? = ChangeHistoryService:TryBeginRecording("VertexAttachment moved")
+
+			-- Check if recording was successfully initiated
+			if not VAMovedRecording then
+				print(">")
+				return
+			end
+		
+			-- Finish the recording, committing the changes to the history
+			ChangeHistoryService:FinishRecording(VAMovedRecording, Enum.FinishRecordingOperation.Commit)
+			]]
 		end
 	end
 	

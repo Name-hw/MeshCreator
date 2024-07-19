@@ -82,4 +82,8 @@ function TableFunctions.FindVertexDataFromEFElement(Vertices: {Classes.Vertex}, 
 	return VertexAttachments
 end
 
+function TableFunctions.Round(number, decimalPlaces)
+    return math.round(number * 10^decimalPlaces)/10^decimalPlaces
+end
+
 return TableFunctions

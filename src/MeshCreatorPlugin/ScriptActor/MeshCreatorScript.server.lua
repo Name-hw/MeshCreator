@@ -298,6 +298,7 @@ PluginButton.Click:Connect(function()
 			if CurrentMeshCreator then
 				if CurrentTool then
 					if CurrentTool == Enums.Tool.AddVertexTool then
+						print("?")
 						CurrentMeshCreator:AddVertexByWorldPosition(PluginMouse.Hit.Position)
 					end
 				else

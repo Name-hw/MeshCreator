@@ -176,7 +176,7 @@ function MeshCreator:CreatePlaneMesh(width: number, height: number, orientation:
 	end
 	
 	for index, value in pairs(OffsetCFrameTable) do
-		OffsetCFrameTable[index] = math.round(value * 10^MaxDecimalPlace)/10^MaxDecimalPlace
+		OffsetCFrameTable[index] = TableFunctions.Round(value, MaxDecimalPlace)
 	end
 
 	OffsetCFrame = CFrame.new(table.unpack(OffsetCFrameTable))
