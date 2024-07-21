@@ -75,6 +75,7 @@ local SelectMode = {}
 local CurrentTool = {}
 local PreviousSetting: Types.Settings = {}
 local HeldInputs = {}
+local Connections: {RBXScriptConnection} = {}
 
 if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor") then
 	game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
@@ -92,6 +93,11 @@ local function PluginExit()
 		EditorGuiHandler.ToolBarHandler.ToolBarFrame.Visible = false
 		EditorGuiHandler.EditorGui.Enabled = false
 		PluginMouse.TargetFilter = nil
+
+		for _, connection: RBXScriptConnection in Connections do
+			connection:Disconnect()
+		end
+
 		plugin:Deactivate()
 		MeshSaveLoadSystem.Save(CurrentMeshCreator)
 		CurrentMeshCreator:Remove()
@@ -294,7 +300,7 @@ PluginButton.Click:Connect(function()
 			end
 		end)
 
-		PluginMouse.Button1Down:Connect(function()
+		table.insert(Connections, PluginMouse.Button1Down:Connect(function()
 			if CurrentMeshCreator then
 				if CurrentTool then
 					if CurrentTool == Enums.Tool.AddVertexTool then
@@ -309,7 +315,8 @@ PluginButton.Click:Connect(function()
 					end
 				end
 			end
-		end)
+		end))
+		
 		--[[
 		PluginMouse.DragEnter:Connect(function(instances)
 			local Object = instances[1]
