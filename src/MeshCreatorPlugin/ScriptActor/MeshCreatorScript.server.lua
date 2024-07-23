@@ -72,7 +72,7 @@ local CurrentMeshCreator, SelectingObject, SelectingObjects, EACHCoroutine --EAC
 local LastSelectedEA: LineHandleAdornment
 
 local SelectMode = {}
-local CurrentTool = {}
+local CurrentTool: Enums.UserEnumItem = {}
 local PreviousSetting: Types.Settings = {}
 local HeldInputs = {}
 local Connections: {RBXScriptConnection} = {}
@@ -114,7 +114,11 @@ local function SetSelectMode(newSelectModeName)
 end
 
 local function SetCurrentTool(CurrentToolName)
-	CurrentTool = Enums.Tool[CurrentToolName]
+	if CurrentToolName then
+		CurrentTool = Enums.Tool[CurrentToolName]
+	else
+		CurrentTool = nil
+	end
 
 	--[[
 	if CurrentMeshCreator.LastSelectedTriangle then
@@ -263,7 +267,7 @@ PluginButton.Click:Connect(function()
 								else
 									MeshCreator:SelectTriangle(SelectingObject, true)
 								end
-
+								
 								if CurrentTool == Enums.Tool.ExtrudeRegionTool and not MeshTools.IsToolEnabled then
 									MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.PrimaryPart)
 								end
@@ -302,11 +306,8 @@ PluginButton.Click:Connect(function()
 
 		table.insert(Connections, PluginMouse.Button1Down:Connect(function()
 			if CurrentMeshCreator then
-				if CurrentTool then
-					if CurrentTool == Enums.Tool.AddVertexTool then
-						print("?")
-						CurrentMeshCreator:AddVertexByWorldPosition(PluginMouse.Hit.Position)
-					end
+				if CurrentTool == Enums.Tool.AddVertexTool then
+					CurrentMeshCreator:AddVertexByWorldPosition(PluginMouse.Hit.Position)
 				else
 					if PluginMouse.Target and not PluginMouse.Target.Locked and PluginMouse.Target.Parent.Name == "TriangleModel" then
 						Selection:Add({PluginMouse.Target.Parent})
