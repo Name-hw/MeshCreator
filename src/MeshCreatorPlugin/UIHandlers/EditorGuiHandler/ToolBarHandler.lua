@@ -6,6 +6,7 @@ local Vendor = Root.Vendor
 local GuiLib = require(Vendor.GuiLib.LazyLoader)
 local GuiClasses = GuiLib.Classes
 local UI = Root.UI
+local SelectedToolButton
 
 function ToolBarHandler.new(ToolBarFrame: Frame)
 	local self = setmetatable(ToolBarHandler, {})
@@ -26,7 +27,12 @@ function ToolBarHandler.new(ToolBarFrame: Frame)
 				IsToolSelected = not IsToolSelected
 				
 				if IsToolSelected then
+					if SelectedToolButton then
+						self:DisableToolButton(SelectedToolButton)
+					end
+
 					self:EnableToolButton(toolButton)
+					SelectedToolButton = toolButton
 				else
 					self:DisableToolButton(toolButton)
 				end
