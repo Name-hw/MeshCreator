@@ -36,28 +36,30 @@ local function CalculateNormal(A, B, C): Vector3
     local AB = B - A
     local AC = C - A
 	local Normal = AB:Cross(AC).Unit:Abs()
-	--[[
-	for _, value: number in {width, height, localUp} do
-		local _, FractionalPart = math.modf(value)
-		local DecimalPlace = 0
+	local MaxDecimalPlace: number = 0
+	
+	for _, vector3Value: Vector3 in {A, B, C} do
+		for _, value: number in {vector3Value.X, vector3Value.Y, vector3Value.Z} do
+			local _, FractionalPart = math.modf(value)
+			local DecimalPlace = 0
+	
+			if FractionalPart ~= 0 then
+				DecimalPlace = #(tostring(value):split(".")[2])
+			end
 
-		if FractionalPart ~= 0 then
-			DecimalPlace = #(tostring(value):split(".")[2])
-		end
-
-		if MaxDecimalPlace < DecimalPlace then
-			MaxDecimalPlace = DecimalPlace
+			if MaxDecimalPlace < DecimalPlace then
+				MaxDecimalPlace = DecimalPlace
+			end
 		end
 	end
 	
 	local RoundedNormal = Vector3.new(
-		TableFunctions.Round(Normal.X, 1),
-		TableFunctions.Round(Normal.Y, 1),
-		TableFunctions.Round(Normal.Z, 1)
+		TableFunctions.Round(Normal.X, MaxDecimalPlace),
+		TableFunctions.Round(Normal.Y, MaxDecimalPlace),
+		TableFunctions.Round(Normal.Z, MaxDecimalPlace)
 	)
-	]]
 	
-    return Normal
+    return RoundedNormal
 end
 
 local function IsPointInTriangle(point: Vector3, prevVertex: Vector3, centerVertex: Vector3, nextVertex: Vector3)
@@ -81,7 +83,7 @@ local function IsEar(prevVertex: Vector3, centerVertex: Vector3, nextVertex: Vec
     return true
 end
 
-local function FindEar(vertexPositions: {Vector3}, vertexIndices: {Vector3})
+local function FindEar(vertexPositions: {Vector3}, vertexIndices: {number}): (number, number, number, number)
 	local VertexCount = #vertexIndices
 
     for i = 1, VertexCount do
@@ -96,9 +98,10 @@ local function FindEar(vertexPositions: {Vector3}, vertexIndices: {Vector3})
 			return i, PrevVertexIndex, CenterVertexIndex, NextVertexIndex
 		end
     end
+
+	return 0, 0, 0, 0
 end
 
--- Ear Clipping 알고리즘을 사용해 다각형을 삼각형으로 분할
 local function Triangulate(vertexPositions: {Vector3})
     local Triangles = {}
 	local VertexIndices = {}
@@ -108,7 +111,7 @@ local function Triangulate(vertexPositions: {Vector3})
     end
 
     while #VertexIndices >= 3 do
-        local EarIndex: number, PrevVertexIndex, CenterVertexIndex, NextVertexIndex = FindEar(vertexPositions, VertexIndices)
+        local EarIndex, PrevVertexIndex, CenterVertexIndex, NextVertexIndex = FindEar(vertexPositions, VertexIndices)
 		
 		if EarIndex then
 			table.insert(Triangles, {PrevVertexIndex, CenterVertexIndex, NextVertexIndex})
@@ -129,7 +132,7 @@ function MeshClass:Init()
 	end)
 end
 
-function MeshClass:SortVerticesCCW(vertices: {Classes.Vertex}): {Vector3}
+function MeshClass:SortVerticesCCW(vertices: {Classes.Vertex}): {Classes.Vertex}
     local Reference = vertices[1].VA_Position
 	
     table.sort(vertices, function(a: Classes.Vertex, b: Classes.Vertex)

@@ -83,21 +83,20 @@ function ExtrudeRegionTool.OnDragged(MeshCreator, face: Faces, distance: number)
             Vertex:SetVAPosition(Vertex.VertexAttachment.Position + ExtrudeRegionTool.ExtrudedTriangle.TriangleNormal / MeshCreator.Mesh.VA_Offset * distance)
         end
 
+        task.wait()
+
         for i = 1, 3, 1 do
+            local NewTriangles: {Classes.Triangle}
+
             if i ~= 3 then
-                local NewTriangles: {Classes.Triangle} = MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[i + 1], TVs[i + 1], TVs[i]})
-
-                for _, Triangle: Classes.Triangle in NewTriangles do
-                    Triangle.Triangle3D:Set("Locked", false)
-                    Triangle.Triangle3D:Transparency(0)
-                end
+                NewTriangles = MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[i + 1], TVs[i + 1], TVs[i]})
             else
-                local NewTriangles: {Classes.Triangle} = MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[1], TVs[1], TVs[i]})
+                NewTriangles = MeshCreator.Mesh:NewFaceFromVertices({ExtrudedVertices[i], ExtrudedVertices[1], TVs[1], TVs[i]})
+            end
 
-                for _, Triangle: Classes.Triangle in NewTriangles do
-                    Triangle.Triangle3D:Set("Locked", false)
-                    Triangle.Triangle3D:Transparency(0)
-                end
+            for _, Triangle: Classes.Triangle in NewTriangles do
+                Triangle.Triangle3D:Set("Locked", false)
+                Triangle.Triangle3D:Transparency(0)
             end
         end
 

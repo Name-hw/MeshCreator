@@ -20,7 +20,7 @@ export type Mesh = GeometryElement & {
 }
 
 export type CustomMesh = Mesh & {
-	MeshType: Enums.CEnumItem
+	MeshType: Enums.UserEnumItem
 }
 
 export type Vertex = GeometryElement & {
