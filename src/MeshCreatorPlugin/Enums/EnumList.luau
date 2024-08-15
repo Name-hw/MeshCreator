@@ -15,7 +15,7 @@ local EnumList = {
 		TriangleMode = {} :: UserEnumItem,
 		FaceMode = {} :: UserEnumItem
 	},
-	Tool = {
+	ToolType = {
 		AddVertexTool = {} :: UserEnumItem,
 		ExtrudeRegionTool = {} :: UserEnumItem,
 		

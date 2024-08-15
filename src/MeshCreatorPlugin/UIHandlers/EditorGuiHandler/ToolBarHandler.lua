@@ -6,7 +6,7 @@ local Vendor = Root.Vendor
 local GuiLib = require(Vendor.GuiLib.LazyLoader)
 local GuiClasses = GuiLib.Classes
 local UI = Root.UI
-local SelectedToolButton
+local SelectedToolButton: ImageButton | nil
 
 function ToolBarHandler.new(ToolBarFrame: Frame)
 	local self = setmetatable(ToolBarHandler, {})
@@ -16,33 +16,32 @@ function ToolBarHandler.new(ToolBarFrame: Frame)
 
 	self.ToolButtons = {}
 	
-	for _, toolButton: ImageButton? in self.ToolBarFrame.ToolListFrame:GetChildren() do
+	for _, toolButton: ImageButton in self.ToolBarFrame.ToolListFrame:GetChildren() do
 		if toolButton:IsA("ImageButton") then
-			local HintLabel: TextLabel = toolButton:FindFirstChild("HintLabel")
-			local IsToolSelected = false
+			local HintLabel: TextLabel = toolButton:FindFirstChild("HintLabel") :: TextLabel
+			toolButton:SetAttribute("IsToolSelected", false)
 
 			table.insert(self.ToolButtons, toolButton)
 			
 			local function OnActivated(inputObject: InputObject, clickCount: number)
-				IsToolSelected = not IsToolSelected
-				
-				if IsToolSelected then
-					if SelectedToolButton then
-						self:DisableToolButton(SelectedToolButton)
-					end
-
+				local IsToolButtonSelected = SelectedToolButton ~= toolButton
+				print(toolButton, SelectedToolButton)
+				if SelectedToolButton then
+					print(SelectedToolButton, "disable")
+					self:DisableToolButton(SelectedToolButton)
+				end
+				task.wait()
+				if IsToolButtonSelected then
+					print(toolButton, "enable")
 					self:EnableToolButton(toolButton)
-					SelectedToolButton = toolButton
-				else
-					self:DisableToolButton(toolButton)
 				end
 			end
 			
-			local function OnMouseEnter(inputObject: InputObject, clickCount: number)
+			local function OnMouseEnter(x: number, y: number)
 				HintLabel.Visible = true
 			end
 
-			local function OnMouseLeave(inputObject: InputObject, clickCount: number)
+			local function OnMouseLeave(x: number, y: number)
 				HintLabel.Visible = false
 			end
 
@@ -52,9 +51,9 @@ function ToolBarHandler.new(ToolBarFrame: Frame)
 		end
 	end
 
-	for _, historyButton: ImageButton? in self.ToolBarFrame.HistoryFrame:GetChildren() do
+	for _, historyButton: ImageButton in self.ToolBarFrame.HistoryFrame:GetChildren() do
 		if historyButton:IsA("ImageButton") then
-			local HintLabel: TextLabel = historyButton:FindFirstChild("HintLabel")
+			local HintLabel: TextLabel = historyButton:FindFirstChild("HintLabel") :: TextLabel
 
 			table.insert(self.ToolButtons, historyButton)
 			
@@ -70,11 +69,11 @@ function ToolBarHandler.new(ToolBarFrame: Frame)
 				end
 			end
 			
-			local function OnMouseEnter(inputObject: InputObject, clickCount: number)
+			local function OnMouseEnter(x: number, y: number)
 				HintLabel.Visible = true
 			end
 
-			local function OnMouseLeave(inputObject: InputObject, clickCount: number)
+			local function OnMouseLeave(x: number, y: number)
 				HintLabel.Visible = false
 			end
 
@@ -88,19 +87,26 @@ function ToolBarHandler.new(ToolBarFrame: Frame)
 end
 
 function ToolBarHandler:EnableToolButton(toolButton: ImageButton)
+	SelectedToolButton = toolButton
+	toolButton:SetAttribute("IsToolSelected", true)
 	toolButton.BackgroundColor3 = Color3.new(0.117647, 0.117647, 0.117647)
 	self.ToolBarFrame:SetAttribute("CurrentTool", string.gsub(toolButton.Name, "Button", ""))
 end
 
 function ToolBarHandler:DisableToolButton(toolButton: ImageButton)
+	SelectedToolButton = nil
+	toolButton:SetAttribute("IsToolSelected", false)
 	toolButton.BackgroundColor3 = Color3.new(0.196078, 0.196078, 0.196078)
-	self.ToolBarFrame:SetAttribute("CurrentTool", nil)
+	self.ToolBarFrame:SetAttribute("CurrentTool", "")
 end
 
 function ToolBarHandler:DisableAllToolButton()
 	for _, toolButton: ImageButton in self.ToolButtons do
-		self:DisableToolButton(toolButton)
+		toolButton:SetAttribute("IsToolSelected", false)
+		toolButton.BackgroundColor3 = Color3.new(0.196078, 0.196078, 0.196078)
 	end
+
+	self.ToolBarFrame:SetAttribute("CurrentTool", "")
 end
 
 return ToolBarHandler

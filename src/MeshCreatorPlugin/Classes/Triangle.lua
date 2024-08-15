@@ -1,6 +1,6 @@
 local Classes = require(script.Parent)
 
-local TriangleClass: Classes.Triangle = {
+local TriangleClass = {
 	ParentClass = script.Parent.EFElement
 }
 TriangleClass.__index = TriangleClass

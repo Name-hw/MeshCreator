@@ -1,8 +1,7 @@
---Mesh Class
-local MeshClass = {
+local Mesh = {
 	ParentClass = script.Parent.GeometryElement
 }
-MeshClass.__index = MeshClass
+Mesh.__index = Mesh
 
 local Classes = require(script.Parent)
 
@@ -124,7 +123,7 @@ local function Triangulate(vertexPositions: {Vector3})
     return Triangles
 end
 
-function MeshClass:Init()
+function Mesh:Init()
 	self.VA_Offset = SetVA_Offset(self.MeshPart)
 	
 	self.MeshPart:GetPropertyChangedSignal("Size"):Connect(function()
@@ -132,7 +131,7 @@ function MeshClass:Init()
 	end)
 end
 
-function MeshClass:SortVerticesCCW(vertices: {Classes.Vertex}): {Classes.Vertex}
+function Mesh:SortVerticesCCW(vertices: {Classes.Vertex}): {Classes.Vertex}
     local Reference = vertices[1].VA_Position
 	
     table.sort(vertices, function(a: Classes.Vertex, b: Classes.Vertex)
@@ -146,7 +145,7 @@ function MeshClass:SortVerticesCCW(vertices: {Classes.Vertex}): {Classes.Vertex}
     return vertices
 end
 
-function MeshClass:NewFaceFromVertices(vertices: {Classes.Vertex})
+function Mesh:NewFaceFromVertices(vertices: {Classes.Vertex})
 	local MeshCreator = self.MeshCreator
 	--local NewFace: Classes.Face = {}
 	local NewTriangles: {Classes.Triangle} = {}
@@ -212,4 +211,4 @@ function MeshClass:NewFaceFromVertices(vertices: {Classes.Vertex})
 	return NewTriangles
 end
 
-return MeshClass
+return Mesh

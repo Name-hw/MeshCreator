@@ -72,7 +72,6 @@ local CurrentMeshCreator, SelectingObject, SelectingObjects, EACHCoroutine --EAC
 local LastSelectedEA: LineHandleAdornment
 
 local SelectMode = {}
-local CurrentTool: Enums.UserEnumItem = {}
 local PreviousSetting: Types.Settings = {}
 local HeldInputs = {}
 local Connections: {RBXScriptConnection} = {}
@@ -93,15 +92,16 @@ local function PluginExit()
 		EditorGuiHandler.ToolBarHandler.ToolBarFrame.Visible = false
 		EditorGuiHandler.EditorGui.Enabled = false
 		PluginMouse.TargetFilter = nil
-
+		
+		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
+		task.wait()
 		for _, connection: RBXScriptConnection in Connections do
 			connection:Disconnect()
 		end
 
-		plugin:Deactivate()
 		MeshSaveLoadSystem.Save(CurrentMeshCreator)
 		CurrentMeshCreator:Remove()
-		MeshTools.Disable()
+		plugin:Deactivate()
 	end
 end
 
@@ -113,19 +113,6 @@ local function SetSelectMode(newSelectModeName)
 	end
 end
 
-local function SetCurrentTool(CurrentToolName)
-	if CurrentToolName then
-		CurrentTool = Enums.Tool[CurrentToolName]
-	else
-		CurrentTool = nil
-	end
-
-	--[[
-	if CurrentMeshCreator.LastSelectedTriangle then
-		MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.PrimaryPart)
-	end
-	]]
-end
 
 local function OnEAClicked(Edge: Classes.Edge)
 	local EA = Edge.EdgeAdornment
@@ -182,14 +169,17 @@ local function OnHeaderChanged(attributeName)
 	end
 end
 
-local function OnToolChanged(attributeName)
+local function OnToolBarChanged(attributeName: string)
 	local Attribute = EditorGuiHandler.ToolBarHandler.ToolBarFrame:GetAttribute(attributeName)
-	
+	print(attributeName, Attribute)
 	if attributeName == "CurrentTool" then
-		SetCurrentTool(Attribute)
+		if Attribute == "" then
+			MeshTools.Disable()
+		else
+			plugin:Activate(false)
+			MeshTools.Enable(CurrentMeshCreator, Enums.ToolType[Attribute], plugin:GetMouse())
+		end
 	end
-	
-	plugin:Activate(false)
 end
 
 SetSelectMode("VertexMode")
@@ -234,9 +224,9 @@ PluginButton.Click:Connect(function()
 							SetSelectMode(EditorGuiHandler.HeaderHandler.HeaderFrame:GetAttribute("SelectMode"))
 						end
 
-						SettingsHandler.SettingsFrame.AttributeChanged:Connect(OnSettingsChanged)
-						EditorGuiHandler.HeaderHandler.HeaderFrame.AttributeChanged:Connect(OnHeaderChanged)
-						EditorGuiHandler.ToolBarHandler.ToolBarFrame.AttributeChanged:Connect(OnToolChanged)
+						table.insert(Connections, SettingsHandler.SettingsFrame.AttributeChanged:Connect(OnSettingsChanged))
+						table.insert(Connections, EditorGuiHandler.HeaderHandler.HeaderFrame.AttributeChanged:Connect(OnHeaderChanged))
+						table.insert(Connections, EditorGuiHandler.ToolBarHandler.ToolBarFrame.AttributeChanged:Connect(OnToolBarChanged))
 					end
 					
 					if CurrentMeshCreator then
@@ -252,7 +242,6 @@ PluginButton.Click:Connect(function()
 							if SelectingObject.Name == "VertexAttachment" and SelectMode ~= Enums.SelectMode.VertexMode then
 								if not IsEdgeSelected and not IsSelectingObjectInLST then
 									Selection:Set(Instance)
-									MeshTools.Disable()
 								end
 							elseif SelectingObject.Parent == MeshCreator.EM:FindFirstChild("TriangleGizmoFolder") then
 								IsTriangleSelected = true
@@ -263,13 +252,8 @@ PluginButton.Click:Connect(function()
 									end
 
 									MeshCreator:SelectTriangle(SelectingObject, false)
-									MeshTools.Disable()
 								else
 									MeshCreator:SelectTriangle(SelectingObject, true)
-								end
-								
-								if CurrentTool == Enums.Tool.ExtrudeRegionTool and not MeshTools.IsToolEnabled then
-									MeshTools.Enable(CurrentMeshCreator, "ExtrudeRegionTool", CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model.PrimaryPart)
 								end
 							elseif CurrentMeshCreator.SelectedTriangles[1] and not IsSelectingObjectInLST and SelectingObject == CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model then
 								print("Bug?")
@@ -297,8 +281,6 @@ PluginButton.Click:Connect(function()
 						end
 						
 						CurrentMeshCreator.LastSelectedTriangle = nil
-
-						MeshTools.Disable()
 					end
 				end
 			end
@@ -306,14 +288,10 @@ PluginButton.Click:Connect(function()
 
 		table.insert(Connections, PluginMouse.Button1Down:Connect(function()
 			if CurrentMeshCreator then
-				if CurrentTool == Enums.Tool.AddVertexTool then
-					CurrentMeshCreator:AddVertexByWorldPosition(PluginMouse.Hit.Position)
+				if PluginMouse.Target and not PluginMouse.Target.Locked and PluginMouse.Target.Parent.Name == "TriangleModel" then
+					Selection:Add({PluginMouse.Target.Parent})
 				else
-					if PluginMouse.Target and not PluginMouse.Target.Locked and PluginMouse.Target.Parent.Name == "TriangleModel" then
-						Selection:Add({PluginMouse.Target.Parent})
-					else
-						Selection:Set(Instance)
-					end
+					Selection:Set(Instance)
 				end
 			end
 		end))
@@ -385,15 +363,15 @@ NewFaceFromVerticesAction.Triggered:Connect(function()
 		end
 	end
 end)
-
+--[[
 plugin.Deactivation:Connect(function()
 	if EditorGuiHandler then
 		plugin:Deactivate()
-		MeshTools.Disable()
+		MeshTools:Disable()
 		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
 	end
 end)
-
+]]
 plugin.Unloading:Connect(PluginExit)
 
 game.Close:Connect(PluginExit)

@@ -1,6 +1,6 @@
 local MeshTools = require(script.Parent)
 
-local ExtrudeRegionTool = {} :: MeshTools.ArrowGizmoTool
+local ExtrudeRegionTool = {} :: MeshTools.MeshTool_ArrowGizmo
 
 local Root = script.Parent.Parent
 local Classes = require(Root.Classes)
@@ -10,24 +10,25 @@ local ExtrudedVertices: {Classes.Vertex} = {}
 local ExtrudedTriangle: Classes.Triangle | nil
 local OriginalVertexAttachments = {}
 
-function ExtrudeRegionTool:OnEnabled()
-    self:CreateArrowGizmo()
+function ExtrudeRegionTool.Enable(MeshCreator, adornee)
+    ExtrudeRegionTool.MeshCreator = MeshCreator
+    MeshTools.CreateArrowGizmo(adornee)
     --MeshTools.Tool.SphereGizmo = CreateSphereGizmo(Adornee)
     --MeshTools.Tool.SphereGizmo.Parent = ToolGizmoFolder
 end
 
-function ExtrudeRegionTool:OnArrowGizmo_MouseEntered()
+function ExtrudeRegionTool.OnArrowGizmo_MouseEntered()
     
 end
 
-function ExtrudeRegionTool:OnArrowGizmo_MouseLeaved()
+function ExtrudeRegionTool.OnArrowGizmo_MouseLeaved()
     IsExtruded = false
     ExtrudedTriangle = nil
     ExtrudedVertices = {}
 end
 
-function ExtrudeRegionTool:OnArrowGizmo_Dragged(face: Enum.NormalId, distance: number)
-    local MeshCreator = self.MeshCreator
+function ExtrudeRegionTool.OnArrowGizmo_Dragged(face: Enum.NormalId, distance: number)
+    local MeshCreator = ExtrudeRegionTool.MeshCreator
 
     if IsExtruded and ExtrudedTriangle then
         for tablePosition, vertexAttachment: Attachment in ipairs(ExtrudedTriangle.VertexAttachments) do
@@ -36,17 +37,17 @@ function ExtrudeRegionTool:OnArrowGizmo_Dragged(face: Enum.NormalId, distance: n
     else
         IsExtruded = true
         
-        local TVs = TableFunctions.GetVerticesFromEFElement(MeshCreator.Mesh.Vertices, self.SelectedElement) --TriangleVertices
+        local TVs = TableFunctions.GetVerticesFromEFElement(MeshCreator.Mesh.Vertices, ExtrudeRegionTool.SelectedElement) --TriangleVertices
         local TVAPositions = {} --TriangleVertexAttachmentPositions
         
-        for _, vertexAttachment in self.SelectedElement.VertexAttachments do
+        for _, vertexAttachment in ExtrudeRegionTool.SelectedElement.VertexAttachments do
             table.insert(TVAPositions, vertexAttachment.Position)
         end
         
         ExtrudedTriangle, ExtrudedVertices = MeshCreator:AddTriangleByVertexAttachmentPositions(TVAPositions)
-        self.ArrowGizmo.Adornee = ExtrudedTriangle.Triangle3D.Model.TriangleMesh
-        --self.SphereGizmo.Adornee = ExtrudedTriangle.Triangle3D.Model.TriangleMesh
-        OriginalVertexAttachments = self.SelectedElement.VertexAttachments
+        ExtrudeRegionTool.ArrowGizmo.Adornee = ExtrudedTriangle.Triangle3D.Model.TriangleMesh
+        --ExtrudeRegionTool.SphereGizmo.Adornee = ExtrudedTriangle.Triangle3D.Model.TriangleMesh
+        OriginalVertexAttachments = ExtrudeRegionTool.SelectedElement.VertexAttachments
 
         ExtrudedTriangle.Triangle3D:Set("Locked", false)
         MeshCreator.MeshGizmo:DrawLineFromTriangle(ExtrudedTriangle)
@@ -72,16 +73,18 @@ function ExtrudeRegionTool:OnArrowGizmo_Dragged(face: Enum.NormalId, distance: n
             end
         end
 
-        self.SelectedElement:Destroy()
+        ExtrudeRegionTool.SelectedElement:Destroy()
         MeshCreator:SelectTriangle(ExtrudedTriangle.Triangle3D.Model, false)
     end
 end
 
-function ExtrudeRegionTool:OnDisabled()
+function ExtrudeRegionTool.Disable()
     print("disable")
     IsExtruded = false
     ExtrudedTriangle = nil
     ExtrudedVertices = {}
 end
+
+
 
 return ExtrudeRegionTool

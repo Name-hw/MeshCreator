@@ -43,7 +43,7 @@ export type Edge = EFElement & {
 
 export type Triangle = EFElement & {
 	Triangle3D: {},
-	TrianleNormal: Vector3
+	TriangleNormal: Vector3
 }
 
 export type Face = EFElement & {

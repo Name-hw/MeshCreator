@@ -1,7 +1,4 @@
---GeometryElement Class
-GeometryElementClass = {}
-GeometryElementClass.__index = GeometryElementClass
+local GeometryElement = {}
+GeometryElement.__index = GeometryElement
 
-local Classes = require(script.Parent)
-
-return GeometryElementClass
+return GeometryElement
