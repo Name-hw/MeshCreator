@@ -78,7 +78,6 @@ function ExtrudeRegionTool:OnArrowGizmo_Dragged(face: Enum.NormalId, distance: n
 end
 
 function ExtrudeRegionTool:OnDisabled()
-    print("disable")
     IsExtruded = false
     ExtrudedTriangle = nil
     ExtrudedVertices = {}

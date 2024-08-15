@@ -166,7 +166,7 @@ function MeshFunctions:AddVertexByVertexAttachmentPosition(vertexAttachmentPosit
 end
 
 function MeshFunctions:AddVertexByWorldPosition(worldPosition: Vector3)
-	local VertexPosition = (worldPosition - self.MeshPart.Position) / self.Mesh.VA_Offset
+	local VertexPosition = self.MeshPart.CFrame:PointToObjectSpace(worldPosition) / self.Mesh.VA_Offset
 	
 	return self:AddVertex(VertexPosition)
 end

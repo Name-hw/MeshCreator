@@ -171,11 +171,11 @@ end
 
 local function OnToolBarChanged(attributeName: string)
 	local Attribute = EditorGuiHandler.ToolBarHandler.ToolBarFrame:GetAttribute(attributeName)
-	print(attributeName, Attribute)
+	
 	if attributeName == "CurrentTool" then
-		if Attribute == "" then
+		if Attribute == "" and MeshTools.IsToolEnabled then
 			MeshTools.Disable()
-		else
+		elseif Attribute ~= "" then
 			plugin:Activate(false)
 			MeshTools.Enable(CurrentMeshCreator, Enums.ToolType[Attribute], plugin:GetMouse())
 		end

@@ -37,7 +37,6 @@ function BaseMeshTool:CreateArrowGizmo()
     self.ArrowGizmo.Style = Enum.HandlesStyle.Movement
     self.ArrowGizmo.Adornee = self.Adornee
     self.ArrowGizmo.Faces = Faces.new(Enum.NormalId.Right)
-    print("ArrowGizmo")
 end
 
 function BaseMeshTool:CreateSphereGizmo()
@@ -121,7 +120,7 @@ function BaseMeshTool:Enable(MeshCreator, pluginMouse)
     if self.ArrowGizmo :: Handles then
         table.insert(self.Connections, self.ArrowGizmo.MouseEnter:Connect(function()
             self.IsArrowGizmo_MouseEntered = true
-            print(self.ArrowGizmo)
+            
             self.ArrowGizmo.Color3 = Color3.new(1, 0.690196, 0)
             self:OnArrowGizmo_MouseEntered()
         end))

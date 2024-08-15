@@ -19,7 +19,7 @@ function AddVertexTool:OnPluginMouse_Clicked()
 end
 
 function AddVertexTool:OnDisabled()
-    print("disable")
+    
 end
 
 return AddVertexTool

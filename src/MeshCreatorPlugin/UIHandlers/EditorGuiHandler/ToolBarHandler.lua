@@ -25,14 +25,12 @@ function ToolBarHandler.new(ToolBarFrame: Frame)
 			
 			local function OnActivated(inputObject: InputObject, clickCount: number)
 				local IsToolButtonSelected = SelectedToolButton ~= toolButton
-				print(toolButton, SelectedToolButton)
+
 				if SelectedToolButton then
-					print(SelectedToolButton, "disable")
 					self:DisableToolButton(SelectedToolButton)
 				end
 				task.wait()
 				if IsToolButtonSelected then
-					print(toolButton, "enable")
 					self:EnableToolButton(toolButton)
 				end
 			end
