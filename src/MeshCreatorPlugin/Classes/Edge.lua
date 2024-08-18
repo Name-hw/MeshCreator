@@ -12,7 +12,7 @@ function EdgeClass:Init()
 
 	local function OnChanged(propertyName)
 		if propertyName == "Position" then
-			if MeshCreator.Settings["GizmoVisible"] then
+			if MeshCreator.Settings["EdgeVisible"] then
 				local Origin = self.VertexAttachments[1].Position
 				local End = self.VertexAttachments[2].Position
 				--task.synchronize()
@@ -23,7 +23,7 @@ function EdgeClass:Init()
 	end
 	
 	local function OnAncestryChanged()
-		if MeshCreator.Settings["GizmoVisible"] then
+		if MeshCreator.Settings["EdgeVisible"] then
 			table.remove(self.Parent.Edges, table.find(self.Parent.Edges, self))
 			--task.synchronize()
 			self.EdgeAdornment:Destroy()

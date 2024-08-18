@@ -1,6 +1,6 @@
 export type Settings = {
 	EA_Thickness: number,
-	GizmoVisible: boolean
+	EdgeVisible: boolean
 }
 
 return nil

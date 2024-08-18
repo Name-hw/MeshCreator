@@ -51,11 +51,11 @@ local Enums = require(Root.Enums)
 local Types = require(Root.Types)
 local Settings: Types.Settings = {
 	EA_Thickness = plugin:GetSetting("EA_Thickness"),
-	GizmoVisible = plugin:GetSetting("GizmoVisible")
+	EdgeVisible = plugin:GetSetting("EdgeVisible")
 }
 local DefaultSettings: Types.Settings = {
 	EA_Thickness = 5,
-	GizmoVisible = true
+	EdgeVisible = true
 }
 local TableFunctions = require(Root.TableFunctions)
 local MeshCreator = require(Root.MeshCreator)
@@ -140,10 +140,10 @@ local function OnSettingsChanged(attributeName)
 	
 	if Settings[attributeName] ~= PreviousSetting[attributeName] then
 		if attributeName == "EA_Thickness" then
-			if Settings["GizmoVisible"] then
+			if Settings["EdgeVisible"] then
 				CurrentMeshCreator.MeshGizmo:SetEAs_Thickness(Attribute)
 			end
-		elseif attributeName == "GizmoVisible" then
+		elseif attributeName == "EdgeVisible" then
 			if CurrentMeshCreator then
 				CurrentMeshCreator.MeshGizmo:SetEAs_Visible(Attribute)
 			end
@@ -216,7 +216,7 @@ PluginButton.Click:Connect(function()
 						EditorGuiHandler.HeaderHandler.HeaderFrame.Visible = MeshCreator.IsPluginEnabled
 						EditorGuiHandler.ToolBarHandler.ToolBarFrame.Visible = MeshCreator.IsPluginEnabled
 
-						if Settings["GizmoVisible"] then
+						if Settings["EdgeVisible"] then
 							EACHCoroutine = task.spawn(EAConnectHandling)
 						end
 						

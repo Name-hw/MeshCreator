@@ -46,7 +46,7 @@ function MeshGizmo:DrawLine(startVertexData: Classes.Vertex, endVertexData: Clas
 	if not Redundant then
 		local LineAdornment: LineHandleAdornment
 
-		if self.Settings["GizmoVisible"] then
+		if self.Settings["EdgeVisible"] then
 			LineAdornment = self:CreateEdgeAdornment(Origin, End)
 		end
 		
@@ -163,15 +163,15 @@ function MeshGizmo:SetEAs_Thickness(thickness)
 	end
 end
 
-function MeshGizmo:SetEAs_Visible(GizmoVisible)
-	if GizmoVisible then
+function MeshGizmo:SetEAs_Visible(EdgeVisible)
+	if EdgeVisible then
 		for _, Edge: Classes.Edge in self.Mesh.Edges do
 			local Origin = Edge.VertexAttachments[1].Position
 			local End = Edge.VertexAttachments[2].Position
 			
 			Edge.EdgeAdornment = self:CreateEdgeAdornment(Origin, End)
 		end
-	elseif not GizmoVisible then
+	elseif not EdgeVisible then
 		self:RemoveEdgeAdornments()
 	end
 end

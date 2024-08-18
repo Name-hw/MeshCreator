@@ -26,17 +26,17 @@ function SettingsHandler.new(parent, pluginSettings: {}, defaultSettings: {})
 	self.ControlFrame = self.SettingsFrame.ControlFrame
 	self.MenuFrame = self.SettingsFrame.MenuFrame
 	self.EdgeThicknessFrame = self.MenuFrame.EdgeThicknessFrame
-	self.GizmoVisibleFrame = self.MenuFrame.GizmoVisibleFrame
+	self.EdgeVisibleFrame = self.MenuFrame.EdgeVisibleFrame
 
 	--local EdgeThicknessSlider = GuiClasses.Slider.new(self.MenuFrame.EdgeThicknessFrame.SliderFrameX, "x")
 	self.ET_TextMask = GuiClasses.TextMask.new(self.MenuFrame.EdgeThicknessFrame.TextBox)
 	self.ET_TextMask:SetMaxLength(2)
 	self.ET_TextMask:SetMaskType("Number")
 	--self.SM_Dropdown = GuiClasses.Dropdown.new(self.SelectModeFrame.DropdownButton, self.SelectModeFrame.DropdownButton.ListFrame)
-	self.GV_Checkbox = GuiClasses.CheckboxLabel.new(self.GizmoVisibleFrame)
+	self.GV_Checkbox = GuiClasses.CheckboxLabel.new(self.EdgeVisibleFrame)
 
 	checkSetting("EA_Thickness", self.ET_TextMask)
-	self.GV_Checkbox:SetValue(pluginSettings["GizmoVisible"])
+	self.GV_Checkbox:SetValue(pluginSettings["EdgeVisible"])
 	
 	self.SettingsFrame.Parent = parent
 	
@@ -58,7 +58,7 @@ function SettingsHandler.new(parent, pluginSettings: {}, defaultSettings: {})
 	end)
 	]]
 	self.GV_Checkbox.Changed:Connect(function(bool: boolean)
-		CurrentSettings["GizmoVisible"] = bool
+		CurrentSettings["EdgeVisible"] = bool
 	end)
 
 	self.ControlFrame.ApplyButton.Activated:Connect(function()
@@ -67,7 +67,7 @@ function SettingsHandler.new(parent, pluginSettings: {}, defaultSettings: {})
 	
 	self.ControlFrame.ResetButton.Activated:Connect(function()
 		self.ET_TextMask.Frame.Text = defaultSettings["EA_Thickness"]
-		self.GV_Checkbox:SetValue(defaultSettings["GizmoVisible"])
+		self.GV_Checkbox:SetValue(defaultSettings["EdgeVisible"])
 		
 		for settingName, value in pairs(defaultSettings) do
 			CurrentSettings[settingName] = value
