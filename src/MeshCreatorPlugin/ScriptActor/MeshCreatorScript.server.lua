@@ -80,9 +80,9 @@ if game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActo
 	game:GetService("ReplicatedFirst"):FindFirstChild("MeshCreator_MeshLoaderActor"):Destroy()
 end
 
-local MeshLoaderActorClone = Root.MeshLoaderActor:Clone()
-MeshLoaderActorClone.Name = "MeshCreator_MeshLoaderActor"
-MeshLoaderActorClone.Parent = game.ReplicatedFirst
+--local MeshLoaderActorClone = Root.MeshLoaderActor:Clone()
+--MeshLoaderActorClone.Name = "MeshCreator_MeshLoaderActor"
+--MeshLoaderActorClone.Parent = game.ReplicatedFirst
 
 local function PluginExit()
 	if CurrentMeshCreator then
