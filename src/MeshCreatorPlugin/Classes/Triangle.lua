@@ -74,10 +74,6 @@ function TriangleClass:SelectTriangle(isMultipleSelection: boolean)
 		table.insert(MeshCreator.SelectedTriangles, self)
 		Selection:Set({self.VertexAttachments[1], self.VertexAttachments[2], self.VertexAttachments[3], self.Triangle3D.Model})
 	end
-
-	for _, t:Classes.Triangle in MeshCreator.SelectedTriangles do
-		print(t.ID)
-	end
 end
 
 function TriangleClass:DeSelectTriangle()
@@ -88,10 +84,6 @@ function TriangleClass:DeSelectTriangle()
 	table.remove(MeshCreator.SelectedTriangles, table.find(MeshCreator.SelectedTriangles, self))
 	
 	Selection:Remove({self.VertexAttachments[1], self.VertexAttachments[2], self.VertexAttachments[3], self.Triangle3D.Model})
-	
-	for _, t:Classes.Triangle in MeshCreator.SelectedTriangles do
-		print(t.ID)
-	end
 end
 
 function TriangleClass:SetTriangle3DPrimaryPart()
@@ -123,6 +115,8 @@ function TriangleClass:Destroy()
 	end
 
 	table.remove(self.Parent.Triangles, table.find(self.Parent.Triangles, self))
+	
+	self:DeSelectTriangle()
 	--task.synchronize()
 	self.Parent.MeshCreator.EM:RemoveTriangle(TriangleID)
 	self.Triangle3D.Model:Destroy()

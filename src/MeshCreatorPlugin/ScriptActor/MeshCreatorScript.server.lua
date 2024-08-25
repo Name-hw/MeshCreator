@@ -303,26 +303,32 @@ end)
 
 UIS.InputBegan:Connect(function(input, gameProcessed)
 	HeldInputs[input.KeyCode] = true
+end)
+
+UIS.InputEnded:Connect(function(input, gameProcessed)
+	HeldInputs[input.KeyCode] = false
 
 	if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if CurrentMeshCreator then
-			if SelectMode == Enums.SelectMode.TriangleMode then
-				if Mouse.Target and Mouse.Target.Parent.Name == "TriangleModel" then
-					local TriangleModel = Mouse.Target.Parent
-	
-					for _, Triangle in ipairs(CurrentMeshCreator.Mesh.Triangles) do
-						local isSelected = TriangleModel == Triangle.Triangle3D.Model and not table.find(CurrentMeshCreator.SelectedTriangles, Triangle)
-	
-						if isSelected then
-							local isMultipleSelection = HeldInputs[Enum.KeyCode.LeftShift]
+			local Target = Mouse.Target
 
-							Triangle:SelectTriangle(isMultipleSelection)
-
-							break
+			if Target then
+				if SelectMode == Enums.SelectMode.TriangleMode then
+					if Target.Parent.Name == "TriangleModel" then
+						local TriangleModel = Target.Parent
+		
+						for _, Triangle in ipairs(CurrentMeshCreator.Mesh.Triangles) do
+							local isSelected = TriangleModel == Triangle.Triangle3D.Model and not table.find(CurrentMeshCreator.SelectedTriangles, Triangle)
+		
+							if isSelected then
+								local isMultipleSelection = HeldInputs[Enum.KeyCode.LeftShift]
+	
+								Triangle:SelectTriangle(isMultipleSelection)
+	
+								break
+							end
 						end
-					end
-				else
-					if CurrentMeshCreator.IsTriangleSelected then
+					elseif CurrentMeshCreator.IsTriangleSelected then
 						for _, Triangle: Classes.Triangle in CurrentMeshCreator.SelectedTriangles do
 							Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
 						end
@@ -338,20 +344,6 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
 			end
 		end
 	end
-end)
-
-UIS.InputEnded:Connect(function(input)
-	HeldInputs[input.KeyCode] = false
-
-	--[[
-	if input.UserInputType == Enum.UserInputType.MouseButton2 then
-		if MeshCreator.IsPluginEnabled then
-			if SelectMode == Enums.SelectMode.VertexMode then
-				VertexMenu:ShowAsync()
-			end
-		end
-	end
-	]]
 end)
 
 EditorGuiHandler.HeaderHandler.VertexMenuButton.MouseButton1Click:Connect(function()
