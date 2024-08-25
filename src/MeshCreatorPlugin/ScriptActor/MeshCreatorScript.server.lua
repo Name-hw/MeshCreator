@@ -117,7 +117,7 @@ local function PluginExit()
 		EditorGuiHandler.HeaderHandler.HeaderFrame.Visible = false
 		EditorGuiHandler.ToolBarHandler.ToolBarFrame.Visible = false
 		EditorGuiHandler.EditorGui.Enabled = false
-		
+		Mouse.TargetFilter = nil
 		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
 		task.wait()
 		for _, connection: RBXScriptConnection in Connections do
@@ -227,6 +227,7 @@ PluginButton.Click:Connect(function()
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
 						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings, EditorGuiHandler)
 						EditorGuiHandler.EditorGui.Enabled = MeshCreator.IsPluginEnabled
+						Mouse.TargetFilter = SelectingObject
 						
 						CurrentMeshCreator.MeshPart:SetAttribute("EditedByMeshCreator", true)
 						
@@ -285,14 +286,6 @@ PluginButton.Click:Connect(function()
 			print("DragEntered")
 			if MeshTools.Tool.IsSphereGizmoClicked then
 				CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model:TranslateBy(PluginMouse.Origin.Position)
-			end
-		end)
-		]]
-
-		--[[
-		UIS.InputEnded:ConnectParallel(function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseMovement then
-				PluginExit()
 			end
 		end)
 		]]
@@ -400,75 +393,6 @@ DeleteTrianglesAction.Triggered:Connect(function()
 	CurrentMeshCreator.SelectedTriangles = {}
 end)
 
---[[
-
-	table.insert(self.Connections, Selection.SelectionChanged:Connect(function()
-		local SelectingObjects = Selection:Get()
-
-		for _, SelectingObject in SelectingObjects do
-			if SelectingObject.Parent == MeshCreator.EM:FindFirstChild("TriangleGizmoFolder") then
-				local isSelected = SelectingObject == self.Triangle3D.Model and not table.find(MeshCreator.SelectedTriangles, self)
-				print(isSelected, SelectingObject ~= self.Triangle3D.Model and table.find(MeshCreator.SelectedTriangles, self))
-				if isSelected then
-					MeshCreator.IsTriangleSelected = true
-					
-					self:SelectTriangle(false)
-	
-					--if HeldInputs[Enum.KeyCode.LeftShift] then
-						--self:SelectTriangle(SelectingObject, true)
-					--else
-						--self:SelectTriangle(SelectingObject, false)
-					--end
-
-					break
-				elseif SelectingObject ~= self.Triangle3D.Model and table.find(MeshCreator.SelectedTriangles, self) then
-					self:DeSelectTriangle()
-
-					break
-				end
-			end
-		end
-	end))]]
---[[
-plugin.Deactivation:Connect(function()
-	task.wait()
-	task.wait()
-	if not isSelectingRibbonTool then
-		isSelectingRibbonTool = true
-		local SelectedRibbonTool = plugin:GetSelectedRibbonTool()
-		print(SelectedRibbonTool)
-		plugin:Activate(false)
-		task.wait()
-		plugin:SelectRibbonTool(SelectedRibbonTool, UDim2.new(0, 0))
-	end
-end)
-]]
 plugin.Unloading:Connect(PluginExit)
 
 game.Close:Connect(PluginExit)
---[[
-RunService.PostSimulation:Connect(function()
-	if CurrentMeshCreator and CurrentMeshCreator.MeshGizmo then
-		for _, Vertex: Classes.Vertex in CurrentMeshCreator.Vertices do
-			if Vertex.VertexAttachment.Position ~= VertexPositions[Vertex.ID] then
-				CurrentMeshCreator.MeshGizmo:UpdateByVertexID(CurrentMeshCreator.Vertices, Vertex.ID)
-			end
-			
-			VertexPositions[Vertex.ID] = Vertex.VertexAttachment.Position
-			task.synchronize()
-		end
-	end
-end)
-]]
---[[
-while task.wait() do
-	if IsMeshPartSelected then
-		local SelectedRibbonTool = plugin:GetSelectedRibbonTool()
-		print(SelectedRibbonTool)
-		
-		if SelectedRibbonTool == Enum.RibbonTool.Select then
-			plugin:Activate(false)
-		end
-	end
-end
-]]

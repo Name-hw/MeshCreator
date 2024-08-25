@@ -114,7 +114,7 @@ function MeshGizmo.new(Mesh: Classes.Mesh, Settings, EditorGuiHandler)
 	self.Settings = Settings
 	self.EditorGuiHandler = EditorGuiHandler
 	
-	TriangleGizmoFolder = Mesh.EM:FindFirstChild("TriangleGizmoFolder")
+	TriangleGizmoFolder = workspace:FindFirstChild("TriangleGizmoFolder")
 	TriangleDrawPreset.parent = TriangleGizmoFolder
 	
 	return self

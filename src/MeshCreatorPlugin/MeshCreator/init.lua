@@ -19,7 +19,6 @@ function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Setting
 	
 	newMeshCreator.Settings = Settings
 	newMeshCreator.MeshPart = MeshPart
-	newMeshCreator.MeshPart.Locked = true
 	newMeshCreator.Mesh = Classes.new("Mesh", {ID = 1, MeshCreator = newMeshCreator, Vertices = {}, Edges = {}, Triangles = {}, MeshPart = MeshPart})
 	newMeshCreator.EditorGuiHandler = EditorGuiHandler
 	newMeshCreator.SelectedTriangles = {}
@@ -38,7 +37,7 @@ function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Setting
 	newMeshCreator.VertexAttachmentFolder.Name = "VertexAttachmentFolder"
 	]]
 
-	newMeshCreator.TriangleGizmoFolder = Instance.new("Folder", newMeshCreator.EM)
+	newMeshCreator.TriangleGizmoFolder = Instance.new("Folder", workspace)
 	newMeshCreator.TriangleGizmoFolder.Name = "TriangleGizmoFolder"
 
 	newMeshCreator.MeshGizmo = MeshGizmo.new(newMeshCreator.Mesh, newMeshCreator.Settings, newMeshCreator.EditorGuiHandler)
@@ -223,7 +222,8 @@ function MeshCreator:Remove()
 	
 	self:RemoveVertexAttachments()
 	
-	self.MeshPart.Locked = false
+	self.TriangleGizmoFolder:Destroy()
+	
 	self = nil
 end
 
