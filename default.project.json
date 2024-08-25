@@ -10,5 +10,5 @@
       }
     }
   },
-  "globIgnorePaths": ["src/.vscode"]
+  "globIgnorePaths": ["src/.vscode", "src/MeshCreatorPlugin/MeshLoaderActor"]
 }
