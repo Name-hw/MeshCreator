@@ -1,4 +1,4 @@
-EdgeClass = {
+local EdgeClass = {
 	ParentClass = script.Parent.EFElement
 }
 EdgeClass.__index = EdgeClass
@@ -22,22 +22,20 @@ function EdgeClass:Init()
 		end
 	end
 	
-	local function OnAncestryChanged()
-		if MeshCreator.Settings["EdgeVisible"] then
-			table.remove(self.Parent.Edges, table.find(self.Parent.Edges, self))
-			--task.synchronize()
-			self.EdgeAdornment:Destroy()
-		end
-	end
-	
 	for _, VA in VAs do
 		VA.Changed:Connect(function(propertyName)
 			task.spawn(OnChanged, propertyName)
 		end)
-		
-		VA.AncestryChanged:Connect(function()
-			task.spawn(OnAncestryChanged)
-		end)
+	end
+end
+
+function EdgeClass:Destroy()
+	local MeshCreator = self.Parent.MeshCreator
+
+	if MeshCreator.Settings["EdgeVisible"] then
+		table.remove(self.Parent.Edges, table.find(self.Parent.Edges, self))
+		--task.synchronize()
+		self.EdgeAdornment:Destroy()
 	end
 end
 

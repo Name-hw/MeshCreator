@@ -1,18 +1,20 @@
 local Classes = require(script.Parent)
 
-local VertexClass: Classes.Vertex = {
+local VertexClass = {
 	ParentClass = script.Parent.GeometryElement
 }
 VertexClass.__index = VertexClass
 
 local ChangeHistoryService = game:GetService("ChangeHistoryService")
 local Root = script.Parent.Parent
+local TableFunctions = require(Root.TableFunctions)
 
 function VertexClass:Init()
 	local MeshCreator = self.Parent.MeshCreator
 
 	self.VertexAttachment = MeshCreator.CreateVertexAttachment(self.Parent.MeshPart, self.VA_Position)
-	
+	self.Connections = {}
+
 	local EMVertexIDs = self.EMVertexIDs
 	local VA: Attachment = self.VertexAttachment
 	local LastVAPosition: Vector3
@@ -45,13 +47,13 @@ function VertexClass:Init()
 		end
 	end
 	
-	VA.Changed:Connect(function(propertyName)
+	table.insert(self.Connections, VA.Changed:Connect(function(propertyName)
 		task.spawn(OnChanged, propertyName)
-	end)
+	end))
 	
-	VA.AncestryChanged:Connect(function()
+	table.insert(self.Connections, VA.AncestryChanged:Connect(function()
 		task.spawn(OnAncestryChanged)
-	end)
+	end))
 end
 
 function VertexClass:SetUV(VertexUV: Vector2)
@@ -77,11 +79,27 @@ end
 
 function VertexClass:Destroy()
 	local MeshCreator = self.Parent.MeshCreator
+	
+	for _, connection: RBXScriptConnection in self.Connections do
+		connection:Disconnect()
+	end
+
+	for _, IncludedEdge in ipairs(TableFunctions.GetEFElementsByVertexID(MeshCreator.Mesh.Edges, self.ID)) do
+		IncludedEdge:Destroy()
+	end
+
+	for _, IncludedTriangle in ipairs(TableFunctions.GetEFElementsByVertexID(MeshCreator.Mesh.Triangles, self.ID)) do
+		IncludedTriangle:Destroy()
+	end
 
 	table.remove(self.Parent.Vertices, table.find(self.Parent.Vertices, self))
 	
 	for _, EMVertexID in self.EMVertexIDs do
 		MeshCreator.EM:RemoveVertex(EMVertexID)
+	end
+
+	if self.VertexAttachment then
+		self.VertexAttachment:Destroy()
 	end
 end
 

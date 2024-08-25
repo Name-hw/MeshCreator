@@ -1,5 +1,4 @@
-local MeshCreator = {}
-MeshCreator.IsPluginEnabled = false
+local MeshCreator = {IsPluginEnabled = false, EM = nil, Mesh = nil}
 
 local Selection = game:GetService("Selection")
 local AssetService = game:GetService("AssetService")
@@ -217,23 +216,6 @@ function MeshCreator:CreateCubeMesh(scale: Vector3, offset: Vector3)
 	}
 
 	return newCubeMesh
-end
-
-function MeshCreator:SelectTriangle(SelectingObject, IsShiftHeld)
-	for _, Triangle: Classes.Triangle in self.Mesh.Triangles do
-		if SelectingObject == Triangle.Triangle3D.Model then
-			Triangle.Triangle3D:Set("BrickColor", BrickColor.new("Deep orange"))
-			self.LastSelectedTriangle = Triangle
-			
-			table.insert(self.SelectedTriangles, Triangle)
-			
-			if IsShiftHeld then
-				Selection:Add(Triangle.VertexAttachments)
-			else
-				Selection:Set({Triangle.VertexAttachments[1], Triangle.VertexAttachments[2], Triangle.VertexAttachments[3], Triangle.Triangle3D.Model})
-			end
-		end
-	end
 end
 
 function MeshCreator:Remove()

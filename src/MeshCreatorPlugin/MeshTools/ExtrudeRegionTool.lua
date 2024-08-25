@@ -73,7 +73,7 @@ function ExtrudeRegionTool:OnArrowGizmo_Dragged(face: Enum.NormalId, distance: n
         end
 
         self.SelectedElement:Destroy()
-        MeshCreator:SelectTriangle(ExtrudedTriangle.Triangle3D.Model, false)
+        ExtrudedTriangle:SelectTriangle(false)
     end
 end
 

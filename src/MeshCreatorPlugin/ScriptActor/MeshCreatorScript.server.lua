@@ -1,6 +1,8 @@
 local Selection = game:GetService("Selection")
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
+local Player = game:GetService("Players").LocalPlayer
+local Mouse = Player:GetMouse()
 local Root = script.Parent.Parent
 local PluginToolbar = plugin:CreateToolbar("MeshCreator")
 local PluginButton = PluginToolbar:CreateButton(
@@ -32,11 +34,25 @@ local ExtrudeRegionAction: PluginAction = plugin:CreatePluginAction(
 	true
 )
 ]]
-
 local NewFaceFromVerticesAction: PluginAction = plugin:CreatePluginAction(
 	"MeshCreator_NewFaceFromVertices",
 	"New Face From Vertices",
 	"Create New Face from Vertices"
+)
+local DeleteVerticesAction: PluginAction = plugin:CreatePluginAction(
+	"MeshCreator_DeleteVertices",
+	"Delete Vertices",
+	"Delete Vertices"
+)
+local DeleteEdgesAction: PluginAction = plugin:CreatePluginAction(
+	"MeshCreator_DeleteEdges",
+	"Delete Edges",
+	"Delete Edges"
+)
+local DeleteTrianglesAction: PluginAction = plugin:CreatePluginAction(
+	"MeshCreator_DeleteTriangles",
+	"Delete Triangles",
+	"Delete Triangles"
 )
 
 --PluginMenus
@@ -45,6 +61,17 @@ local VertexMenu: PluginMenu = plugin:CreatePluginMenu(
 	"Vertex Menu"
 )
 VertexMenu:AddAction(NewFaceFromVerticesAction)
+VertexMenu:AddAction(DeleteVerticesAction)
+local EdgeMenu: PluginMenu = plugin:CreatePluginMenu(
+	"EdgeMenu",
+	"Edge Menu"
+)
+EdgeMenu:AddAction(DeleteEdgesAction)
+local TriangleMenu: PluginMenu = plugin:CreatePluginMenu(
+	"TriangleMenu",
+	"Triangle Menu"
+)
+TriangleMenu:AddAction(DeleteTrianglesAction)
 
 local Classes = require(Root.Classes)
 local Enums = require(Root.Enums)
@@ -67,7 +94,6 @@ local EditorGuiHandler = require(UIHandlers.EditorGuiHandler).new(CoreGui)
 local MeshTools = require(Root.MeshTools)
 local IsMeshPartSelected = false
 local IsEdgeSelected = false
-local IsTriangleSelected = false
 local CurrentMeshCreator, SelectingObject, SelectingObjects, EACHCoroutine --EAConnectHandlingCoroutine
 local LastSelectedEA: LineHandleAdornment
 
@@ -91,7 +117,6 @@ local function PluginExit()
 		EditorGuiHandler.HeaderHandler.HeaderFrame.Visible = false
 		EditorGuiHandler.ToolBarHandler.ToolBarFrame.Visible = false
 		EditorGuiHandler.EditorGui.Enabled = false
-		PluginMouse.TargetFilter = nil
 		
 		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
 		task.wait()
@@ -202,7 +227,6 @@ PluginButton.Click:Connect(function()
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
 						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings, EditorGuiHandler)
 						EditorGuiHandler.EditorGui.Enabled = MeshCreator.IsPluginEnabled
-						--PluginMouse.TargetFilter = SelectingObject
 						
 						CurrentMeshCreator.MeshPart:SetAttribute("EditedByMeshCreator", true)
 						
@@ -240,61 +264,20 @@ PluginButton.Click:Connect(function()
 							end
 
 							if SelectingObject.Name == "VertexAttachment" and SelectMode ~= Enums.SelectMode.VertexMode then
-								if not IsEdgeSelected and not IsSelectingObjectInLST then
+								if not IsEdgeSelected and not IsSelectingObjectInLST and not CurrentMeshCreator.IsTriangleSelected then
 									Selection:Set(Instance)
-								end
-							elseif SelectingObject.Parent == MeshCreator.EM:FindFirstChild("TriangleGizmoFolder") then
-								IsTriangleSelected = true
-
-								if CurrentMeshCreator.LastSelectedTriangle and SelectingObject ~= CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model and not HeldInputs[Enum.KeyCode.LeftShift] then
-									for _, Triangle: Classes.Triangle in CurrentMeshCreator.SelectedTriangles do
-										Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
-									end
-
-									MeshCreator:SelectTriangle(SelectingObject, false)
-								else
-									MeshCreator:SelectTriangle(SelectingObject, true)
-								end
-							elseif CurrentMeshCreator.SelectedTriangles[1] and not IsSelectingObjectInLST and SelectingObject == CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model then
-								print("Bug?")
-								if IsTriangleSelected then
-									Selection:Set({CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[1],
-									CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[2],
-									CurrentMeshCreator.LastSelectedTriangle.VertexAttachments[3],
-									CurrentMeshCreator.LastSelectedTriangle.Triangle3D.Model})
 								end
 							end
 						end
 					end
-				else
+				elseif CurrentMeshCreator then
 					if IsEdgeSelected then
 						IsEdgeSelected = false
 						LastSelectedEA.Color3 = Color3.new(0.0509804, 0.411765, 0.67451)
 					end
-					
-					if IsTriangleSelected then
-						IsTriangleSelected = false
-						
-						for position, Triangle: Classes.Triangle in CurrentMeshCreator.SelectedTriangles do
-							Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
-							CurrentMeshCreator.SelectedTriangles[position] = nil
-						end
-						
-						CurrentMeshCreator.LastSelectedTriangle = nil
-					end
 				end
 			end
 		end)
-
-		table.insert(Connections, PluginMouse.Button1Down:Connect(function()
-			if CurrentMeshCreator then
-				if PluginMouse.Target and not PluginMouse.Target.Locked and PluginMouse.Target.Parent.Name == "TriangleModel" then
-					Selection:Add({PluginMouse.Target.Parent})
-				else
-					Selection:Set(Instance)
-				end
-			end
-		end))
 		
 		--[[
 		PluginMouse.DragEnter:Connect(function(instances)
@@ -318,14 +301,43 @@ PluginButton.Click:Connect(function()
 	end
 end)
 
-UIS.InputBegan:Connect(function(input)
+UIS.InputBegan:Connect(function(input, gameProcessed)
 	HeldInputs[input.KeyCode] = true
 
-	--[[
-	if input.UserInputType == Enum.UserInputType.MouseButton2 then
+	if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if CurrentMeshCreator then
+			if SelectMode == Enums.SelectMode.TriangleMode then
+				if Mouse.Target and Mouse.Target.Parent.Name == "TriangleModel" then
+					local TriangleModel = Mouse.Target.Parent
+	
+					for _, Triangle in ipairs(CurrentMeshCreator.Mesh.Triangles) do
+						local isSelected = TriangleModel == Triangle.Triangle3D.Model and not table.find(CurrentMeshCreator.SelectedTriangles, Triangle)
+	
+						if isSelected then
+							local isMultipleSelection = HeldInputs[Enum.KeyCode.LeftShift]
 
+							Triangle:SelectTriangle(isMultipleSelection)
+
+							break
+						end
+					end
+				else
+					if CurrentMeshCreator.IsTriangleSelected then
+						for _, Triangle: Classes.Triangle in CurrentMeshCreator.SelectedTriangles do
+							Triangle.Triangle3D:Set("Color", CurrentMeshCreator.MeshPart.Color)
+						end
+
+						CurrentMeshCreator.SelectedTriangles = {}
+
+						Selection:Set({})
+
+						CurrentMeshCreator.IsTriangleSelected = false
+						CurrentMeshCreator.LastSelectedTriangle = nil
+					end
+				end
+			end
+		end
 	end
-	]]
 end)
 
 UIS.InputEnded:Connect(function(input)
@@ -346,29 +358,96 @@ EditorGuiHandler.HeaderHandler.VertexMenuButton.MouseButton1Click:Connect(functi
 	VertexMenu:ShowAsync()
 end)
 
+EditorGuiHandler.HeaderHandler.EdgeMenuButton.MouseButton1Click:Connect(function()
+	EdgeMenu:ShowAsync()
+end)
+
+EditorGuiHandler.HeaderHandler.TriangleMenuButton.MouseButton1Click:Connect(function()
+	TriangleMenu:ShowAsync()
+end)
+
 NewFaceFromVerticesAction.Triggered:Connect(function()
-	if MeshCreator.IsPluginEnabled then
-		local Vertices: {Classes.Vertex} = {}
+	local Vertices: {Classes.Vertex} = {}
 
-		for _, SelectingObject: Instance | Attachment in SelectingObjects do
-			assert(SelectingObject:IsA("Attachment"), "Please select only VertexAttachment.")
+	for _, SelectingObject: Instance | Attachment in SelectingObjects do
+		assert(SelectingObject:IsA("Attachment"), "Please select only VertexAttachment.")
 
-			table.insert(Vertices, TableFunctions.GetVertexFromVertexAttachment(MeshCreator.Mesh.Vertices, SelectingObject))
-		end
+		table.insert(Vertices, TableFunctions.GetVertexFromVertexAttachment(MeshCreator.Mesh.Vertices, SelectingObject))
+	end
 
-		local NewTriangles = MeshCreator.Mesh:NewFaceFromVertices(Vertices)
+	local NewTriangles = MeshCreator.Mesh:NewFaceFromVertices(Vertices)
 
-		for _, Triangle: Classes.Triangle in NewTriangles do
-			Triangle.Triangle3D:Transparency(1)
+	for _, Triangle: Classes.Triangle in NewTriangles do
+		Triangle.Triangle3D:Transparency(1)
+	end
+end)
+
+DeleteVerticesAction.Triggered:Connect(function()
+	for _, SelectingObject: Instance | Attachment in SelectingObjects do
+		if SelectingObject:IsA("Attachment") then
+			TableFunctions.GetVertexFromVertexAttachment(MeshCreator.Mesh.Vertices, SelectingObject):Destroy()
 		end
 	end
 end)
+
+DeleteEdgesAction.Triggered:Connect(function()
+	if IsEdgeSelected then
+		for _, Edge: Classes.Edge in CurrentMeshCreator.Mesh.Edges do
+			if Edge.EdgeAdornment == LastSelectedEA then
+				Edge:Destroy()
+			end
+		end
+	end
+end)
+
+DeleteTrianglesAction.Triggered:Connect(function()
+	for _, Triangle: Classes.Triangle in CurrentMeshCreator.SelectedTriangles do
+		Triangle:Destroy()
+	end
+
+	CurrentMeshCreator.SelectedTriangles = {}
+end)
+
+--[[
+
+	table.insert(self.Connections, Selection.SelectionChanged:Connect(function()
+		local SelectingObjects = Selection:Get()
+
+		for _, SelectingObject in SelectingObjects do
+			if SelectingObject.Parent == MeshCreator.EM:FindFirstChild("TriangleGizmoFolder") then
+				local isSelected = SelectingObject == self.Triangle3D.Model and not table.find(MeshCreator.SelectedTriangles, self)
+				print(isSelected, SelectingObject ~= self.Triangle3D.Model and table.find(MeshCreator.SelectedTriangles, self))
+				if isSelected then
+					MeshCreator.IsTriangleSelected = true
+					
+					self:SelectTriangle(false)
+	
+					--if HeldInputs[Enum.KeyCode.LeftShift] then
+						--self:SelectTriangle(SelectingObject, true)
+					--else
+						--self:SelectTriangle(SelectingObject, false)
+					--end
+
+					break
+				elseif SelectingObject ~= self.Triangle3D.Model and table.find(MeshCreator.SelectedTriangles, self) then
+					self:DeSelectTriangle()
+
+					break
+				end
+			end
+		end
+	end))]]
 --[[
 plugin.Deactivation:Connect(function()
-	if EditorGuiHandler then
-		plugin:Deactivate()
-		MeshTools:Disable()
-		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
+	task.wait()
+	task.wait()
+	if not isSelectingRibbonTool then
+		isSelectingRibbonTool = true
+		local SelectedRibbonTool = plugin:GetSelectedRibbonTool()
+		print(SelectedRibbonTool)
+		plugin:Activate(false)
+		task.wait()
+		plugin:SelectRibbonTool(SelectedRibbonTool, UDim2.new(0, 0))
 	end
 end)
 ]]
@@ -388,4 +467,16 @@ RunService.PostSimulation:Connect(function()
 		end
 	end
 end)
+]]
+--[[
+while task.wait() do
+	if IsMeshPartSelected then
+		local SelectedRibbonTool = plugin:GetSelectedRibbonTool()
+		print(SelectedRibbonTool)
+		
+		if SelectedRibbonTool == Enum.RibbonTool.Select then
+			plugin:Activate(false)
+		end
+	end
+end
 ]]
