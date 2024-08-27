@@ -1,8 +1,6 @@
 local Selection = game:GetService("Selection")
 local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
-local Player = game:GetService("Players").LocalPlayer
-local Mouse = Player:GetMouse()
 local Root = script.Parent.Parent
 local PluginToolbar = plugin:CreateToolbar("MeshCreator")
 local PluginButton = PluginToolbar:CreateButton(
@@ -117,7 +115,6 @@ local function PluginExit()
 		EditorGuiHandler.HeaderHandler.HeaderFrame.Visible = false
 		EditorGuiHandler.ToolBarHandler.ToolBarFrame.Visible = false
 		EditorGuiHandler.EditorGui.Enabled = false
-		Mouse.TargetFilter = nil
 		EditorGuiHandler.ToolBarHandler:DisableAllToolButton()
 		task.wait()
 		for _, connection: RBXScriptConnection in Connections do
@@ -227,8 +224,7 @@ PluginButton.Click:Connect(function()
 						local MeshSaveFile = MeshSaveLoadSystem.LoadMeshSaveFile(SelectingObject)
 						CurrentMeshCreator = MeshCreator.new(SelectingObject, MeshSaveFile, Settings, EditorGuiHandler)
 						EditorGuiHandler.EditorGui.Enabled = MeshCreator.IsPluginEnabled
-						Mouse.TargetFilter = SelectingObject
-						
+
 						CurrentMeshCreator.MeshPart:SetAttribute("EditedByMeshCreator", true)
 						
 						if CurrentMeshCreator.EM:GetAttribute("NoMeshID") then
@@ -269,6 +265,10 @@ PluginButton.Click:Connect(function()
 									Selection:Set(Instance)
 								end
 							end
+
+							if SelectingObject == CurrentMeshCreator.MeshPart then
+								Selection:Remove({SelectingObject})
+							end
 						end
 					end
 				elseif CurrentMeshCreator then
@@ -303,7 +303,19 @@ UIS.InputEnded:Connect(function(input, gameProcessed)
 
 	if not gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
 		if CurrentMeshCreator then
-			local Target = Mouse.Target
+			local mousePosition = UIS:GetMouseLocation()
+
+        	-- 화면 좌표를 월드 좌표로 변환하여 레이케스트 시작점과 방향을 얻기
+        	local unitRay = workspace.Camera:ScreenPointToRay(mousePosition.X, mousePosition.Y)
+
+       	 	-- RaycastParameters 설정
+        	local raycastParams = RaycastParams.new()
+        	raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+       	 	raycastParams.FilterDescendantsInstances = {CurrentMeshCreator.MeshPart}
+
+        	-- 레이캐스트 시작점과 방향
+       		local raycastResult = workspace:Raycast(unitRay.Origin, unitRay.Direction * 500, raycastParams)
+			local Target = raycastResult.Instance
 
 			if Target then
 				if SelectMode == Enums.SelectMode.TriangleMode then
@@ -359,6 +371,8 @@ NewFaceFromVerticesAction.Triggered:Connect(function()
 
 		table.insert(Vertices, TableFunctions.GetVertexFromVertexAttachment(MeshCreator.Mesh.Vertices, SelectingObject))
 	end
+	
+	assert((#Vertices <= 4), "Please select 4 or fewer vertices.")
 
 	local NewTriangles = MeshCreator.Mesh:NewFaceFromVertices(Vertices)
 

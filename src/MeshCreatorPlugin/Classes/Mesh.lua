@@ -151,6 +151,19 @@ function Mesh:NewFaceFromVertices(vertices: {Classes.Vertex})
 	local NewTriangles: {Classes.Triangle} = {}
 	local AddedEMVertexIDs: {number} = {}
 
+	if #vertices > 3 then
+		local Normal = CalculateNormal(vertices[1].VA_Position, vertices[2].VA_Position, vertices[3].VA_Position)
+		
+		for i = 4, #vertices do
+			local D = vertices[i].VA_Position
+			local AD = D - vertices[1].VA_Position
+	
+			if Normal:Dot(AD) ~= 0 then
+				error("The vertices are not in one plane")
+			end
+		end
+	end
+
 	self:SortVerticesCCW(vertices)
 
 	for order, vertex: Classes.Vertex in vertices do

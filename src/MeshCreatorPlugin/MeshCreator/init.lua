@@ -39,6 +39,7 @@ function MeshCreator.new(MeshPart: MeshPart, MeshSaveFile: Classes.Mesh, Setting
 
 	newMeshCreator.TriangleGizmoFolder = Instance.new("Folder", workspace)
 	newMeshCreator.TriangleGizmoFolder.Name = "TriangleGizmoFolder"
+	newMeshCreator.TriangleGizmoFolder.Archivable = false
 
 	newMeshCreator.MeshGizmo = MeshGizmo.new(newMeshCreator.Mesh, newMeshCreator.Settings, newMeshCreator.EditorGuiHandler)
 
